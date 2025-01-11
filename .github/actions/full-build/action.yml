@@ -1,0 +1,47 @@
+name: Full Build
+
+description: Builds, tests, and creates binaries that are ready for release.
+
+inputs:
+  version:
+    description: 'Version number for the app'
+    default: '0.0.0'
+  archs:
+    description: 'Architectures for the build'
+    default: 'x64 arm64'
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-dotnet@v4
+
+    - name: Build
+      shell: bash
+      run: dotnet build
+
+    - name: Test
+      shell: bash
+      run: dotnet test
+
+    - name: Create Binaries
+      shell: bash
+      run: |
+        dotnet tool install --global wix --version 5.0.2
+        for arch in ${{ inputs.archs }}; do
+          dotnet publish ./RadialActions/RadialActions.csproj -o "publish/$arch" -c Release --os win --arch $arch -p:Version=${{ inputs.version }}
+          wix build Product.wxs -d MainExeSource="publish/$arch/RadialActions.exe" -o "publish/RadialActions-${{ inputs.version }}-${arch}.msi"
+        done
+
+    - name: Create Portable ZIPs
+      shell: pwsh
+      run: |
+        foreach ($arch in "${{ inputs.archs }}".Split(' ')) {
+          Compress-Archive -Path "publish/$arch/RadialActions.exe" -DestinationPath "publish/RadialActions-${{ inputs.version }}-$arch.zip"
+        }
+
+    - uses: actions/upload-artifact@v4
+      with:
+        if-no-files-found: error
+        path: |
+          publish/*.zip
+          publish/*.msi
