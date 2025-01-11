@@ -27,8 +27,7 @@
     <TabControl Padding="12,12,12,0"
                 SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
         <TabItem Header="_General">
-            <StackPanel>
-            </StackPanel>
+            <StackPanel />
         </TabItem>
 
         <TabItem Header="H_elp">

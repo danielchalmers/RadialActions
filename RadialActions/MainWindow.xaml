@@ -4,9 +4,40 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RadialActions"
+        xmlns:p="clr-namespace:RadialActions.Properties"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Radial Actions"
+        Height="450"
+        Width="800">
+    <Window.Resources>
+        <ContextMenu x:Key="MainContextMenu"
+                     x:Shared="False">
+
+            <MenuItem Command="{Binding OpenSettingsWindowCommand}"
+                      CommandParameter="0"
+                      Header="_Settings" />
+
+            <MenuItem Command="{Binding OpenSettingsWindowCommand}"
+                      CommandParameter="1"
+                      Header="_Help" />
+
+            <MenuItem Command="{Binding OpenSettingsFileCommand}"
+                      Header="_Advanced settings"
+                      IsEnabled="{x:Static p:Settings.CanBeSaved}" />
+
+            <MenuItem Command="{Binding ExitCommand}"
+                      Header="E_xit" />
+        </ContextMenu>
+
+        <tb:TaskbarIcon x:Key="TrayIcon"
+                        x:Shared="False"
+                        IconSource="RadialActions.ico"
+                        ToolTipText="Radial Actions"
+                        MenuActivation="LeftOrRightClick" />
+    </Window.Resources>
+
     <Grid>
-        <Button Click="Button_Click">Settings</Button>
+        <TextBlock Text="Hello, World!" />
     </Grid>
 </Window>

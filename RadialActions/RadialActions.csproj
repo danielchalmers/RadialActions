@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Title>Radial Actions</Title>
+    <Product>Radial Actions</Product>
     <Company>Daniel Chalmers</Company>
     <Copyright>© Daniel Chalmers</Copyright>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
