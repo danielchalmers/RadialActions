@@ -5,6 +5,8 @@ VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadialActions", "RadialActions\RadialActions.csproj", "{1DFA57DA-E96F-4BD0-B08A-3419DC0DA2C4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadialActions.Tests", "RadialActions.Tests\RadialActions.Tests.csproj", "{755E74F8-491A-411B-8B4C-D22D8D427462}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{1DFA57DA-E96F-4BD0-B08A-3419DC0DA2C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DFA57DA-E96F-4BD0-B08A-3419DC0DA2C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DFA57DA-E96F-4BD0-B08A-3419DC0DA2C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{755E74F8-491A-411B-8B4C-D22D8D427462}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{755E74F8-491A-411B-8B4C-D22D8D427462}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{755E74F8-491A-411B-8B4C-D22D8D427462}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{755E74F8-491A-411B-8B4C-D22D8D427462}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

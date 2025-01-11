@@ -1,0 +1,134 @@
+﻿<Window x:Class="RadialActions.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RadialActions"
+        xmlns:p="clr-namespace:RadialActions.Properties"
+        d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        mc:Ignorable="d"
+        Title="Radial Actions"
+        Width="500"
+        ResizeMode="CanMinimize"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="4,0" />
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="MinHeight" Value="23" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+    </Window.Resources>
+
+    <TabControl Padding="12,12,12,0"
+                SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
+        <TabItem Header="_General">
+            <StackPanel>
+            </StackPanel>
+        </TabItem>
+
+        <TabItem Header="H_elp">
+            <StackPanel>
+                <TextBlock FontWeight="Bold"
+                           FontSize="16">
+                    Shortcuts
+                </TextBlock>
+                <StackPanel Margin="0,0,0,12">
+                    <TextBlock>
+                        <Run FontWeight="Bold">Placeholder:</Run>
+                        Do nothing</TextBlock>
+                </StackPanel>
+
+                <TextBlock FontWeight="Bold"
+                           FontSize="16">
+                    Links
+                </TextBlock>
+                <StackPanel Margin="0,0,0,12">
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            GitHub Releases (Check for updates)
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            GitHub Issues (Found a bug or have an idea?)
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            DesktopClock - A digital clock for your desktop (Windows)
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://play.google.com/store/apps/details?id=com.danielchalmers.journalapp"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            JournalApp - Stay on top of your well-being (Android)
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/Network-Monitor"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            Network Monitor - See latency and bandwidth usage (Windows)
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/TeslaCam"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            TeslaCam - Watch dashcam clips on your computer (Windows)
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+
+                <TextBlock FontWeight="Bold"
+                           FontSize="16">
+                    Credits
+                </TextBlock>
+                <StackPanel Margin="0,0,0,12">
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/CommunityToolkit/dotnet"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            CommunityToolkit
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/Fody/Costura"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            Costura.Fody
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/HavenDV/H.NotifyIcon"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            H.NotifyIcon.Wpf
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://www.newtonsoft.com/json"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            Newtonsoft.Json
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/Fody/PropertyChanged"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            PropertyChanged.Fody
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://icon.kitchen/i/H4sIAAAAAAAAA1WQsW4CMQyG38Vdb%2BAKrcStDF0rla2qKh9xchG5%2BEhyIIR4d%2BwAA0tifdH%2F2fEFjhhmytBdwGDabwcaCTqLIVMDvdtw4AQdvNG6pc8lNGDdJvgJU9FIJrnAkMU5FHn0O44CeKL4f%2FJlgKsGtudJnLB75NT7RFWv4Cuh8RSrtdL2pWtF74oWS1zblSCMLohj9VF7fKMxPjqNF56gaxcNJO8GEWrZcyk83utAtlLJ9e5nwDpJPsyYSOcd2cxBN%2FIrLUxib%2FRjnOU8UQ9%2F1xtax8BpNAEAAA%3D%3D"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            IconKitchen
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </TabItem>
+    </TabControl>
+</Window>
