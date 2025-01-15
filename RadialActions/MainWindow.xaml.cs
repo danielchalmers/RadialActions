@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using RadialActions.Properties;
@@ -15,6 +16,7 @@ namespace RadialActions;
 public partial class MainWindow : Window
 {
     private readonly TaskbarIcon _trayIcon;
+    private HotkeyManager _hotkeyManager;
 
     public MainWindow()
     {
@@ -35,8 +37,9 @@ public partial class MainWindow : Window
     /// </summary>
     private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        switch (e.PropertyName)
+        if (e.PropertyName == nameof(Settings.ActivationHotkey))
         {
+            _hotkeyManager?.UpdateHotkey(Settings.Default.ActivationHotkey);
         }
     }
 
@@ -93,5 +96,24 @@ public partial class MainWindow : Window
     public void Exit()
     {
         Application.Current.Shutdown();
+    }
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        var windowHandle = new WindowInteropHelper(this).Handle;
+        _hotkeyManager = new HotkeyManager(windowHandle);
+        _hotkeyManager.HotkeyPressed += OnHotkeyPressed;
+
+        _hotkeyManager.RegisterHotkey(Settings.Default.ActivationHotkey);
+    }
+
+    private void Window_Unloaded(object sender, RoutedEventArgs e)
+    {
+        _hotkeyManager?.UnregisterHotkey(Settings.Default.ActivationHotkey);
+    }
+
+    private void OnHotkeyPressed(object sender, EventArgs e)
+    {
+        Activate();
     }
 }

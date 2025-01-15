@@ -9,7 +9,9 @@
         mc:Ignorable="d"
         Title="Radial Actions"
         Height="450"
-        Width="800">
+        Width="800"
+        Loaded="Window_Loaded"
+        Unloaded="Window_Unloaded">
     <Window.Resources>
         <ContextMenu x:Key="MainContextMenu"
                      x:Shared="False">

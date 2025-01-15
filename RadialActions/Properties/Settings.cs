@@ -72,6 +72,11 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
     /// </summary>
     public int SettingsTabIndex { get; set; }
 
+    /// <summary>
+    /// The hotkey used to activate the radial menu.
+    /// </summary>
+    public string ActivationHotkey { get; set; } = "ctrl+alt+4";
+
     #endregion "Properties"
 
     /// <summary>
