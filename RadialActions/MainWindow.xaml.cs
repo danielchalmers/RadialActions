@@ -6,6 +6,7 @@ using System.Windows.Interop;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using RadialActions.Properties;
+using static RadialActions.InteractivePie;
 
 namespace RadialActions;
 
@@ -124,8 +125,12 @@ public partial class MainWindow : Window
         _hotkeys.HotkeyPressed += OnHotkeyPressed;
         SetHotkey();
 
-        Hide();
+        HideMenu();
         Opacity = 1;
+
+#if DEBUG
+        ShowMenu();
+#endif
     }
 
     private void Window_Unloaded(object sender, RoutedEventArgs e)
@@ -133,7 +138,7 @@ public partial class MainWindow : Window
         _hotkeys?.UnregisterHotkey(Settings.Default.ActivationHotkey);
     }
 
-    public void OpenMenu()
+    public void ShowMenu()
     {
         Log.Information("Opening menu");
         ShowInTaskbar = true;
@@ -142,7 +147,7 @@ public partial class MainWindow : Window
         Activate();
     }
 
-    public void CloseMenu()
+    public void HideMenu()
     {
         Log.Information("Closing menu");
         ShowInTaskbar = false;
@@ -152,13 +157,13 @@ public partial class MainWindow : Window
 
     public void ToggleMenu()
     {
-        if (IsVisible)
+        if (IsActive)
         {
-            CloseMenu();
+            HideMenu();
         }
         else
         {
-            OpenMenu();
+            ShowMenu();
         }
     }
 
@@ -177,5 +182,10 @@ public partial class MainWindow : Window
     private void Window_Closing(object sender, CancelEventArgs e)
     {
         App.SetRunOnStartup(Settings.Default.RunOnStartup);
+    }
+
+    private void InteractivePie_SliceClicked(object sender, SliceClickEventArgs e)
+    {
+        Log.Information($"Took a byte out of slice {e.SliceNumber}");
     }
 }

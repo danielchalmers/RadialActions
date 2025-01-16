@@ -47,13 +47,12 @@
                         TrayLeftMouseDoubleClick="TaskbarIcon_TrayLeftMouseDoubleClick" />
     </Window.Resources>
 
-    <Grid Width="300"
-          Height="300"
-          Background="AliceBlue">
-        <TextBlock>
-            <Run Text="Hello World." />
-            <Run Text="Using hotkey:" />
-            <Run Text="{Binding ActivationHotkey, Source={x:Static p:Settings.Default}}" />
-        </TextBlock>
+    <Grid>
+        <local:InteractivePie SliceCount="8"
+                              Width="300"
+                              Height="300"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              SliceClicked="InteractivePie_SliceClicked" />
     </Grid>
 </Window>
