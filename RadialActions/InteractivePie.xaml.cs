@@ -65,14 +65,42 @@ public partial class InteractivePie : UserControl
             slice.Stroke = Brushes.Black;
             slice.StrokeThickness = 1;
 
-            // Add hover effect
-            slice.MouseEnter += (s, e) => AnimateSliceColor(fillBrush, Colors.Orange, 0.075); // Animate to orange
-            slice.MouseLeave += (s, e) => AnimateSliceColor(fillBrush, GetSliceColor(i), 0.075); // Animate back to original
+            var isMouseDown = false;
 
-            // Handle click events
+            // Add mouse-down animation
+            slice.MouseLeftButtonDown += (s, e) =>
+            {
+                isMouseDown = true;
+                AnimateSliceClickDown(slice);
+                e.Handled = true;
+            };
+
+            // Add mouse-up animation
             slice.MouseLeftButtonUp += (s, e) =>
             {
-                SliceClicked?.Invoke(this, new SliceClickEventArgs(sliceIndex));
+                if (isMouseDown)
+                {
+                    isMouseDown = false;
+                    AnimateSliceClickUp(slice);
+                    SliceClicked?.Invoke(this, new SliceClickEventArgs(sliceIndex));
+                    e.Handled = true;
+                }
+            };
+
+            // Add hover effects
+            slice.MouseEnter += (s, e) =>
+            {
+                AnimateSliceColor(fillBrush, Colors.Orange, 0.1); // Animate to orange
+            };
+            slice.MouseLeave += (s, e) =>
+            {
+                AnimateSliceColor(fillBrush, GetSliceColor(i), 0.1); // Animate back to original
+
+                if (isMouseDown)
+                {
+                    isMouseDown = false;
+                    AnimateSliceClickUp(slice);
+                }
             };
 
             PieMenuCanvas.Children.Add(slice);
@@ -86,7 +114,8 @@ public partial class InteractivePie : UserControl
                 FontWeight = FontWeights.Bold,
                 TextAlignment = TextAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                IsHitTestVisible = false, // Allow clicks to pass through
             };
 
             // Calculate the center position of the slice
@@ -114,6 +143,40 @@ public partial class InteractivePie : UserControl
         };
 
         brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+    }
+
+    private void AnimateSliceClickDown(Path slice)
+    {
+        var scaleTransform = new ScaleTransform(1, 1);
+        slice.RenderTransform = scaleTransform;
+        slice.RenderTransformOrigin = new Point(0.5, 0.5);
+
+        var scaleAnimation = new DoubleAnimation
+        {
+            From = 1,
+            To = 0.95, // Shrink slightly
+            Duration = TimeSpan.FromMilliseconds(75),
+            FillBehavior = FillBehavior.HoldEnd // Hold the smaller size
+        };
+
+        scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimation);
+        scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation);
+    }
+
+    private void AnimateSliceClickUp(Path slice)
+    {
+        if (slice.RenderTransform is not ScaleTransform scaleTransform)
+            return;
+
+        var scaleAnimation = new DoubleAnimation
+        {
+            From = 0.95, // Start from the smaller size
+            To = 1,     // Scale back to original size
+            Duration = TimeSpan.FromMilliseconds(75),
+        };
+
+        scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimation);
+        scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation);
     }
 
 
