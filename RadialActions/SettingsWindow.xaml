@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RadialActions"
         xmlns:p="clr-namespace:RadialActions.Properties"
-        d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
         mc:Ignorable="d"
         Title="Radial Actions"
         Width="500"
@@ -38,8 +38,9 @@
                 </TextBlock>
                 <StackPanel Margin="0,0,0,12">
                     <TextBlock>
-                        <Run FontWeight="Bold">Placeholder:</Run>
-                        Do nothing</TextBlock>
+                        <Run FontWeight="Bold">Hotkey:</Run>
+                        <Run Text="{Binding ActivationHotkey, Source={x:Static p:Settings.Default}}" />
+                    </TextBlock>
                 </StackPanel>
 
                 <TextBlock FontWeight="Bold"
@@ -57,6 +58,12 @@
                         <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues"
                                    RequestNavigate="Hyperlink_RequestNavigate">
                             GitHub Issues (Found a bug or have an idea?)
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            Radial Actions - Summon a menu at your cursor (Windows)
                         </Hyperlink>
                     </TextBlock>
                     <TextBlock>

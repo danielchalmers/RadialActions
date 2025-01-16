@@ -6,10 +6,16 @@
         xmlns:local="clr-namespace:RadialActions"
         xmlns:p="clr-namespace:RadialActions.Properties"
         xmlns:tb="http://www.hardcodet.net/taskbar"
+        d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         mc:Ignorable="d"
         Title="{x:Static local:App.Title}"
-        Height="450"
-        Width="800"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        Opacity="0"
+        ShowInTaskbar="False"
         Loaded="Window_Loaded"
         Unloaded="Window_Unloaded"
         Closing="Window_Closing">
@@ -36,11 +42,14 @@
         <tb:TaskbarIcon x:Key="TrayIcon"
                         x:Shared="False"
                         IconSource="RadialActions.ico"
-                        ToolTipText="Radial Actions"
-                        MenuActivation="LeftOrRightClick" />
+                        ToolTipText="{x:Static local:App.Title}"
+                        MenuActivation="LeftOrRightClick"
+                        TrayLeftMouseDoubleClick="TaskbarIcon_TrayLeftMouseDoubleClick" />
     </Window.Resources>
 
-    <Grid>
+    <Grid Width="300"
+          Height="300"
+          Background="AliceBlue">
         <TextBlock>
             <Run Text="Hello World." />
             <Run Text="Using hotkey:" />

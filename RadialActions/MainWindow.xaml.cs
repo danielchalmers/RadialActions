@@ -14,8 +14,8 @@ namespace RadialActions;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private readonly TaskbarIcon _trayIcon;
-    private HotkeyManager _hotkeyManager;
+    private readonly TaskbarIcon _tray;
+    private HotkeyManager _hotkeys;
 
     public MainWindow()
     {
@@ -25,10 +25,11 @@ public partial class MainWindow : Window
         Settings.Default.PropertyChanged += (s, e) => Dispatcher.Invoke(() => Settings_PropertyChanged(s, e));
 
         // Construct the tray from the resources defined.
-        _trayIcon = Resources["TrayIcon"] as TaskbarIcon;
-        _trayIcon.ContextMenu = Resources["MainContextMenu"] as ContextMenu;
-        _trayIcon.ContextMenu.DataContext = this;
-        _trayIcon.ForceCreate(enablesEfficiencyMode: false);
+        _tray = Resources["TrayIcon"] as TaskbarIcon;
+        _tray.ContextMenu = Resources["MainContextMenu"] as ContextMenu;
+        _tray.ContextMenu.DataContext = this;
+        _tray.ForceCreate(enablesEfficiencyMode: false);
+        _tray.ShowNotification("Radial Actions", "Running in the background");
         Log.Debug("Created tray icon");
     }
 
@@ -51,6 +52,7 @@ public partial class MainWindow : Window
     [RelayCommand]
     public void OpenSettingsWindow(string tabIndex)
     {
+        Log.Debug($"Opening settings window to tab index {tabIndex}");
         Settings.Default.SettingsTabIndex = int.Parse(tabIndex);
         App.ShowSingletonWindow<SettingsWindow>(this);
     }
@@ -103,7 +105,7 @@ public partial class MainWindow : Window
 
     private void SetHotkey()
     {
-        var registered = _hotkeyManager.RegisterHotkey(Settings.Default.ActivationHotkey);
+        var registered = _hotkeys.RegisterHotkey(Settings.Default.ActivationHotkey);
 
         if (registered)
         {
@@ -118,20 +120,58 @@ public partial class MainWindow : Window
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
         var windowHandle = new WindowInteropHelper(this).Handle;
-        _hotkeyManager = new HotkeyManager(windowHandle);
-        _hotkeyManager.HotkeyPressed += OnHotkeyPressed;
+        _hotkeys = new HotkeyManager(windowHandle);
+        _hotkeys.HotkeyPressed += OnHotkeyPressed;
         SetHotkey();
+
+        Hide();
+        Opacity = 1;
     }
 
     private void Window_Unloaded(object sender, RoutedEventArgs e)
     {
-        _hotkeyManager?.UnregisterHotkey(Settings.Default.ActivationHotkey);
+        _hotkeys?.UnregisterHotkey(Settings.Default.ActivationHotkey);
+    }
+
+    public void OpenMenu()
+    {
+        Log.Information("Opening menu");
+        ShowInTaskbar = true;
+        Show();
+        SystemCommands.RestoreWindow(this);
+        Activate();
+    }
+
+    public void CloseMenu()
+    {
+        Log.Information("Closing menu");
+        ShowInTaskbar = false;
+        Hide();
+        SystemCommands.MinimizeWindow(this);
+    }
+
+    public void ToggleMenu()
+    {
+        if (IsVisible)
+        {
+            CloseMenu();
+        }
+        else
+        {
+            OpenMenu();
+        }
     }
 
     private void OnHotkeyPressed(object sender, EventArgs e)
     {
-        SystemCommands.RestoreWindow(this);
-        Activate();
+        Log.Debug("Hotkey pressed");
+        ToggleMenu();
+    }
+
+    private void TaskbarIcon_TrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)
+    {
+        Log.Debug("Tray icon double clicked");
+        ToggleMenu();
     }
 
     private void Window_Closing(object sender, CancelEventArgs e)
