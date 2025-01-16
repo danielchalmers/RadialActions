@@ -7,11 +7,12 @@
         xmlns:p="clr-namespace:RadialActions.Properties"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Radial Actions"
+        Title="{x:Static local:App.Title}"
         Height="450"
         Width="800"
         Loaded="Window_Loaded"
-        Unloaded="Window_Unloaded">
+        Unloaded="Window_Unloaded"
+        Closing="Window_Closing">
     <Window.Resources>
         <ContextMenu x:Key="MainContextMenu"
                      x:Shared="False">
@@ -40,6 +41,10 @@
     </Window.Resources>
 
     <Grid>
-        <TextBlock Text="Hello, World!" />
+        <TextBlock>
+            <Run Text="Hello World." />
+            <Run Text="Using hotkey:" />
+            <Run Text="{Binding ActivationHotkey, Source={x:Static p:Settings.Default}}" />
+        </TextBlock>
     </Grid>
 </Window>

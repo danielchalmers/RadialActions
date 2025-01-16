@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace RadialActions.Properties;
 
@@ -17,12 +18,16 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
         Formatting = Formatting.Indented,
 
         // Prevent a single error from taking down the whole file.
-        Error = (_, e) => e.ErrorContext.Handled = true,
+        Error = (_, e) =>
+        {
+            Log.Error(e.ErrorContext.Error, "Serializer error");
+            e.ErrorContext.Handled = true;
+        },
     };
 
     static Settings()
     {
-        // Settings file path from the same directory as the executable.
+        // Settings file path from the same directory as the executable (not working directory).
         var settingsFileName = Path.GetFileNameWithoutExtension(App.MainFileInfo.FullName) + ".settings";
         FilePath = Path.Combine(App.MainFileInfo.DirectoryName, settingsFileName);
     }
@@ -30,7 +35,7 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
     // Private constructor to enforce singleton pattern.
     private Settings()
     {
-        // Watch for changes in the settings file.
+        // Watch for changes in specifically the settings file.
         _watcher = new(App.MainFileInfo.DirectoryName, Path.GetFileName(FilePath))
         {
             EnableRaisingEvents = true,
@@ -77,6 +82,11 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
     /// </summary>
     public string ActivationHotkey { get; set; } = "ctrl+alt+4";
 
+    /// <summary>
+    /// Opens the app when you log in.
+    /// </summary>
+    public bool RunOnStartup { get; set; } = false;
+
     #endregion "Properties"
 
     /// <summary>
@@ -84,6 +94,8 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
     /// </summary>
     public bool Save()
     {
+        Log.Information($"Saving to {FilePath}");
+
         try
         {
             var json = JsonConvert.SerializeObject(this, _jsonSerializerSettings);
@@ -99,12 +111,14 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
                 catch
                 {
                     // Wait before next attempt to read.
+                    Log.Debug("Couldn't save file; Waiting a bit");
                     System.Threading.Thread.Sleep(250);
                 }
             }
         }
-        catch (JsonSerializationException)
+        catch (JsonSerializationException ex)
         {
+            Log.Error(ex, "Failed to save settings");
         }
 
         return false;
@@ -133,8 +147,10 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
             Populate(settings);
             return settings;
         }
-        catch
+        catch (Exception ex)
         {
+            Log.Error(ex, $"Failed to load {FilePath}");
+            Log.Information("Creating new settings");
             return new();
         }
     }
@@ -147,6 +163,7 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
         var settings = LoadFromFile();
 
         CanBeSaved = settings.Save();
+        Log.Debug($"Settings can be saved: {CanBeSaved}");
 
         return settings;
     }
@@ -156,12 +173,15 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
     /// </summary>
     private void FileChanged(object sender, FileSystemEventArgs e)
     {
+        Log.Debug($"File changed: {e.FullPath}");
+
         try
         {
             Populate(this);
         }
-        catch
+        catch (Exception ex)
         {
+            Log.Error(ex, "Failed to reload settings after the file changed");
         }
     }
 

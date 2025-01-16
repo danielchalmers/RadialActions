@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using Microsoft.Win32;
+using Serilog;
 
 namespace RadialActions;
 
@@ -13,18 +14,41 @@ public partial class App : Application
 {
     public static FileInfo MainFileInfo = new(Process.GetCurrentProcess().MainModule.FileName);
 
+    public static string Title { get; } = "Radial Actions";
+
+    public static string AssemblyName { get; } = "RadialActions";
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .MinimumLevel.Verbose()
+            .WriteTo.Debug()
+            .CreateLogger();
+
+        Log.Information($"Starting {Title}");
+    }
+
     /// <summary>
     /// Sets or deletes a value in the registry which enables the current executable to run on system startup.
     /// </summary>
     public static void SetRunOnStartup(bool runOnStartup)
     {
-        var keyName = "RadialActions";
+        var keyName = AssemblyName;
         using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
 
         if (runOnStartup)
+        {
+            Log.Information($"Setting to run on startup under key named {keyName}");
             key?.SetValue(keyName, MainFileInfo.FullName);
+        }
         else
+        {
+            Log.Information($"Removing from startup under key named {keyName}");
             key?.DeleteValue(keyName, false);
+        }
     }
 
     /// <summary>

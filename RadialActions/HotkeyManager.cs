@@ -30,23 +30,21 @@ public class HotkeyManager
 
     public bool RegisterHotkey(string hotkey)
     {
+        if (_hotkeys.ContainsKey(hotkey))
+        {
+            UnregisterHotkey(hotkey);
+        }
+
         var (modifiers, keyCode) = ParseHotkey(hotkey);
         var id = ++_currentId;
 
         return RegisterHotKey(_windowHandle, id, modifiers, keyCode);
     }
 
-    public void UnregisterHotkey(string hotkey)
+    public bool UnregisterHotkey(string hotkey)
     {
         var id = _hotkeys[hotkey];
-        UnregisterHotKey(_windowHandle, id);
-    }
-
-    public bool UpdateHotkey(string newHotkey)
-    {
-        var id = _hotkeys[newHotkey];
-        UnregisterHotKey(_windowHandle, id);
-        return RegisterHotkey(newHotkey);
+        return UnregisterHotKey(_windowHandle, id);
     }
 
     private (uint modifiers, uint keyCode) ParseHotkey(string hotkey)
