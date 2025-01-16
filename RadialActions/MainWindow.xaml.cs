@@ -181,7 +181,20 @@ public partial class MainWindow : Window
 
     private void OnSliceClicked(object sender, SliceClickEventArgs e)
     {
-        Log.Information($"Took a byte out of slice {e.SliceNumber}");
+        Log.Debug($"Took a byte out of slice {e.SliceNumber}");
+
+        switch (e.SliceNumber)
+        {
+            case 0:
+                PieActions.SimulateKey(0xB3); // VK_MEDIA_PLAY_PAUSE
+                break;
+
+            default:
+                Log.Error("This slice has not been implemented");
+                break;
+        }
+
+        HideMenu();
     }
 
     private void Window_Deactivated(object sender, EventArgs e)
