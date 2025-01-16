@@ -109,13 +109,12 @@ public partial class MainWindow : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
+        HideMenu();
+
         _handle = new WindowInteropHelper(this).Handle;
         _hotkeys = new(_handle);
         _hotkeys.HotkeyPressed += OnHotkeyPressed;
         SetHotkey();
-
-        HideMenu();
-        Opacity = 1;
 
 #if DEBUG
         ShowMenu(false);

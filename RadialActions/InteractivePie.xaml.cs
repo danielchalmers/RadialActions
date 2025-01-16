@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 namespace RadialActions;
@@ -57,19 +58,16 @@ public partial class InteractivePie : UserControl
 
             // Create the pie slice
             var slice = CreateSlice(center, canvasRadius, startAngle, endAngle);
-            slice.Fill = new SolidColorBrush(GetSliceColor(i));
+
+            // Use a SolidColorBrush for animation
+            var fillBrush = new SolidColorBrush(GetSliceColor(i));
+            slice.Fill = fillBrush;
             slice.Stroke = Brushes.Black;
             slice.StrokeThickness = 1;
 
             // Add hover effect
-            slice.MouseEnter += (s, e) =>
-            {
-                slice.Fill = new SolidColorBrush(Color.FromRgb(200, 200, 200));
-            };
-            slice.MouseLeave += (s, e) =>
-            {
-                slice.Fill = new SolidColorBrush(GetSliceColor(i));
-            };
+            slice.MouseEnter += (s, e) => AnimateSliceColor(fillBrush, Colors.Orange, 0.075); // Animate to orange
+            slice.MouseLeave += (s, e) => AnimateSliceColor(fillBrush, GetSliceColor(i), 0.075); // Animate back to original
 
             // Handle click events
             slice.MouseLeftButtonDown += (s, e) =>
@@ -105,6 +103,19 @@ public partial class InteractivePie : UserControl
             PieMenuCanvas.Children.Add(text);
         }
     }
+
+    private void AnimateSliceColor(SolidColorBrush brush, Color toColor, double durationInSeconds)
+    {
+        var colorAnimation = new ColorAnimation
+        {
+            To = toColor,
+            Duration = TimeSpan.FromSeconds(durationInSeconds),
+            EasingFunction = new QuadraticEase()
+        };
+
+        brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+    }
+
 
     private Point GetTextPosition(Point center, double radius, double startAngle, double endAngle)
     {
