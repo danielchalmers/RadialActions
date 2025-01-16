@@ -1,8 +1,6 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using Newtonsoft.Json;
-using Serilog;
 
 namespace RadialActions.Properties;
 

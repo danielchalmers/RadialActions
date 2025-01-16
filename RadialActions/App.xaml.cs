@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using Microsoft.Win32;
-using Serilog;
 
 namespace RadialActions;
 
@@ -34,20 +32,30 @@ public partial class App : Application
     /// <summary>
     /// Sets or deletes a value in the registry which enables the current executable to run on system startup.
     /// </summary>
-    public static void SetRunOnStartup(bool runOnStartup)
+    public static bool SetRunOnStartup(bool runOnStartup)
     {
         var keyName = AssemblyName;
         using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
 
-        if (runOnStartup)
+        try
         {
-            Log.Information($"Setting to run on startup under key named {keyName}");
-            key?.SetValue(keyName, MainFileInfo.FullName);
+            if (runOnStartup)
+            {
+                Log.Information($"Setting to run on startup under key named {keyName}");
+                key?.SetValue(keyName, MainFileInfo.FullName);
+            }
+            else
+            {
+                Log.Information($"Removing from startup under key named {keyName}");
+                key?.DeleteValue(keyName, false);
+            }
+
+            return true;
         }
-        else
+        catch (Exception ex)
         {
-            Log.Information($"Removing from startup under key named {keyName}");
-            key?.DeleteValue(keyName, false);
+            Log.Error(ex, "Failed to set run on startup");
+            return false;
         }
     }
 

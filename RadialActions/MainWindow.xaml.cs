@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,7 +6,6 @@ using System.Windows.Interop;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using RadialActions.Properties;
-using Serilog;
 
 namespace RadialActions;
 
@@ -132,6 +130,7 @@ public partial class MainWindow : Window
 
     private void OnHotkeyPressed(object sender, EventArgs e)
     {
+        SystemCommands.RestoreWindow(this);
         Activate();
     }
 

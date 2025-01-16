@@ -2,16 +2,8 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net481</TargetFramework>
     <UseWPF>true</UseWPF>
-    <LangVersion>latest</LangVersion>
     <ApplicationIcon>RadialActions.ico</ApplicationIcon>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <Product>Radial Actions</Product>
-    <Company>Daniel Chalmers</Company>
-    <Copyright>© Daniel Chalmers</Copyright>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
@@ -24,6 +16,10 @@
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Serilog" />
   </ItemGroup>
 
   <ItemGroup>

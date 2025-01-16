@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>Radial Actions</Product>
+    <Authors>Daniel Chalmers</Authors>
+    <Copyright>© Daniel Chalmers</Copyright>
+  </PropertyGroup>
+
+</Project>
