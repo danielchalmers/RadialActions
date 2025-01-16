@@ -70,7 +70,7 @@ public partial class InteractivePie : UserControl
             slice.MouseLeave += (s, e) => AnimateSliceColor(fillBrush, GetSliceColor(i), 0.075); // Animate back to original
 
             // Handle click events
-            slice.MouseLeftButtonDown += (s, e) =>
+            slice.MouseLeftButtonUp += (s, e) =>
             {
                 SliceClicked?.Invoke(this, new SliceClickEventArgs(sliceIndex));
             };

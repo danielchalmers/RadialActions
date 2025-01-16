@@ -54,7 +54,7 @@ public partial class MainWindow : Window
     [RelayCommand]
     public void OpenSettingsWindow(string tabIndex)
     {
-        Log.Debug($"Opening settings window to tab index {tabIndex}");
+        Log.Debug($"Opening settings window to tab {tabIndex}");
         Settings.Default.SettingsTabIndex = int.Parse(tabIndex);
         App.ShowSingletonWindow<SettingsWindow>(this);
     }

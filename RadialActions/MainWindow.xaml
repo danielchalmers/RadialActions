@@ -30,10 +30,16 @@
 
             <MenuItem Command="{Binding OpenSettingsWindowCommand}"
                       CommandParameter="1"
+                      Header="_Actions" />
+
+            <MenuItem Command="{Binding OpenSettingsWindowCommand}"
+                      CommandParameter="2"
                       Header="_Help" />
 
+            <Separator />
+
             <MenuItem Command="{Binding OpenSettingsFileCommand}"
-                      Header="_Advanced settings"
+                      Header="Ad_vanced settings"
                       IsEnabled="{x:Static p:Settings.CanBeSaved}" />
 
             <MenuItem Command="{Binding ExitCommand}"
@@ -70,8 +76,8 @@
 
     <Grid>
         <local:InteractivePie SliceCount="8"
-                              Width="400"
-                              Height="400"
+                              Width="{Binding Size, Source={x:Static p:Settings.Default}}"
+                              Height="{Binding Size, Source={x:Static p:Settings.Default}}"
                               HorizontalAlignment="Center"
                               VerticalAlignment="Center"
                               SliceClicked="OnSliceClicked" />

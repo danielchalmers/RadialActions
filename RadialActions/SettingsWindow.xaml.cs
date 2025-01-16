@@ -29,5 +29,6 @@ public partial class SettingsWindowViewModel : ObservableObject
 
     public SettingsWindowViewModel(Settings settings)
     {
+        Settings = settings;
     }
 }

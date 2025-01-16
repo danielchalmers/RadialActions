@@ -76,12 +76,17 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
     public int SettingsTabIndex { get; set; }
 
     /// <summary>
-    /// The hotkey used to activate the radial menu.
+    /// The hotkey used to activate the pie menu.
     /// </summary>
     public string ActivationHotkey { get; set; } = "ctrl+alt+4";
 
     /// <summary>
-    /// Opens the app when you log in.
+    /// The width and height of the pie visual.
+    /// </summary>
+    public int Size { get; set; } = 400;
+
+    /// <summary>
+    /// Starts the app in the background when you log in.
     /// </summary>
     public bool RunOnStartup { get; set; } = false;
 
