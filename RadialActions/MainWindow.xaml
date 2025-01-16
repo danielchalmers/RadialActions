@@ -75,11 +75,9 @@
     </Window.Style>
 
     <Grid>
-        <local:InteractivePie SliceCount="8"
+        <local:InteractivePie Slices="{Binding Slices}"
                               Width="{Binding Size, Source={x:Static p:Settings.Default}}"
                               Height="{Binding Size, Source={x:Static p:Settings.Default}}"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Center"
                               SliceClicked="OnSliceClicked" />
     </Grid>
 </Window>

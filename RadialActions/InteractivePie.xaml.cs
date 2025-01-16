@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -14,34 +15,67 @@ public partial class InteractivePie : UserControl
     public InteractivePie()
     {
         InitializeComponent();
+        Slices = [];
+        Slices.CollectionChanged += OnSlicesCollectionChanged;
     }
 
-    public static readonly DependencyProperty SliceCountProperty =
-        DependencyProperty.Register("SliceCount", typeof(int), typeof(InteractivePie),
-            new PropertyMetadata(6, OnSliceCountChanged));
+    /// <summary>
+    /// Dependency property for the Slices collection.
+    /// </summary>
+    public static readonly DependencyProperty SlicesProperty =
+        DependencyProperty.Register(
+            nameof(Slices),
+            typeof(ObservableCollection<Slice>),
+            typeof(InteractivePie),
+            new PropertyMetadata(null, OnSlicesPropertyChanged));
 
-    public int SliceCount
+    /// <summary>
+    /// Gets or sets the collection of slices.
+    /// </summary>
+    public ObservableCollection<Slice> Slices
     {
-        get => (int)GetValue(SliceCountProperty);
-        set => SetValue(SliceCountProperty, value);
+        get => (ObservableCollection<Slice>)GetValue(SlicesProperty);
+        set => SetValue(SlicesProperty, value);
     }
 
-    private static void OnSliceCountChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    /// <summary>
+    /// Handles changes to the Slices dependency property.
+    /// </summary>
+    private static void OnSlicesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is InteractivePie control)
         {
+            if (e.OldValue is ObservableCollection<Slice> oldCollection)
+            {
+                oldCollection.CollectionChanged -= control.OnSlicesCollectionChanged;
+            }
+
+            if (e.NewValue is ObservableCollection<Slice> newCollection)
+            {
+                newCollection.CollectionChanged += control.OnSlicesCollectionChanged;
+            }
+
+            // Trigger UI update for new collection
             control.CreatePieMenu();
         }
     }
 
-    private void UserControl_Loaded(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Handles changes to the Slices collection.
+    /// </summary>
+    private void OnSlicesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
+        // Update the UI when the collection changes
         CreatePieMenu();
     }
 
     private void CreatePieMenu()
     {
         PieMenuCanvas.Children.Clear();
+
+        if (Slices == null || Slices.Count == 0)
+            return;
+
         var canvasSize = Math.Min(ActualWidth, ActualHeight);
         var canvasRadius = canvasSize / 2;
         var center = new Point(canvasRadius, canvasRadius);
@@ -49,10 +83,10 @@ public partial class InteractivePie : UserControl
         PieMenuCanvas.Width = canvasSize;
         PieMenuCanvas.Height = canvasSize;
 
-        var angleStep = 360.0 / SliceCount;
-        for (var i = 0; i < SliceCount; i++)
+        var angleStep = 360.0 / Slices.Count;
+        for (var i = 0; i < Slices.Count; i++)
         {
-            var sliceIndex = i; // Create a local copy for the current slice number
+            var sliceObject = Slices[i];
             var startAngle = i * angleStep;
             var endAngle = startAngle + angleStep;
 
@@ -82,7 +116,7 @@ public partial class InteractivePie : UserControl
                 {
                     isMouseDown = false;
                     AnimateSliceClickUp(slice);
-                    SliceClicked?.Invoke(this, new SliceClickEventArgs(sliceIndex));
+                    SliceClicked?.Invoke(this, new SliceClickEventArgs(sliceObject));
                     e.Handled = true;
                 }
             };
@@ -108,7 +142,7 @@ public partial class InteractivePie : UserControl
             // Add text to the slice
             var text = new TextBlock
             {
-                Text = $"Slice {sliceIndex}",
+                Text = sliceObject.Name,
                 Foreground = Brushes.White,
                 FontSize = 14,
                 FontWeight = FontWeights.Bold,
@@ -179,7 +213,6 @@ public partial class InteractivePie : UserControl
         scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation);
     }
 
-
     private Point GetTextPosition(Point center, double radius, double startAngle, double endAngle)
     {
         var midAngle = (startAngle + endAngle) / 2;
@@ -226,8 +259,8 @@ public partial class InteractivePie : UserControl
 
     public event EventHandler<SliceClickEventArgs> SliceClicked;
 
-    public class SliceClickEventArgs(int sliceNumber) : EventArgs
+    public class SliceClickEventArgs(Slice slice) : EventArgs
     {
-        public int SliceNumber { get; } = sliceNumber;
+        public Slice Slice { get; } = slice;
     }
 }

@@ -6,7 +6,6 @@
              xmlns:local="clr-namespace:RadialActions"
              mc:Ignorable="d"
              d:DesignHeight="300"
-             d:DesignWidth="300"
-             Loaded="UserControl_Loaded">
+             d:DesignWidth="300">
     <Canvas Name="PieMenuCanvas" />
 </UserControl>

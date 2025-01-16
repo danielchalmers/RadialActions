@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,7 +34,16 @@ public partial class MainWindow : Window
         _tray.ForceCreate(enablesEfficiencyMode: false);
         _tray.ShowNotification("Radial Actions", "Running in the background");
         Log.Debug("Created tray icon");
+
+        // Temporary
+        Slices.Add(new("PlayPause"));
+        Slices.Add(new("Test Slice 1"));
+        Slices.Add(new("Test Slice 2"));
+        Slices.Add(new("Test Slice 3"));
+        Slices.Add(new("Test Slice 4"));
     }
+
+    public ObservableCollection<Slice> Slices { get; set; } = [];
 
     /// <summary>
     /// Handles setting changes.
@@ -181,12 +191,12 @@ public partial class MainWindow : Window
 
     private void OnSliceClicked(object sender, SliceClickEventArgs e)
     {
-        Log.Debug($"Took a byte out of slice {e.SliceNumber}");
+        Log.Debug($"Took a byte out of slice {e.Slice.Name}");
 
-        switch (e.SliceNumber)
+        switch (e.Slice.Name)
         {
-            case 0:
-                PieActions.SimulateKey(0xB3); // VK_MEDIA_PLAY_PAUSE
+            case "PlayPause":
+                Actions.SimulateKey(0xB3); // VK_MEDIA_PLAY_PAUSE
                 break;
 
             default:
