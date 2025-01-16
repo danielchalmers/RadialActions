@@ -31,13 +31,33 @@ public class HotkeyManager
     {
         if (_hotkeys.ContainsKey(hotkey))
         {
-            UnregisterHotkey(hotkey);
+            var unregistered = UnregisterHotkey(hotkey);
+
+            if (unregistered)
+            {
+                Log.Debug($"Hotkey unregistered <{hotkey}>");
+            }
+            else
+            {
+                Log.Debug($"Hotkey failed to unregister <{hotkey}>");
+            }
         }
 
         var (modifiers, keyCode) = ParseHotkey(hotkey);
         var id = ++_currentId;
 
-        return RegisterHotKey(_windowHandle, id, modifiers, keyCode);
+        var registered = RegisterHotKey(_windowHandle, id, modifiers, keyCode);
+
+        if (registered)
+        {
+            Log.Information($"Hotkey registered <{hotkey}>");
+            return true;
+        }
+        else
+        {
+            Log.Information($"Hotkey failed to register <{hotkey}>");
+            return false;
+        }
     }
 
     public bool UnregisterHotkey(string hotkey)

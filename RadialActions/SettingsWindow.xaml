@@ -63,7 +63,7 @@
                     <TextBlock>
                         <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock"
                                    RequestNavigate="Hyperlink_RequestNavigate">
-                            Radial Actions - Summon a menu at your cursor (Windows)
+                            Radial Actions - Summon a pie menu at your cursor (Windows)
                         </Hyperlink>
                     </TextBlock>
                     <TextBlock>

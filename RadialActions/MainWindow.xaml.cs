@@ -16,6 +16,7 @@ namespace RadialActions;
 public partial class MainWindow : Window
 {
     private readonly TaskbarIcon _tray;
+    private IntPtr _handle;
     private HotkeyManager _hotkeys;
 
     public MainWindow()
@@ -104,24 +105,12 @@ public partial class MainWindow : Window
         Application.Current.Shutdown();
     }
 
-    private void SetHotkey()
-    {
-        var registered = _hotkeys.RegisterHotkey(Settings.Default.ActivationHotkey);
-
-        if (registered)
-        {
-            Log.Information($"Hotkey registered <{Settings.Default.ActivationHotkey}>");
-        }
-        else
-        {
-            Log.Information($"Hotkey failed to register <{Settings.Default.ActivationHotkey}>");
-        }
-    }
+    private void SetHotkey() => _hotkeys.RegisterHotkey(Settings.Default.ActivationHotkey);
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        var windowHandle = new WindowInteropHelper(this).Handle;
-        _hotkeys = new HotkeyManager(windowHandle);
+        _handle = new WindowInteropHelper(this).Handle;
+        _hotkeys = new(_handle);
         _hotkeys.HotkeyPressed += OnHotkeyPressed;
         SetHotkey();
 
@@ -129,7 +118,7 @@ public partial class MainWindow : Window
         Opacity = 1;
 
 #if DEBUG
-        ShowMenu();
+        ShowMenu(false);
 #endif
     }
 
@@ -138,44 +127,52 @@ public partial class MainWindow : Window
         _hotkeys?.UnregisterHotkey(Settings.Default.ActivationHotkey);
     }
 
-    public void ShowMenu()
+    public void ShowMenu(bool atCursor)
     {
-        Log.Information("Opening menu");
-        ShowInTaskbar = true;
-        this.CenterOnCursor();
+        if (atCursor)
+        {
+            Log.Information("Opening at the cursor");
+            this.CenterOnCursor();
+        }
+        else
+        {
+            Log.Information("Opening at the center of the screen");
+            this.CenterOnScreen();
+        }
+
         Show();
         Activate();
     }
 
     public void HideMenu()
     {
-        Log.Information("Closing menu");
-        ShowInTaskbar = false;
+        if (Visibility != Visibility.Visible)
+        {
+            return;
+        }
+
+        Log.Information("Dismissing menu");
         Hide();
     }
 
-    public void ToggleMenu()
+    private void OnHotkeyPressed(object sender, EventArgs e)
     {
+        Log.Debug("Hotkey pressed");
+
         if (IsActive)
         {
             HideMenu();
         }
         else
         {
-            ShowMenu();
+            ShowMenu(true);
         }
     }
 
-    private void OnHotkeyPressed(object sender, EventArgs e)
-    {
-        Log.Debug("Hotkey pressed");
-        ToggleMenu();
-    }
-
-    private void TaskbarIcon_TrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)
+    private void OnTrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)
     {
         Log.Debug("Tray icon double clicked");
-        ToggleMenu();
+        ShowMenu(false);
     }
 
     private void Window_Closing(object sender, CancelEventArgs e)
@@ -183,8 +180,14 @@ public partial class MainWindow : Window
         App.SetRunOnStartup(Settings.Default.RunOnStartup);
     }
 
-    private void InteractivePie_SliceClicked(object sender, SliceClickEventArgs e)
+    private void OnSliceClicked(object sender, SliceClickEventArgs e)
     {
         Log.Information($"Took a byte out of slice {e.SliceNumber}");
+    }
+
+    private void Window_Deactivated(object sender, EventArgs e)
+    {
+        Log.Debug("Lost focus");
+        HideMenu();
     }
 }
