@@ -8,7 +8,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         mc:Ignorable="d"
-        Title="{x:Static local:App.Title}"
+        Title="{x:Static local:App.FriendlyName}"
         AllowsTransparency="True"
         Background="Transparent"
         WindowStyle="None"
@@ -49,7 +49,7 @@
         <tb:TaskbarIcon x:Key="TrayIcon"
                         x:Shared="False"
                         IconSource="RadialActions.ico"
-                        ToolTipText="{x:Static local:App.Title}"
+                        ToolTipText="{x:Static local:App.FriendlyName}"
                         MenuActivation="LeftOrRightClick"
                         TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick" />
     </Window.Resources>
@@ -75,9 +75,9 @@
     </Window.Style>
 
     <Grid>
-        <local:InteractivePie Slices="{Binding Slices}"
-                              Width="{Binding Size, Source={x:Static p:Settings.Default}}"
-                              Height="{Binding Size, Source={x:Static p:Settings.Default}}"
-                              SliceClicked="OnSliceClicked" />
+        <local:PieControl Slices="{Binding Slices}"
+                          Width="{Binding Size, Source={x:Static p:Settings.Default}}"
+                          Height="{Binding Size, Source={x:Static p:Settings.Default}}"
+                          SliceClicked="OnSliceClicked" />
     </Grid>
 </Window>

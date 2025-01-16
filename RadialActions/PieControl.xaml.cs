@@ -8,70 +8,56 @@ using System.Windows.Shapes;
 namespace RadialActions;
 
 /// <summary>
-/// Interaction logic for InteractivePie.xaml
+/// Interaction logic for PieControl.xaml
 /// </summary>
-public partial class InteractivePie : UserControl
+public partial class PieControl : UserControl
 {
-    public InteractivePie()
+    public PieControl()
     {
         InitializeComponent();
         Slices = [];
         Slices.CollectionChanged += OnSlicesCollectionChanged;
     }
 
-    /// <summary>
-    /// Dependency property for the Slices collection.
-    /// </summary>
     public static readonly DependencyProperty SlicesProperty =
         DependencyProperty.Register(
             nameof(Slices),
-            typeof(ObservableCollection<Slice>),
-            typeof(InteractivePie),
+            typeof(ObservableCollection<Action>),
+            typeof(PieControl),
             new PropertyMetadata(null, OnSlicesPropertyChanged));
 
-    /// <summary>
-    /// Gets or sets the collection of slices.
-    /// </summary>
-    public ObservableCollection<Slice> Slices
+    public ObservableCollection<Action> Slices
     {
-        get => (ObservableCollection<Slice>)GetValue(SlicesProperty);
+        get => (ObservableCollection<Action>)GetValue(SlicesProperty);
         set => SetValue(SlicesProperty, value);
     }
 
-    /// <summary>
-    /// Handles changes to the Slices dependency property.
-    /// </summary>
     private static void OnSlicesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is InteractivePie control)
+        if (d is PieControl control)
         {
-            if (e.OldValue is ObservableCollection<Slice> oldCollection)
+            if (e.OldValue is ObservableCollection<Action> oldCollection)
             {
                 oldCollection.CollectionChanged -= control.OnSlicesCollectionChanged;
             }
 
-            if (e.NewValue is ObservableCollection<Slice> newCollection)
+            if (e.NewValue is ObservableCollection<Action> newCollection)
             {
                 newCollection.CollectionChanged += control.OnSlicesCollectionChanged;
             }
 
-            // Trigger UI update for new collection
             control.CreatePieMenu();
         }
     }
 
-    /// <summary>
-    /// Handles changes to the Slices collection.
-    /// </summary>
     private void OnSlicesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        // Update the UI when the collection changes
         CreatePieMenu();
     }
 
     private void CreatePieMenu()
     {
-        PieMenuCanvas.Children.Clear();
+        PieCanvas.Children.Clear();
 
         if (Slices == null || Slices.Count == 0)
             return;
@@ -80,8 +66,8 @@ public partial class InteractivePie : UserControl
         var canvasRadius = canvasSize / 2;
         var center = new Point(canvasRadius, canvasRadius);
 
-        PieMenuCanvas.Width = canvasSize;
-        PieMenuCanvas.Height = canvasSize;
+        PieCanvas.Width = canvasSize;
+        PieCanvas.Height = canvasSize;
 
         var angleStep = 360.0 / Slices.Count;
         for (var i = 0; i < Slices.Count; i++)
@@ -121,7 +107,7 @@ public partial class InteractivePie : UserControl
                 }
             };
 
-            // Add hover effects
+            // Add more mouse effects
             slice.MouseEnter += (s, e) =>
             {
                 AnimateSliceColor(fillBrush, Colors.Orange, 0.1); // Animate to orange
@@ -137,7 +123,7 @@ public partial class InteractivePie : UserControl
                 }
             };
 
-            PieMenuCanvas.Children.Add(slice);
+            PieCanvas.Children.Add(slice);
 
             // Add text to the slice
             var text = new TextBlock
@@ -163,7 +149,7 @@ public partial class InteractivePie : UserControl
             Canvas.SetLeft(text, textPosition.X - (textSize.Width / 2));
             Canvas.SetTop(text, textPosition.Y - (textSize.Height / 2));
 
-            PieMenuCanvas.Children.Add(text);
+            PieCanvas.Children.Add(text);
         }
     }
 
@@ -258,9 +244,9 @@ public partial class InteractivePie : UserControl
     }
 
     public event EventHandler<SliceClickEventArgs> SliceClicked;
+}
 
-    public class SliceClickEventArgs(Slice slice) : EventArgs
-    {
-        public Slice Slice { get; } = slice;
-    }
+public class SliceClickEventArgs(Action action) : EventArgs
+{
+    public Action Slice { get; } = action;
 }

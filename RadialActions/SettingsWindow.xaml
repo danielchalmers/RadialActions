@@ -30,14 +30,14 @@
             <StackPanel>
                 <TextBlock Text="Hotkey:" />
                 <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="The hotkey used to activate the pie menu."
+                <TextBlock Text="The hotkey used to activate the radial."
                            FontStyle="Italic"
                            FontSize="10"
                            Margin="0,0,0,12" />
 
                 <TextBlock Text="Pie Size:" />
                 <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="The width and height of the pie visual."
+                <TextBlock Text="The width and height of the radial."
                            FontStyle="Italic"
                            FontSize="10"
                            Margin="0,0,0,12" />

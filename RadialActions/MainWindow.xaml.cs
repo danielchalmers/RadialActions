@@ -7,7 +7,6 @@ using System.Windows.Interop;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using RadialActions.Properties;
-using static RadialActions.InteractivePie;
 
 namespace RadialActions;
 
@@ -43,7 +42,7 @@ public partial class MainWindow : Window
         Slices.Add(new("Test Slice 4"));
     }
 
-    public ObservableCollection<Slice> Slices { get; set; } = [];
+    public ObservableCollection<Action> Slices { get; set; } = [];
 
     /// <summary>
     /// Handles setting changes.
@@ -189,14 +188,14 @@ public partial class MainWindow : Window
         App.SetRunOnStartup(Settings.Default.RunOnStartup);
     }
 
-    private void OnSliceClicked(object sender, SliceClickEventArgs e)
+    private void OnSliceClicked(object sender, PieControl.SliceClickEventArgs e)
     {
         Log.Debug($"Took a byte out of slice {e.Slice.Name}");
 
         switch (e.Slice.Name)
         {
             case "PlayPause":
-                Actions.SimulateKey(0xB3); // VK_MEDIA_PLAY_PAUSE
+                ActionUtil.SimulateKey(0xB3); // VK_MEDIA_PLAY_PAUSE
                 break;
 
             default:

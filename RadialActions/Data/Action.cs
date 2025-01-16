@@ -1,10 +1,10 @@
 ﻿namespace RadialActions;
 
-public class Slice
+public class Action
 {
     public string Name { get; set; }
 
-    public Slice(string name)
+    public Action(string name)
     {
         Name = name;
     }

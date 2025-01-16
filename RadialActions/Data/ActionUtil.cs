@@ -2,7 +2,7 @@
 
 namespace RadialActions;
 
-public static class Actions
+public static class ActionUtil
 {
     [DllImport("user32.dll", SetLastError = true)]
     private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, IntPtr dwExtraInfo);
