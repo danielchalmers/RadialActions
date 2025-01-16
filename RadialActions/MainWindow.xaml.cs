@@ -142,8 +142,8 @@ public partial class MainWindow : Window
     {
         Log.Information("Opening menu");
         ShowInTaskbar = true;
+        this.CenterOnCursor();
         Show();
-        SystemCommands.RestoreWindow(this);
         Activate();
     }
 
@@ -152,7 +152,6 @@ public partial class MainWindow : Window
         Log.Information("Closing menu");
         ShowInTaskbar = false;
         Hide();
-        SystemCommands.MinimizeWindow(this);
     }
 
     public void ToggleMenu()

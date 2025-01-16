@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace RadialActions;
@@ -52,16 +42,16 @@ public partial class InteractivePie : UserControl
     private void CreatePieMenu()
     {
         PieMenuCanvas.Children.Clear();
-        double canvasRadius = Math.Min(ActualWidth, ActualHeight) / 2;
-        Point center = new Point(canvasRadius, canvasRadius);
+        var canvasRadius = Math.Min(ActualWidth, ActualHeight) / 2;
+        var center = new Point(canvasRadius, canvasRadius);
 
-        double angleStep = 360.0 / SliceCount;
-        for (int i = 0; i < SliceCount; i++)
+        var angleStep = 360.0 / SliceCount;
+        for (var i = 0; i < SliceCount; i++)
         {
-            double startAngle = i * angleStep;
-            double endAngle = startAngle + angleStep;
+            var startAngle = i * angleStep;
+            var endAngle = startAngle + angleStep;
 
-            Path slice = CreateSlice(center, canvasRadius, startAngle, endAngle);
+            var slice = CreateSlice(center, canvasRadius, startAngle, endAngle);
             slice.Fill = new SolidColorBrush(GetSliceColor(i));
             slice.Stroke = Brushes.Black;
             slice.StrokeThickness = 1;
@@ -88,10 +78,10 @@ public partial class InteractivePie : UserControl
     // Creates a pie slice
     private Path CreateSlice(Point center, double radius, double startAngle, double endAngle)
     {
-        Point startPoint = GetPointOnCircle(center, radius, startAngle);
-        Point endPoint = GetPointOnCircle(center, radius, endAngle);
+        var startPoint = GetPointOnCircle(center, radius, startAngle);
+        var endPoint = GetPointOnCircle(center, radius, endAngle);
 
-        PathFigure figure = new PathFigure
+        var figure = new PathFigure
         {
             StartPoint = center
         };
@@ -99,7 +89,7 @@ public partial class InteractivePie : UserControl
         figure.Segments.Add(new ArcSegment(endPoint, new Size(radius, radius), 0, endAngle - startAngle > 180, SweepDirection.Clockwise, true));
         figure.Segments.Add(new LineSegment(center, true));
 
-        PathGeometry geometry = new PathGeometry();
+        var geometry = new PathGeometry();
         geometry.Figures.Add(figure);
 
         return new Path { Data = geometry };
@@ -108,9 +98,9 @@ public partial class InteractivePie : UserControl
     // Calculates a point on the circle given an angle
     private Point GetPointOnCircle(Point center, double radius, double angleInDegrees)
     {
-        double angleInRadians = angleInDegrees * Math.PI / 180;
-        double x = center.X + radius * Math.Cos(angleInRadians);
-        double y = center.Y + radius * Math.Sin(angleInRadians);
+        var angleInRadians = angleInDegrees * Math.PI / 180;
+        var x = center.X + radius * Math.Cos(angleInRadians);
+        var y = center.Y + radius * Math.Sin(angleInRadians);
         return new Point(x, y);
     }
 
