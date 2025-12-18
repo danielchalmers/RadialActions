@@ -7,5 +7,12 @@
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300">
-    <Canvas Name="PieCanvas" />
+    <Canvas Name="PieCanvas">
+        <Canvas.Effect>
+            <DropShadowEffect BlurRadius="20" 
+                              ShadowDepth="0" 
+                              Opacity="0.6" 
+                              Color="Black" />
+        </Canvas.Effect>
+    </Canvas>
 </UserControl>

@@ -16,10 +16,12 @@
         SizeToContent="WidthAndHeight"
         Opacity="0"
         ShowInTaskbar="False"
+        Topmost="True"
         Loaded="Window_Loaded"
         Unloaded="Window_Unloaded"
         Closing="Window_Closing"
-        Deactivated="Window_Deactivated">
+        Deactivated="Window_Deactivated"
+        KeyDown="Window_KeyDown">
     <Window.Resources>
         <ContextMenu x:Key="MainContextMenu"
                      x:Shared="False">
@@ -65,7 +67,7 @@
                                 <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                                  From="0"
                                                  To="1"
-                                                 Duration="0:0:0.05" />
+                                                 Duration="0:0:0.08" />
                             </Storyboard>
                         </BeginStoryboard>
                     </DataTrigger.EnterActions>

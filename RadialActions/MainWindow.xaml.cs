@@ -11,7 +11,7 @@ using RadialActions.Properties;
 namespace RadialActions;
 
 /// <summary>
-/// Interaction logic for MainWindow.xaml
+/// Main window that hosts the radial pie menu.
 /// </summary>
 public partial class MainWindow : Window
 {
@@ -31,18 +31,30 @@ public partial class MainWindow : Window
         _tray.ContextMenu = Resources["MainContextMenu"] as ContextMenu;
         _tray.ContextMenu.DataContext = this;
         _tray.ForceCreate(enablesEfficiencyMode: false);
-        _tray.ShowNotification("Radial Actions", "Running in the background");
+        _tray.ShowNotification(App.FriendlyName, "Press " + Settings.Default.ActivationHotkey + " to open the menu");
         Log.Debug("Created tray icon");
 
-        // Temporary
-        Slices.Add(new("PlayPause"));
-        Slices.Add(new("Test Slice 1"));
-        Slices.Add(new("Test Slice 2"));
-        Slices.Add(new("Test Slice 3"));
-        Slices.Add(new("Test Slice 4"));
+        // Load actions from settings
+        LoadActions();
     }
 
-    public ObservableCollection<Action> Slices { get; set; } = [];
+    /// <summary>
+    /// The collection of actions displayed in the pie menu.
+    /// </summary>
+    public ObservableCollection<PieAction> Slices { get; set; } = [];
+
+    /// <summary>
+    /// Loads actions from settings into the pie menu.
+    /// </summary>
+    private void LoadActions()
+    {
+        Slices.Clear();
+        foreach (var action in Settings.Default.Actions)
+        {
+            Slices.Add(action);
+        }
+        Log.Information($"Loaded {Slices.Count} actions");
+    }
 
     /// <summary>
     /// Handles setting changes.
@@ -51,9 +63,14 @@ public partial class MainWindow : Window
     {
         Log.Debug($"Setting changed <{e.PropertyName}>");
 
-        if (e.PropertyName == nameof(Settings.ActivationHotkey))
+        switch (e.PropertyName)
         {
-            SetHotkey();
+            case nameof(Settings.ActivationHotkey):
+                SetHotkey();
+                break;
+            case nameof(Settings.Actions):
+                LoadActions();
+                break;
         }
     }
 
@@ -67,6 +84,7 @@ public partial class MainWindow : Window
         Settings.Default.SettingsTabIndex = int.Parse(tabIndex);
         App.ShowSingletonWindow<SettingsWindow>(this);
     }
+
     /// <summary>
     /// Opens the settings file in Notepad.
     /// </summary>
@@ -79,7 +97,7 @@ public partial class MainWindow : Window
             Settings.Default.Save();
         }
 
-        // If it doesn't even exist then it's probably somewhere that requires special access and we shouldn't even be at this point.
+        // If it doesn't even exist then it's probably somewhere that requires special access.
         if (!Settings.Exists)
         {
             MessageBox.Show(this,
@@ -96,10 +114,9 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             Log.Error(ex, "Couldn't open notepad");
-            // Lazy scammers on the Microsoft Store may reupload without realizing it gets sandboxed, making it unable to start the Notepad process (#1, #12).
             MessageBox.Show(this,
                 "Couldn't open settings file.\n\n" +
-                "This app may have be reuploaded without permission. If you paid for it, ask for a refund and download it for free from the original source: https://github.com/danielchalmers/RadialActions.\n\n" +
+                "This app may have been reuploaded without permission. If you paid for it, ask for a refund and download it for free from the original source: https://github.com/danielchalmers/RadialActions.\n\n" +
                 $"If it still doesn't work, create a new Issue at that link with details on what happened and include this error: \"{ex.Message}\"",
                 Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
@@ -114,7 +131,14 @@ public partial class MainWindow : Window
         Application.Current.Shutdown();
     }
 
-    private void SetHotkey() => _hotkeys.RegisterHotkey(Settings.Default.ActivationHotkey);
+    private void SetHotkey()
+    {
+        var hotkey = Settings.Default.ActivationHotkey;
+        if (!string.IsNullOrWhiteSpace(hotkey))
+        {
+            _hotkeys?.RegisterHotkey(hotkey);
+        }
+    }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
@@ -132,9 +156,13 @@ public partial class MainWindow : Window
 
     private void Window_Unloaded(object sender, RoutedEventArgs e)
     {
-        _hotkeys?.UnregisterHotkey(Settings.Default.ActivationHotkey);
+        _hotkeys?.Dispose();
     }
 
+    /// <summary>
+    /// Shows the radial menu.
+    /// </summary>
+    /// <param name="atCursor">If true, centers on cursor; otherwise centers on screen.</param>
     public void ShowMenu(bool atCursor)
     {
         if (atCursor)
@@ -147,6 +175,7 @@ public partial class MainWindow : Window
             Log.Information("Opening at the center of the screen");
             this.CenterOnScreen();
         }
+
 
         Show();
         Activate();
@@ -188,21 +217,10 @@ public partial class MainWindow : Window
         App.SetRunOnStartup(Settings.Default.RunOnStartup);
     }
 
-    private void OnSliceClicked(object sender, PieControl.SliceClickEventArgs e)
+    private void OnSliceClicked(object sender, SliceClickEventArgs e)
     {
-        Log.Debug($"Took a byte out of slice {e.Slice.Name}");
-
-        switch (e.Slice.Name)
-        {
-            case "PlayPause":
-                ActionUtil.SimulateKey(0xB3); // VK_MEDIA_PLAY_PAUSE
-                break;
-
-            default:
-                Log.Error("This slice has not been implemented");
-                break;
-        }
-
+        Log.Debug($"Slice clicked: {e.Slice.Name}");
+        e.Slice.Execute();
         HideMenu();
     }
 
@@ -210,5 +228,15 @@ public partial class MainWindow : Window
     {
         Log.Debug("Lost focus");
         HideMenu();
+    }
+
+    private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.Escape)
+        {
+            Log.Debug("Escape pressed");
+            HideMenu();
+            e.Handled = true;
+        }
     }
 }
