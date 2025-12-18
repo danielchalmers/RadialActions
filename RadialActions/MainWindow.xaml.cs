@@ -33,27 +33,6 @@ public partial class MainWindow : Window
         _tray.ForceCreate(enablesEfficiencyMode: false);
         _tray.ShowNotification(App.FriendlyName, "Press " + Settings.Default.ActivationHotkey + " to open the menu");
         Log.Debug("Created tray icon");
-
-        // Load actions from settings
-        LoadActions();
-    }
-
-    /// <summary>
-    /// The collection of actions displayed in the pie menu.
-    /// </summary>
-    public ObservableCollection<PieAction> Slices { get; set; } = [];
-
-    /// <summary>
-    /// Loads actions from settings into the pie menu.
-    /// </summary>
-    private void LoadActions()
-    {
-        Slices.Clear();
-        foreach (var action in Settings.Default.Actions)
-        {
-            Slices.Add(action);
-        }
-        Log.Information($"Loaded {Slices.Count} actions");
     }
 
     /// <summary>
@@ -67,9 +46,6 @@ public partial class MainWindow : Window
         {
             case nameof(Settings.ActivationHotkey):
                 SetHotkey();
-                break;
-            case nameof(Settings.Actions):
-                LoadActions();
                 break;
         }
     }

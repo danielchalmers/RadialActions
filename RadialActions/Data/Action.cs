@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 
 namespace RadialActions;
 
@@ -53,8 +54,10 @@ public enum VolumeKeyType
 /// <summary>
 /// Represents an action that can be assigned to a pie slice.
 /// </summary>
-public class PieAction
+public class PieAction : INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler PropertyChanged;
+
     /// <summary>
     /// The display name of the action.
     /// </summary>

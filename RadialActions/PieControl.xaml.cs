@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -16,8 +17,6 @@ public partial class PieControl : UserControl
     public PieControl()
     {
         InitializeComponent();
-        Slices = [];
-        Slices.CollectionChanged += OnSlicesCollectionChanged;
         Loaded += (s, e) => CreatePieMenu();
         SizeChanged += (s, e) => CreatePieMenu();
     }
@@ -42,11 +41,19 @@ public partial class PieControl : UserControl
             if (e.OldValue is ObservableCollection<PieAction> oldCollection)
             {
                 oldCollection.CollectionChanged -= control.OnSlicesCollectionChanged;
+                foreach (var item in oldCollection)
+                {
+                    item.PropertyChanged -= control.OnSlicePropertyChanged;
+                }
             }
 
             if (e.NewValue is ObservableCollection<PieAction> newCollection)
             {
                 newCollection.CollectionChanged += control.OnSlicesCollectionChanged;
+                foreach (var item in newCollection)
+                {
+                    item.PropertyChanged += control.OnSlicePropertyChanged;
+                }
             }
 
             control.CreatePieMenu();
@@ -54,6 +61,27 @@ public partial class PieControl : UserControl
     }
 
     private void OnSlicesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems != null)
+        {
+            foreach (PieAction item in e.OldItems)
+            {
+                item.PropertyChanged -= OnSlicePropertyChanged;
+            }
+        }
+
+        if (e.NewItems != null)
+        {
+            foreach (PieAction item in e.NewItems)
+            {
+                item.PropertyChanged += OnSlicePropertyChanged;
+            }
+        }
+
+        CreatePieMenu();
+    }
+
+    private void OnSlicePropertyChanged(object sender, PropertyChangedEventArgs e)
     {
         CreatePieMenu();
     }

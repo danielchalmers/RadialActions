@@ -77,7 +77,7 @@
     </Window.Style>
 
     <Grid>
-        <local:PieControl Slices="{Binding Slices}"
+        <local:PieControl Slices="{Binding Actions, Source={x:Static p:Settings.Default}}"
                           Width="{Binding Size, Source={x:Static p:Settings.Default}}"
                           Height="{Binding Size, Source={x:Static p:Settings.Default}}"
                           SliceClicked="OnSliceClicked" />

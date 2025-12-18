@@ -15,6 +15,9 @@ public sealed partial class Settings : INotifyPropertyChanged, IDisposable
         // Make it easier to read by a human.
         Formatting = Formatting.Indented,
 
+        // Replace collections instead of appending to them.
+        ObjectCreationHandling = ObjectCreationHandling.Replace,
+
         // Prevent a single error from taking down the whole file.
         Error = (_, e) =>
         {
