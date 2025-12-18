@@ -8,7 +8,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         mc:Ignorable="d"
-        Title="{x:Static local:App.Title}"
+        Title="{x:Static local:App.FriendlyName}"
         AllowsTransparency="True"
         Background="Transparent"
         WindowStyle="None"
@@ -16,10 +16,12 @@
         SizeToContent="WidthAndHeight"
         Opacity="0"
         ShowInTaskbar="False"
+        Topmost="True"
         Loaded="Window_Loaded"
         Unloaded="Window_Unloaded"
         Closing="Window_Closing"
-        Deactivated="Window_Deactivated">
+        Deactivated="Window_Deactivated"
+        KeyDown="Window_KeyDown">
     <Window.Resources>
         <ContextMenu x:Key="MainContextMenu"
                      x:Shared="False">
@@ -49,7 +51,7 @@
         <tb:TaskbarIcon x:Key="TrayIcon"
                         x:Shared="False"
                         IconSource="RadialActions.ico"
-                        ToolTipText="{x:Static local:App.Title}"
+                        ToolTipText="{x:Static local:App.FriendlyName}"
                         MenuActivation="LeftOrRightClick"
                         TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick" />
     </Window.Resources>
@@ -65,7 +67,7 @@
                                 <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                                  From="0"
                                                  To="1"
-                                                 Duration="0:0:0.05" />
+                                                 Duration="0:0:0.08" />
                             </Storyboard>
                         </BeginStoryboard>
                     </DataTrigger.EnterActions>
@@ -75,11 +77,9 @@
     </Window.Style>
 
     <Grid>
-        <local:InteractivePie SliceCount="8"
-                              Width="{Binding Size, Source={x:Static p:Settings.Default}}"
-                              Height="{Binding Size, Source={x:Static p:Settings.Default}}"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Center"
-                              SliceClicked="OnSliceClicked" />
+        <local:PieControl Slices="{Binding Actions, Source={x:Static p:Settings.Default}}"
+                          Width="{Binding Size, Source={x:Static p:Settings.Default}}"
+                          Height="{Binding Size, Source={x:Static p:Settings.Default}}"
+                          SliceClicked="OnSliceClicked" />
     </Grid>
 </Window>

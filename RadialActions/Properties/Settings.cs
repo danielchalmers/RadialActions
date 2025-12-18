@@ -1,87 +1,23 @@
-﻿using System.ComponentModel;
-using System.IO;
+﻿using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 
 namespace RadialActions.Properties;
 
-public sealed class Settings : INotifyPropertyChanged, IDisposable
+public sealed partial class Settings
 {
-    private readonly FileSystemWatcher _watcher;
-
-    private static readonly Lazy<Settings> _default = new(LoadAndAttemptSave);
-
-    private static readonly JsonSerializerSettings _jsonSerializerSettings = new()
-    {
-        // Make it easier to read by a human.
-        Formatting = Formatting.Indented,
-
-        // Prevent a single error from taking down the whole file.
-        Error = (_, e) =>
-        {
-            Log.Error(e.ErrorContext.Error, "Serializer error");
-            e.ErrorContext.Handled = true;
-        },
-    };
-
-    static Settings()
-    {
-        // Settings file path from the same directory as the executable (not working directory).
-        var settingsFileName = Path.GetFileNameWithoutExtension(App.MainFileInfo.FullName) + ".settings";
-        FilePath = Path.Combine(App.MainFileInfo.DirectoryName, settingsFileName);
-    }
-
-    // Private constructor to enforce singleton pattern.
-    private Settings()
-    {
-        // Watch for changes in specifically the settings file.
-        _watcher = new(App.MainFileInfo.DirectoryName, Path.GetFileName(FilePath))
-        {
-            EnableRaisingEvents = true,
-        };
-        _watcher.Changed += FileChanged;
-    }
-
-#pragma warning disable CS0067 // The event 'Settings.PropertyChanged' is never used. Handled by Fody.
-    public event PropertyChangedEventHandler PropertyChanged;
-#pragma warning restore CS0067
-
-    /// <summary>
-    /// The singleton instance of the local settings file.
-    /// </summary>
-    public static Settings Default => _default.Value;
-
-    /// <summary>
-    /// The full path to the settings file.
-    /// </summary>
-    public static string FilePath { get; private set; }
-
-    /// <summary>
-    /// Indicates if the settings file can be saved to.
-    /// </summary>
-    /// <remarks>
-    /// <c>false</c> could indicate the file is in a folder that requires administrator permissions among other constraints.
-    /// </remarks>
-    public static bool CanBeSaved { get; private set; }
-
-    /// <summary>
-    /// Checks if the settings file exists on the disk.
-    /// </summary>
-    public static bool Exists => File.Exists(FilePath);
-
-    #region "Properties"
-
     /// <summary>
     /// The index of the selected tab in the settings window.
     /// </summary>
+    [JsonIgnore]
     public int SettingsTabIndex { get; set; }
 
     /// <summary>
-    /// The hotkey used to activate the pie menu.
+    /// The hotkey used to activate the radial menu.
     /// </summary>
-    public string ActivationHotkey { get; set; } = "ctrl+alt+4";
+    public string ActivationHotkey { get; set; } = "Ctrl+Alt+Space";
 
     /// <summary>
-    /// The width and height of the pie visual.
+    /// The width and height of the radial menu in pixels.
     /// </summary>
     public int Size { get; set; } = 400;
 
@@ -90,107 +26,64 @@ public sealed class Settings : INotifyPropertyChanged, IDisposable
     /// </summary>
     public bool RunOnStartup { get; set; } = false;
 
-    #endregion "Properties"
+    /// <summary>
+    /// The collection of actions displayed in the pie menu.
+    /// </summary>
+    public ObservableCollection<PieAction> Actions { get; set; } = CreateDefaultActions();
 
     /// <summary>
-    /// Saves to the default path in JSON format.
+    /// The background color of the pie slices (hex format).
     /// </summary>
-    public bool Save()
-    {
-        Log.Information($"Saving to {FilePath}");
-
-        try
-        {
-            var json = JsonConvert.SerializeObject(this, _jsonSerializerSettings);
-
-            // Attempt to save multiple times.
-            for (var i = 0; i < 4; i++)
-            {
-                try
-                {
-                    File.WriteAllText(FilePath, json);
-                    return true;
-                }
-                catch
-                {
-                    // Wait before next attempt to read.
-                    Log.Debug("Couldn't save file; Waiting a bit");
-                    System.Threading.Thread.Sleep(250);
-                }
-            }
-        }
-        catch (JsonSerializationException ex)
-        {
-            Log.Error(ex, "Failed to save settings");
-        }
-
-        return false;
-    }
+    public string SliceColor { get; set; } = "#2D2D30";
 
     /// <summary>
-    /// Populates the given settings with values from the default path.
+    /// The hover color of the pie slices (hex format).
     /// </summary>
-    private static void Populate(Settings settings)
-    {
-        using var fileStream = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        using var streamReader = new StreamReader(fileStream);
-        using var jsonReader = new JsonTextReader(streamReader);
-
-        JsonSerializer.Create(_jsonSerializerSettings).Populate(jsonReader, settings);
-    }
+    public string SliceHoverColor { get; set; } = "#3E3E42";
 
     /// <summary>
-    /// Loads from the default path in JSON format.
+    /// The border color of the pie slices (hex format).
     /// </summary>
-    private static Settings LoadFromFile()
-    {
-        try
-        {
-            var settings = new Settings();
-            Populate(settings);
-            return settings;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to load {FilePath}");
-            Log.Information("Creating new settings");
-            return new();
-        }
-    }
+    public string SliceBorderColor { get; set; } = "#1E1E1E";
 
     /// <summary>
-    /// Loads from the default path in JSON format then attempts to save in order to check if it can be done.
+    /// The text color for slice labels (hex format).
     /// </summary>
-    private static Settings LoadAndAttemptSave()
-    {
-        var settings = LoadFromFile();
-
-        CanBeSaved = settings.Save();
-        Log.Debug($"Settings can be saved: {CanBeSaved}");
-
-        return settings;
-    }
+    public string TextColor { get; set; } = "#FFFFFF";
 
     /// <summary>
-    /// Occurs after the watcher detects a change in the settings file.
+    /// Whether to show the center hole in the pie menu.
     /// </summary>
-    private void FileChanged(object sender, FileSystemEventArgs e)
-    {
-        Log.Debug($"File changed: {e.FullPath}");
+    public bool ShowCenterHole { get; set; } = true;
 
-        try
-        {
-            Populate(this);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to reload settings after the file changed");
-        }
-    }
+    /// <summary>
+    /// The radius of the center hole as a percentage of the total radius (0.0 to 0.5).
+    /// </summary>
+    public double CenterHoleRatio { get; set; } = 0.25;
 
-    public void Dispose()
+    /// <summary>
+    /// Whether to show icons in the pie slices.
+    /// </summary>
+    public bool ShowIcons { get; set; } = true;
+
+    /// <summary>
+    /// Whether to show text labels in the pie slices.
+    /// </summary>
+    public bool ShowLabels { get; set; } = true;
+
+    /// <summary>
+    /// Creates the default set of actions for a new installation.
+    /// </summary>
+    public static ObservableCollection<PieAction> CreateDefaultActions()
     {
-        // We don't dispose of the watcher anymore because it would actually hang indefinitely if you had multiple instances open.
-        //_watcher?.Dispose();
+        return new ObservableCollection<PieAction>
+        {
+            PieAction.CreateMediaAction(MediaKeyType.PlayPause),
+            PieAction.CreateMediaAction(MediaKeyType.PreviousTrack),
+            PieAction.CreateMediaAction(MediaKeyType.NextTrack),
+            PieAction.CreateVolumeAction(VolumeKeyType.Mute),
+            PieAction.CreateVolumeAction(VolumeKeyType.VolumeDown),
+            PieAction.CreateVolumeAction(VolumeKeyType.VolumeUp),
+        };
     }
 }

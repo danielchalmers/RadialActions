@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,12 +7,11 @@ using System.Windows.Interop;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using RadialActions.Properties;
-using static RadialActions.InteractivePie;
 
 namespace RadialActions;
 
 /// <summary>
-/// Interaction logic for MainWindow.xaml
+/// Main window that hosts the radial pie menu.
 /// </summary>
 public partial class MainWindow : Window
 {
@@ -31,7 +31,7 @@ public partial class MainWindow : Window
         _tray.ContextMenu = Resources["MainContextMenu"] as ContextMenu;
         _tray.ContextMenu.DataContext = this;
         _tray.ForceCreate(enablesEfficiencyMode: false);
-        _tray.ShowNotification("Radial Actions", "Running in the background");
+        _tray.ShowNotification(App.FriendlyName, "Press " + Settings.Default.ActivationHotkey + " to open the menu");
         Log.Debug("Created tray icon");
     }
 
@@ -42,9 +42,11 @@ public partial class MainWindow : Window
     {
         Log.Debug($"Setting changed <{e.PropertyName}>");
 
-        if (e.PropertyName == nameof(Settings.ActivationHotkey))
+        switch (e.PropertyName)
         {
-            SetHotkey();
+            case nameof(Settings.ActivationHotkey):
+                SetHotkey();
+                break;
         }
     }
 
@@ -58,6 +60,7 @@ public partial class MainWindow : Window
         Settings.Default.SettingsTabIndex = int.Parse(tabIndex);
         App.ShowSingletonWindow<SettingsWindow>(this);
     }
+
     /// <summary>
     /// Opens the settings file in Notepad.
     /// </summary>
@@ -70,7 +73,7 @@ public partial class MainWindow : Window
             Settings.Default.Save();
         }
 
-        // If it doesn't even exist then it's probably somewhere that requires special access and we shouldn't even be at this point.
+        // If it doesn't even exist then it's probably somewhere that requires special access.
         if (!Settings.Exists)
         {
             MessageBox.Show(this,
@@ -87,10 +90,9 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             Log.Error(ex, "Couldn't open notepad");
-            // Lazy scammers on the Microsoft Store may reupload without realizing it gets sandboxed, making it unable to start the Notepad process (#1, #12).
             MessageBox.Show(this,
                 "Couldn't open settings file.\n\n" +
-                "This app may have be reuploaded without permission. If you paid for it, ask for a refund and download it for free from the original source: https://github.com/danielchalmers/RadialActions.\n\n" +
+                "This app may have been reuploaded without permission. If you paid for it, ask for a refund and download it for free from the original source: https://github.com/danielchalmers/RadialActions.\n\n" +
                 $"If it still doesn't work, create a new Issue at that link with details on what happened and include this error: \"{ex.Message}\"",
                 Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
@@ -105,7 +107,14 @@ public partial class MainWindow : Window
         Application.Current.Shutdown();
     }
 
-    private void SetHotkey() => _hotkeys.RegisterHotkey(Settings.Default.ActivationHotkey);
+    private void SetHotkey()
+    {
+        var hotkey = Settings.Default.ActivationHotkey;
+        if (!string.IsNullOrWhiteSpace(hotkey))
+        {
+            _hotkeys?.RegisterHotkey(hotkey);
+        }
+    }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
@@ -123,9 +132,13 @@ public partial class MainWindow : Window
 
     private void Window_Unloaded(object sender, RoutedEventArgs e)
     {
-        _hotkeys?.UnregisterHotkey(Settings.Default.ActivationHotkey);
+        _hotkeys?.Dispose();
     }
 
+    /// <summary>
+    /// Shows the radial menu.
+    /// </summary>
+    /// <param name="atCursor">If true, centers on cursor; otherwise centers on screen.</param>
     public void ShowMenu(bool atCursor)
     {
         if (atCursor)
@@ -138,6 +151,7 @@ public partial class MainWindow : Window
             Log.Information("Opening at the center of the screen");
             this.CenterOnScreen();
         }
+
 
         Show();
         Activate();
@@ -181,12 +195,24 @@ public partial class MainWindow : Window
 
     private void OnSliceClicked(object sender, SliceClickEventArgs e)
     {
-        Log.Information($"Took a byte out of slice {e.SliceNumber}");
+        Log.Debug($"Slice clicked: {e.Slice.Name}");
+        e.Slice.Execute();
+        HideMenu();
     }
 
     private void Window_Deactivated(object sender, EventArgs e)
     {
         Log.Debug("Lost focus");
         HideMenu();
+    }
+
+    private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.Escape)
+        {
+            Log.Debug("Escape pressed");
+            HideMenu();
+            e.Handled = true;
+        }
     }
 }

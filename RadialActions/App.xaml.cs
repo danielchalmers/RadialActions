@@ -10,10 +10,19 @@ namespace RadialActions;
 /// </summary>
 public partial class App : Application
 {
+    /// <summary>
+    /// The main executable file of the application.
+    /// </summary>
     public static FileInfo MainFileInfo = new(Process.GetCurrentProcess().MainModule.FileName);
 
-    public static string Title { get; } = "Radial Actions";
+    /// <summary>
+    /// The name used in branding and user-visible text.
+    /// </summary>
+    public static string FriendlyName { get; } = "Radial Actions";
 
+    /// <summary>
+    /// The name used in file paths, registry keys, etc.
+    /// </summary>
     public static string AssemblyName { get; } = "RadialActions";
 
     protected override void OnStartup(StartupEventArgs e)
@@ -26,20 +35,20 @@ public partial class App : Application
             .WriteTo.Debug()
             .CreateLogger();
 
-        Log.Information($"Starting {Title}");
+        Log.Information($"Starting {FriendlyName}");
     }
 
     /// <summary>
     /// Sets or deletes a value in the registry which enables the current executable to run on system startup.
     /// </summary>
-    public static bool SetRunOnStartup(bool runOnStartup)
+    public static bool SetRunOnStartup(bool enable)
     {
         var keyName = AssemblyName;
         using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
 
         try
         {
-            if (runOnStartup)
+            if (enable)
             {
                 Log.Information($"Setting to run on startup under key named {keyName}");
                 key?.SetValue(keyName, MainFileInfo.FullName);
