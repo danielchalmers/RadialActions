@@ -62,7 +62,7 @@ public static class WpfUtil
         // Get the monitor at cursor position
         var monitor = MonitorFromPoint(cursorPosition, MONITOR_DEFAULTTONEAREST);
         var monitorInfo = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
-        
+
         if (!GetMonitorInfo(monitor, ref monitorInfo))
             return;
 

@@ -1,14 +1,14 @@
 {
-    "AttributesTolerance": 1,
+    "AttributesTolerance": 0,
     "KeepFirstAttributeOnSameLine": true,
     "MaxAttributeCharactersPerLine": 40,
-    "MaxAttributesPerLine": 1,
+    "MaxAttributesPerLine": 0,
     "NewlineExemptionElements": "RadialGradientBrush, GradientStop, LinearGradientBrush, ScaleTransform, SkewTransform, RotateTransform, TranslateTransform, Trigger, Condition, Setter",
     "SeparateByGroups": false,
     "AttributeIndentation": 0,
     "AttributeIndentationStyle": 1,
     "RemoveDesignTimeReferences":  false,
-    "EnableAttributeReordering": false,
+    "EnableAttributeReordering": true,
     "AttributeOrderingRuleGroups": [
         "x:Class",
         "xmlns, xmlns:x",

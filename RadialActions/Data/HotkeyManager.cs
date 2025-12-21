@@ -56,7 +56,7 @@ public class HotkeyManager : IDisposable
         }
 
         var (modifiers, keyCode) = ParseHotkey(hotkey);
-        
+
         if (keyCode == 0)
         {
             Log.Warning($"Could not parse hotkey: {hotkey}");

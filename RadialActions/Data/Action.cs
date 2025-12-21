@@ -8,25 +8,39 @@ namespace RadialActions;
 /// </summary>
 public enum ActionType
 {
-    /// <summary>No action.</summary>
+    /// <summary>
+    /// No action.
+    /// </summary>
     None,
 
-    /// <summary>Simulate a media key press (play/pause, next, previous, etc.).</summary>
+    /// <summary>
+    /// Simulate a media key press (play/pause, next, previous, etc.).
+    /// </summary>
     MediaKey,
 
-    /// <summary>Simulate a volume control key press.</summary>
+    /// <summary>
+    /// Simulate a volume control key press.
+    /// </summary>
     VolumeKey,
 
-    /// <summary>Launch an application or open a file.</summary>
+    /// <summary>
+    /// Launch an application or open a file.
+    /// </summary>
     LaunchApp,
 
-    /// <summary>Open a URL in the default browser.</summary>
+    /// <summary>
+    /// Open a URL in the default browser.
+    /// </summary>
     OpenUrl,
 
-    /// <summary>Run a custom command.</summary>
+    /// <summary>
+    /// Run a custom command.
+    /// </summary>
     RunCommand,
 
-    /// <summary>Simulate a keyboard shortcut.</summary>
+    /// <summary>
+    /// Simulate a keyboard shortcut.
+    /// </summary>
     Keyboard,
 }
 
