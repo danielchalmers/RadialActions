@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
-using System.IO;
+﻿using System.IO;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
 
 namespace RadialActions.Properties;
 
-public sealed partial class Settings : INotifyPropertyChanged, IDisposable
+public sealed partial class Settings : ObservableObject, IDisposable
 {
     private readonly FileSystemWatcher _watcher;
 
@@ -43,10 +43,6 @@ public sealed partial class Settings : INotifyPropertyChanged, IDisposable
         };
         _watcher.Changed += FileChanged;
     }
-
-#pragma warning disable CS0067 // The event 'Settings.PropertyChanged' is never used. Handled by Fody.
-    public event PropertyChangedEventHandler PropertyChanged;
-#pragma warning restore CS0067
 
     /// <summary>
     /// The singleton instance of the local settings file.

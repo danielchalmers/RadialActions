@@ -1,5 +1,5 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace RadialActions;
 
@@ -54,34 +54,37 @@ public enum VolumeKeyType
 /// <summary>
 /// Represents an action that can be assigned to a pie slice.
 /// </summary>
-public class PieAction : INotifyPropertyChanged
+public partial class PieAction : ObservableObject
 {
-    public event PropertyChangedEventHandler PropertyChanged;
-
     /// <summary>
     /// The display name of the action.
     /// </summary>
-    public string Name { get; set; } = "New Action";
+    [ObservableProperty]
+    private string _name = "New Action";
 
     /// <summary>
     /// The icon character or emoji to display.
     /// </summary>
-    public string Icon { get; set; } = "⚡";
+    [ObservableProperty]
+    private string _icon = "⚡";
 
     /// <summary>
     /// The type of action to perform.
     /// </summary>
-    public ActionType Type { get; set; } = ActionType.None;
+    [ObservableProperty]
+    private ActionType _type = ActionType.None;
 
     /// <summary>
     /// The parameter for the action (path, URL, command, key name, etc.).
     /// </summary>
-    public string Parameter { get; set; } = string.Empty;
+    [ObservableProperty]
+    private string _parameter = string.Empty;
 
     /// <summary>
     /// Additional arguments for LaunchApp or RunCommand actions.
     /// </summary>
-    public string Arguments { get; set; } = string.Empty;
+    [ObservableProperty]
+    private string _arguments = string.Empty;
 
     /// <summary>
     /// Creates a new empty action.

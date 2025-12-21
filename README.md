@@ -70,7 +70,6 @@ Combine with any letter, number, function key (F1-F24), or special key.
 - [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) - MVVM library
 - [H.NotifyIcon.Wpf](https://github.com/HavenDV/H.NotifyIcon) - System tray icon support
 - [Newtonsoft.Json](https://www.newtonsoft.com/json) - JSON serialization
-- [PropertyChanged.Fody](https://github.com/Fody/PropertyChanged) - Property change notifications
 - [Serilog](https://serilog.net/) - Logging
 
 ## 🔗 Other Projects

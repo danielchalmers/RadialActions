@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
 
 namespace RadialActions.Properties;
@@ -8,68 +9,81 @@ public sealed partial class Settings
     /// <summary>
     /// The index of the selected tab in the settings window.
     /// </summary>
-    [JsonIgnore]
-    public int SettingsTabIndex { get; set; }
+    [ObservableProperty]
+    [property: JsonIgnore]
+    private int _settingsTabIndex;
 
     /// <summary>
     /// The hotkey used to activate the radial menu.
     /// </summary>
-    public string ActivationHotkey { get; set; } = "Ctrl+Alt+Space";
+    [ObservableProperty]
+    private string _activationHotkey = "Ctrl+Alt+Space";
 
     /// <summary>
     /// The width and height of the radial menu in pixels.
     /// </summary>
-    public int Size { get; set; } = 400;
+    [ObservableProperty]
+    private int _size = 400;
 
     /// <summary>
     /// Starts the app in the background when you log in.
     /// </summary>
-    public bool RunOnStartup { get; set; } = false;
+    [ObservableProperty]
+    private bool _runOnStartup;
 
     /// <summary>
     /// The collection of actions displayed in the pie menu.
     /// </summary>
-    public ObservableCollection<PieAction> Actions { get; set; } = CreateDefaultActions();
+    [ObservableProperty]
+    private ObservableCollection<PieAction> _actions = CreateDefaultActions();
 
     /// <summary>
     /// The background color of the pie slices (hex format).
     /// </summary>
-    public string SliceColor { get; set; } = "#2D2D30";
+    [ObservableProperty]
+    private string _sliceColor = "#2D2D30";
 
     /// <summary>
     /// The hover color of the pie slices (hex format).
     /// </summary>
-    public string SliceHoverColor { get; set; } = "#3E3E42";
+    [ObservableProperty]
+    private string _sliceHoverColor = "#3E3E42";
 
     /// <summary>
     /// The border color of the pie slices (hex format).
     /// </summary>
-    public string SliceBorderColor { get; set; } = "#1E1E1E";
+    [ObservableProperty]
+    private string _sliceBorderColor = "#1E1E1E";
 
     /// <summary>
     /// The text color for slice labels (hex format).
     /// </summary>
-    public string TextColor { get; set; } = "#FFFFFF";
+    [ObservableProperty]
+    private string _textColor = "#FFFFFF";
 
     /// <summary>
     /// Whether to show the center hole in the pie menu.
     /// </summary>
-    public bool ShowCenterHole { get; set; } = true;
+    [ObservableProperty]
+    private bool _showCenterHole = true;
 
     /// <summary>
     /// The radius of the center hole as a percentage of the total radius (0.0 to 0.5).
     /// </summary>
-    public double CenterHoleRatio { get; set; } = 0.25;
+    [ObservableProperty]
+    private double _centerHoleRatio = 0.25;
 
     /// <summary>
     /// Whether to show icons in the pie slices.
     /// </summary>
-    public bool ShowIcons { get; set; } = true;
+    [ObservableProperty]
+    private bool _showIcons = true;
 
     /// <summary>
     /// Whether to show text labels in the pie slices.
     /// </summary>
-    public bool ShowLabels { get; set; } = true;
+    [ObservableProperty]
+    private bool _showLabels = true;
 
     /// <summary>
     /// Creates the default set of actions for a new installation.
