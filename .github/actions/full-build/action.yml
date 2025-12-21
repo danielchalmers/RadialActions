@@ -43,7 +43,7 @@ runs:
       run: |
         dotnet tool install --global wix --version 6.0.*
         for arch in ${{ inputs.archs }}; do
-          wix build Package.wxs -arch $arch -d Version=${{ inputs.version }} -d Arch=$arch -o "publish/RadialActions-${{ inputs.version }}-$arch.msi"
+          wix build Product.wxs -arch $arch -d Version=${{ inputs.version }} -d Arch=$arch -o "publish/RadialActions-${{ inputs.version }}-$arch.msi"
         done
 
     - uses: actions/upload-artifact@v4
