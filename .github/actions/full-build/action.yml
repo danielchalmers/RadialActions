@@ -26,18 +26,25 @@ runs:
     - name: Create Binaries
       shell: bash
       run: |
-        dotnet tool install --global wix --version 5.0.2
         for arch in ${{ inputs.archs }}; do
-          dotnet publish ./RadialActions/RadialActions.csproj -o "publish/$arch" -c Release --os win --arch $arch -p:Version=${{ inputs.version }}
-          wix build Product.wxs -d MainExeSource="publish/$arch/RadialActions.exe" -o "publish/RadialActions-${{ inputs.version }}-${arch}.msi"
+          dotnet publish ./RadialActions/RadialActions.csproj -o "publish/$arch" -c Release -f net10.0-windows --os win --arch $arch --self-contained -p:PublishSingleFile=true -p:DebugType=embedded -p:Version=${{ inputs.version }}
         done
 
     - name: Create Portable ZIPs
       shell: pwsh
       run: |
-        foreach ($arch in "${{ inputs.archs }}".Split(' ')) {
-          Compress-Archive -Path "publish/$arch/RadialActions.exe" -DestinationPath "publish/RadialActions-${{ inputs.version }}-$arch.zip"
+        $archs = "${{ inputs.archs }}".Split(" ")
+        foreach ($arch in $archs) {
+          Compress-Archive -Path "publish/$arch/*" -DestinationPath "publish/RadialActions-${{ inputs.version }}-$arch.zip"
         }
+
+    - name: Create MSI Installers
+      shell: bash
+      run: |
+        dotnet tool install --global wix --version 6.0.*
+        for arch in ${{ inputs.archs }}; do
+          wix build Product.wxs -arch $arch -d Version=${{ inputs.version }} -d Arch=$arch -o "publish/RadialActions-${{ inputs.version }}-$arch.msi"
+        done
 
     - uses: actions/upload-artifact@v4
       with:

@@ -71,7 +71,6 @@ Combine with any letter, number, function key (F1-F24), or special key.
 - [H.NotifyIcon.Wpf](https://github.com/HavenDV/H.NotifyIcon) - System tray icon support
 - [Newtonsoft.Json](https://www.newtonsoft.com/json) - JSON serialization
 - [PropertyChanged.Fody](https://github.com/Fody/PropertyChanged) - Property change notifications
-- [Costura.Fody](https://github.com/Fody/Costura) - Assembly embedding
 - [Serilog](https://serilog.net/) - Logging
 
 ## 🔗 Other Projects
