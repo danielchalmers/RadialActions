@@ -182,10 +182,10 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OnTrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)
+    private void OnTrayLeftMouseDown(object sender, RoutedEventArgs e)
     {
-        Log.Debug("Tray icon double clicked");
-        ShowMenu(false);
+        Log.Debug("Tray icon left clicked");
+        ShowMenu(true);
     }
 
     private void Window_Closing(object sender, CancelEventArgs e)

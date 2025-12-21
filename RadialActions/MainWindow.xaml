@@ -28,32 +28,57 @@
 
             <MenuItem Command="{Binding OpenSettingsWindowCommand}"
                       CommandParameter="0"
-                      Header="_Settings" />
+                      Header="_Settings">
+                <MenuItem.Icon>
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               Text="&#xE713;" />
+                </MenuItem.Icon>
+            </MenuItem>
 
             <MenuItem Command="{Binding OpenSettingsWindowCommand}"
                       CommandParameter="1"
-                      Header="_Actions" />
+                      Header="_Configure actions">
+                <MenuItem.Icon>
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               Text="&#xE7FC;" />
+                </MenuItem.Icon>
+            </MenuItem>
 
             <MenuItem Command="{Binding OpenSettingsWindowCommand}"
                       CommandParameter="2"
-                      Header="_Help" />
+                      Header="_Help and shortcuts">
+                <MenuItem.Icon>
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               Text="&#xE897;" />
+                </MenuItem.Icon>
+            </MenuItem>
 
             <Separator />
 
             <MenuItem Command="{Binding OpenSettingsFileCommand}"
-                      Header="Ad_vanced settings"
-                      IsEnabled="{x:Static p:Settings.CanBeSaved}" />
+                      Header="Ad_vanced settings file"
+                      IsEnabled="{x:Static p:Settings.CanBeSaved}">
+                <MenuItem.Icon>
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               Text="&#xE8A5;" />
+                </MenuItem.Icon>
+            </MenuItem>
 
             <MenuItem Command="{Binding ExitCommand}"
-                      Header="E_xit" />
+                      Header="E_xit">
+                <MenuItem.Icon>
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               Text="&#xE8BB;" />
+                </MenuItem.Icon>
+            </MenuItem>
         </ContextMenu>
 
         <tb:TaskbarIcon x:Key="TrayIcon"
                         x:Shared="False"
                         IconSource="RadialActions.ico"
-                        ToolTipText="{x:Static local:App.FriendlyName}"
-                        MenuActivation="LeftOrRightClick"
-                        TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick" />
+                        ToolTipText="Radial Actions&#10;Left click: open menu&#10;Right click: options"
+                        MenuActivation="RightClick"
+                        TrayLeftMouseDown="OnTrayLeftMouseDown" />
     </Window.Resources>
 
     <Window.Style>
