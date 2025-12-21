@@ -5,54 +5,58 @@
         xmlns:local="clr-namespace:RadialActions"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:p="clr-namespace:RadialActions.Properties"
-        Title="Radial Actions - Settings"
-        Width="550" MinHeight="400"
+        Title="Settings" Width="600"
+        MinHeight="400"
         d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
         ResizeMode="CanResize"
         SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
     <Window.Resources>
-        <Style TargetType="Button">
-            <Setter Property="Padding" Value="8,4" />
-            <Setter Property="MinWidth" Value="70" />
+        <Style x:Key="LabelTextBlock"
+               BasedOn="{StaticResource {x:Type TextBlock}}"
+               TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,0,4" />
         </Style>
 
-        <Style TargetType="TextBox">
-            <Setter Property="MinHeight" Value="26" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Padding" Value="4,2" />
+        <Style x:Key="DescriptionTextBlock"
+               BasedOn="{StaticResource {x:Type TextBlock}}"
+               TargetType="TextBlock">
+            <Setter Property="FontStyle" Value="Italic" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Margin" Value="0,2,0,12" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
         </Style>
 
-        <Style TargetType="ComboBox">
-            <Setter Property="MinHeight" Value="26" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Style BasedOn="{StaticResource {x:Type Hyperlink}}"
+               TargetType="Hyperlink">
+            <Setter Property="TextDecorations" Value="None" />
         </Style>
     </Window.Resources>
-
     <Grid>
         <TabControl Padding="12,12,12,0"
                     SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
             <TabItem Header="_General">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0,0,0,12">
+                    <StackPanel Margin="0">
                         <GroupBox Margin="0,0,0,12" Header="Activation">
                             <StackPanel Margin="8">
-                                <TextBlock FontWeight="SemiBold" Text="Hotkey:" />
+                                <TextBlock Style="{StaticResource LabelTextBlock}"
+                                           Text="Hotkey:" />
                                 <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Margin="0,2,0,0" FontSize="10"
-                                           FontStyle="Italic" Foreground="Gray"
+                                <TextBlock Style="{StaticResource DescriptionTextBlock}"
                                            Text="Examples: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z" />
                             </StackPanel>
                         </GroupBox>
 
                         <GroupBox Margin="0,0,0,12" Header="Appearance">
                             <StackPanel Margin="8">
-                                <TextBlock FontWeight="SemiBold"
+                                <TextBlock Style="{StaticResource LabelTextBlock}"
                                            Text="Menu Size (pixels):" />
                                 <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Margin="0,2,0,12" FontSize="10"
-                                           FontStyle="Italic" Foreground="Gray"
+                                <TextBlock Style="{StaticResource DescriptionTextBlock}"
                                            Text="Recommended: 300-500" />
 
                                 <CheckBox Margin="0,0,0,4"
@@ -69,8 +73,7 @@
                             <StackPanel Margin="8">
                                 <CheckBox Content="Run on Windows startup"
                                           IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
-                                <TextBlock Margin="0,2,0,0" FontSize="10"
-                                           FontStyle="Italic" Foreground="Gray"
+                                <TextBlock Style="{StaticResource DescriptionTextBlock}"
                                            Text="Starts the app minimized to tray when you log in." />
                             </StackPanel>
                         </GroupBox>
@@ -79,7 +82,7 @@
             </TabItem>
 
             <TabItem Header="_Actions">
-                <Grid Margin="0,8,0,8">
+                <Grid Margin="0,12,0,12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" MinHeight="150" />
                         <RowDefinition Height="Auto" />
@@ -109,27 +112,37 @@
                     </ListBox>
 
                     <!--  List Controls  -->
-                    <StackPanel Grid.Row="1" Margin="0,8,0,8"
-                                Orientation="Horizontal">
-                        <Button Margin="0,0,4,0"
+                    <Grid Grid.Row="1" Margin="0,12,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="4" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="4" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="4" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
+                                HorizontalAlignment="Stretch"
                                 Command="{Binding AddActionCommand}"
                                 Content="Add" />
-                        <Button Margin="0,0,4,0"
+                        <Button Grid.Column="2"
+                                HorizontalAlignment="Stretch"
                                 Command="{Binding RemoveActionCommand}"
                                 Content="Remove" />
-                        <Button Margin="0,0,4,0"
+                        <Button Grid.Column="4"
+                                HorizontalAlignment="Stretch"
                                 Command="{Binding MoveUpCommand}"
                                 Content="Move Up" />
-                        <Button Margin="0,0,4,0"
+                        <Button Grid.Column="6"
+                                HorizontalAlignment="Stretch"
                                 Command="{Binding MoveDownCommand}"
                                 Content="Move Down" />
-                        <Button Margin="8,0,0,0"
-                                Command="{Binding ResetActionsCommand}"
-                                Content="Reset to Defaults" />
-                    </StackPanel>
+                    </Grid>
 
                     <!--  Action Editor  -->
-                    <GroupBox Grid.Row="2" Header="Edit Action"
+                    <GroupBox Grid.Row="2" Margin="0,0,0,12"
+                              Header="Edit Action"
                               IsEnabled="{Binding HasSelectedAction}">
                         <Grid Margin="8">
                             <Grid.ColumnDefinitions>
@@ -138,59 +151,66 @@
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="4" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="4" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="4" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="4" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0"
                                        Margin="0,0,8,4"
-                                       VerticalAlignment="Center" Text="Name:" />
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold" Text="Name:" />
                             <TextBox Grid.Row="0" Grid.Column="1"
                                      Margin="0,0,0,4"
                                      Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0"
+                            <TextBlock Grid.Row="2" Grid.Column="0"
                                        Margin="0,0,8,4"
-                                       VerticalAlignment="Center" Text="Icon:" />
-                            <TextBox Grid.Row="1" Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold" Text="Icon:" />
+                            <TextBox Grid.Row="2" Grid.Column="1"
                                      Margin="0,0,0,4"
                                      Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0"
+                            <TextBlock Grid.Row="4" Grid.Column="0"
                                        Margin="0,0,8,4"
-                                       VerticalAlignment="Center" Text="Type:" />
-                            <ComboBox Grid.Row="2" Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold" Text="Type:" />
+                            <ComboBox Grid.Row="4" Grid.Column="1"
                                       Margin="0,0,0,4"
                                       ItemsSource="{Binding ActionTypes}"
                                       SelectedItem="{Binding SelectedAction.Type, Mode=TwoWay}" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0"
+                            <TextBlock Grid.Row="6" Grid.Column="0"
                                        Margin="0,0,8,4"
                                        VerticalAlignment="Center"
-                                       Text="Parameter:" />
-                            <TextBox Grid.Row="3" Grid.Column="1"
+                                       FontWeight="SemiBold" Text="Parameter:" />
+                            <TextBox Grid.Row="6" Grid.Column="1"
                                      Margin="0,0,0,4"
                                      Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                            <TextBlock Grid.Row="4" Grid.Column="0"
+                            <TextBlock Grid.Row="8" Grid.Column="0"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center"
-                                       Text="Arguments:" />
-                            <TextBox Grid.Row="4" Grid.Column="1"
+                                       FontWeight="SemiBold" Text="Arguments:" />
+                            <TextBox Grid.Row="8" Grid.Column="1"
                                      Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </Grid>
                     </GroupBox>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="H_elp">
+            <TabItem Header="_Help">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0,0,0,12">
+                    <StackPanel Margin="0">
                         <GroupBox Margin="0,0,0,12" Header="Quick Start">
                             <StackPanel Margin="8">
-                                <TextBlock TextWrapping="Wrap">
+                                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap">
                                     <Run FontWeight="Bold">
                                         1.
                                     </Run>
@@ -198,12 +218,12 @@
                                     <Run FontWeight="Bold"
                                          Text="{Binding Settings.ActivationHotkey, Mode=OneWay}" />
                                     to open the radial menu</TextBlock>
-                                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap">
+                                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap">
                                     <Run FontWeight="Bold">
                                         2.
                                     </Run>
                                     Click a slice to perform the action</TextBlock>
-                                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap">
+                                <TextBlock TextWrapping="Wrap">
                                     <Run FontWeight="Bold">
                                         3.
                                     </Run>
@@ -211,62 +231,21 @@
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Margin="0,0,0,12" Header="Action Types">
-                            <StackPanel Margin="8">
-                                <TextBlock Margin="0,0,0,4">
-                                    <Run FontWeight="Bold">
-                                        MediaKey:
-                                    </Run>
-                                    <Run>PlayPause, NextTrack, PreviousTrack, Stop</Run>
-                                </TextBlock>
-                                <TextBlock Margin="0,0,0,4">
-                                    <Run FontWeight="Bold">
-                                        VolumeKey:
-                                    </Run>
-                                    <Run>VolumeUp, VolumeDown, Mute</Run>
-                                </TextBlock>
-                                <TextBlock Margin="0,0,0,4">
-                                    <Run FontWeight="Bold">
-                                        LaunchApp:
-                                    </Run>
-                                    <Run>Path to application or file</Run>
-                                </TextBlock>
-                                <TextBlock Margin="0,0,0,4">
-                                    <Run FontWeight="Bold">
-                                        OpenUrl:
-                                    </Run>
-                                    <Run>URL to open in browser</Run>
-                                </TextBlock>
-                                <TextBlock Margin="0,0,0,4">
-                                    <Run FontWeight="Bold">
-                                        RunCommand:
-                                    </Run>
-                                    <Run>Command to run in cmd</Run>
-                                </TextBlock>
-                                <TextBlock>
-                                    <Run FontWeight="Bold">
-                                        Keyboard:
-                                    </Run>
-                                    <Run>Keyboard shortcut (e.g., Ctrl+C)</Run>
-                                </TextBlock>
-                            </StackPanel>
-                        </GroupBox>
-
                         <GroupBox Margin="0,0,0,12" Header="Links">
                             <StackPanel Margin="8">
-                                <TextBlock>
+                                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions"
                                                RequestNavigate="Hyperlink_RequestNavigate">
                                         📦 GitHub Repository
                                     </Hyperlink>
                                 </TextBlock>
-                                <TextBlock>
+                                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
                                                RequestNavigate="Hyperlink_RequestNavigate">
                                         🚀 Check for Updates
                                     </Hyperlink>
                                 </TextBlock>
-                                <TextBlock>
+                                <TextBlock TextWrapping="Wrap">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues"
                                                RequestNavigate="Hyperlink_RequestNavigate">
                                         🐛 Report a Bug / Request a Feature

@@ -29,8 +29,9 @@ public partial class MainWindow : Window
         _tray = Resources["TrayIcon"] as TaskbarIcon;
         _tray.ContextMenu = Resources["MainContextMenu"] as ContextMenu;
         _tray.ContextMenu.DataContext = this;
+        _tray.ToolTipText = "Radial Actions";
         _tray.ForceCreate(enablesEfficiencyMode: false);
-        _tray.ShowNotification(App.FriendlyName, "Press " + Settings.Default.ActivationHotkey + " to open the menu");
+        _tray.ShowNotification("Radial Actions", "Press " + Settings.Default.ActivationHotkey + " to open the menu");
         Log.Debug("Created tray icon");
     }
 

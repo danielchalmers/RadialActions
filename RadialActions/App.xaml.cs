@@ -16,11 +16,6 @@ public partial class App : Application
     public static FileInfo MainFileInfo = new(Process.GetCurrentProcess().MainModule.FileName);
 
     /// <summary>
-    /// The name used in branding and user-visible text.
-    /// </summary>
-    public static string FriendlyName { get; } = "Radial Actions";
-
-    /// <summary>
     /// The name used in file paths, registry keys, etc.
     /// </summary>
     public static string AssemblyName { get; } = "RadialActions";
@@ -35,7 +30,7 @@ public partial class App : Application
             .WriteTo.Debug()
             .CreateLogger();
 
-        Log.Information($"Starting {FriendlyName}");
+        Log.Information($"Starting Radial Actions");
     }
 
     /// <summary>
