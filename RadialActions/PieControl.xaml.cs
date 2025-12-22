@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 using RadialActions.Properties;
 
 namespace RadialActions;
@@ -14,11 +15,26 @@ namespace RadialActions;
 /// </summary>
 public partial class PieControl : UserControl
 {
+    private const string DefaultSliceColorHex = "#2D2D30";
+    private const string DefaultSliceHoverColorHex = "#3E3E42";
+    private const string DefaultSliceBorderColorHex = "#1E1E1E";
+    private const string DefaultTextColorHex = "#FFFFFF";
+
     public PieControl()
     {
         InitializeComponent();
         Loaded += (s, e) => CreatePieMenu();
         SizeChanged += (s, e) => CreatePieMenu();
+        Loaded += (s, e) =>
+        {
+            SystemParameters.StaticPropertyChanged += OnSystemParametersChanged;
+            SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
+        };
+        Unloaded += (s, e) =>
+        {
+            SystemParameters.StaticPropertyChanged -= OnSystemParametersChanged;
+            SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
+        };
     }
 
     public static readonly DependencyProperty SlicesProperty =
@@ -102,10 +118,29 @@ public partial class PieControl : UserControl
         PieCanvas.Height = canvasSize;
 
         // Parse colors from settings
-        var sliceColor = ParseColor(settings.SliceColor, Color.FromRgb(45, 45, 48));
-        var hoverColor = ParseColor(settings.SliceHoverColor, Color.FromRgb(62, 62, 66));
-        var borderColor = ParseColor(settings.SliceBorderColor, Color.FromRgb(30, 30, 30));
-        var textColor = ParseColor(settings.TextColor, Colors.White);
+        var accentColor = GetWindowsAccentColor();
+        var sliceColor = ParseColor(settings.SliceColor, accentColor);
+        if (IsDefaultColor(settings.SliceColor, DefaultSliceColorHex))
+        {
+            sliceColor = accentColor;
+        }
+
+        var hoverColor = ParseColor(settings.SliceHoverColor, BlendColor(sliceColor, Colors.White, 0.15));
+        if (IsDefaultColor(settings.SliceHoverColor, DefaultSliceHoverColorHex))
+        {
+            hoverColor = BlendColor(sliceColor, Colors.White, 0.15);
+        }
+
+        var borderColor = ParseColor(settings.SliceBorderColor, BlendColor(sliceColor, Colors.Black, 0.35));
+        if (IsDefaultColor(settings.SliceBorderColor, DefaultSliceBorderColorHex))
+        {
+            borderColor = BlendColor(sliceColor, Colors.Black, 0.35);
+        }
+        var textColor = ParseColor(settings.TextColor, GetReadableTextColor(sliceColor));
+        if (IsDefaultColor(settings.TextColor, DefaultTextColorHex))
+        {
+            textColor = GetReadableTextColor(sliceColor);
+        }
 
         var innerRadius = settings.ShowCenterHole ? canvasRadius * settings.CenterHoleRatio : 0;
         var angleStep = 360.0 / Slices.Count;
@@ -264,6 +299,50 @@ public partial class PieControl : UserControl
         {
             return fallback;
         }
+    }
+
+    private static bool IsDefaultColor(string hex, string defaultHex)
+    {
+        if (string.IsNullOrWhiteSpace(hex))
+            return true;
+
+        return string.Equals(hex.Trim(), defaultHex, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static Color BlendColor(Color from, Color to, double amount)
+    {
+        amount = Math.Clamp(amount, 0, 1);
+        var r = (byte)Math.Round((from.R * (1 - amount)) + (to.R * amount));
+        var g = (byte)Math.Round((from.G * (1 - amount)) + (to.G * amount));
+        var b = (byte)Math.Round((from.B * (1 - amount)) + (to.B * amount));
+        return Color.FromRgb(r, g, b);
+    }
+
+    private static Color GetReadableTextColor(Color background)
+    {
+        var luminance = (0.2126 * background.R + 0.7152 * background.G + 0.0722 * background.B) / 255.0;
+        return luminance > 0.6
+            ? Color.FromRgb(28, 28, 28)
+            : Color.FromRgb(245, 245, 245);
+    }
+
+    private static Color GetWindowsAccentColor()
+    {
+        return SystemParameters.WindowGlassColor;
+    }
+
+    private void OnSystemParametersChanged(object sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(SystemParameters.WindowGlassColor)
+            or nameof(SystemParameters.HighContrast))
+        {
+            Dispatcher.InvokeAsync(CreatePieMenu);
+        }
+    }
+
+    private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+    {
+        Dispatcher.InvokeAsync(CreatePieMenu);
     }
 
     private void AnimateSliceColor(SolidColorBrush brush, Color toColor, double durationInSeconds)
