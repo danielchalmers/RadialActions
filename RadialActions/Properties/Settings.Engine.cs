@@ -6,8 +6,6 @@ namespace RadialActions.Properties;
 
 public sealed partial class Settings : ObservableObject
 {
-    private readonly FileSystemWatcher _watcher;
-
     private static readonly Lazy<Settings> _default = new(LoadAndAttemptSave);
 
     private static readonly JsonSerializerSettings _jsonSerializerSettings = new()
@@ -34,15 +32,7 @@ public sealed partial class Settings : ObservableObject
     }
 
     // Private constructor to enforce singleton pattern.
-    private Settings()
-    {
-        // Watch for changes in specifically the settings file.
-        _watcher = new(App.MainFileInfo.DirectoryName, Path.GetFileName(FilePath))
-        {
-            EnableRaisingEvents = true,
-        };
-        _watcher.Changed += FileChanged;
-    }
+    private Settings() { }
 
     /// <summary>
     /// The singleton instance of the local settings file.
@@ -144,23 +134,6 @@ public sealed partial class Settings : ObservableObject
         Log.Debug($"Settings can be saved: {CanBeSaved}");
 
         return settings;
-    }
-
-    /// <summary>
-    /// Occurs after the watcher detects a change in the settings file.
-    /// </summary>
-    private void FileChanged(object sender, FileSystemEventArgs e)
-    {
-        Log.Debug($"File changed: {e.FullPath}");
-
-        try
-        {
-            Populate(this);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to reload settings after the file changed");
-        }
     }
 
 }
