@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace RadialActions.Properties;
 
-public sealed partial class Settings : ObservableObject, IDisposable
+public sealed partial class Settings : ObservableObject
 {
     private readonly FileSystemWatcher _watcher;
 
@@ -163,9 +163,4 @@ public sealed partial class Settings : ObservableObject, IDisposable
         }
     }
 
-    public void Dispose()
-    {
-        // We don't dispose of the watcher anymore because it would actually hang indefinitely if you had multiple instances open.
-        //_watcher?.Dispose();
-    }
 }

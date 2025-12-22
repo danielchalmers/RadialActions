@@ -17,10 +17,13 @@ namespace RadialActions;
 /// </summary>
 public partial class SettingsWindow : Window
 {
+    private readonly SettingsWindowViewModel _viewModel;
+
     public SettingsWindow()
     {
         InitializeComponent();
-        DataContext = new SettingsWindowViewModel(Settings.Default);
+        _viewModel = new SettingsWindowViewModel(Settings.Default);
+        DataContext = _viewModel;
         Closed += (s, e) => SaveSettings();
     }
 
@@ -29,10 +32,7 @@ public partial class SettingsWindow : Window
         if (action == null)
             return;
 
-        if (DataContext is SettingsWindowViewModel viewModel)
-        {
-            viewModel.SelectAction(action);
-        }
+        _viewModel.SelectAction(action);
     }
 
     private void SaveSettings()
@@ -73,7 +73,7 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        var hotkey = BuildHotkeyString(key, Keyboard.Modifiers);
+        var hotkey = HotkeyUtil.BuildHotkeyString(key, Keyboard.Modifiers);
         if (string.IsNullOrWhiteSpace(hotkey))
             return;
 
@@ -88,81 +88,6 @@ public partial class SettingsWindow : Window
             or Key.LWin or Key.RWin;
     }
 
-    private static string BuildHotkeyString(Key key, ModifierKeys modifiers)
-    {
-        var parts = new List<string>(4);
-        if ((modifiers & ModifierKeys.Control) != 0)
-            parts.Add("Ctrl");
-        if ((modifiers & ModifierKeys.Alt) != 0)
-            parts.Add("Alt");
-        if ((modifiers & ModifierKeys.Shift) != 0)
-            parts.Add("Shift");
-        if ((modifiers & ModifierKeys.Windows) != 0)
-            parts.Add("Win");
-
-        var keyName = GetKeyName(key);
-        if (string.IsNullOrWhiteSpace(keyName))
-            return string.Empty;
-
-        parts.Add(keyName);
-        return string.Join("+", parts);
-    }
-
-    private static string GetKeyName(Key key)
-    {
-        if (key is >= Key.A and <= Key.Z)
-            return key.ToString();
-
-        if (key is >= Key.D0 and <= Key.D9)
-            return ((int)(key - Key.D0)).ToString();
-
-        if (key is >= Key.NumPad0 and <= Key.NumPad9)
-            return key.ToString();
-
-        if (key is >= Key.F1 and <= Key.F24)
-            return key.ToString();
-
-        return key switch
-        {
-            Key.Space => "Space",
-            Key.Enter => "Enter",
-            Key.Tab => "Tab",
-            Key.Back => "Backspace",
-            Key.Escape => "Escape",
-            Key.Insert => "Insert",
-            Key.Delete => "Delete",
-            Key.Home => "Home",
-            Key.End => "End",
-            Key.PageUp => "PageUp",
-            Key.PageDown => "PageDown",
-            Key.Up => "Up",
-            Key.Down => "Down",
-            Key.Left => "Left",
-            Key.Right => "Right",
-            Key.PrintScreen => "PrintScreen",
-            Key.Scroll => "ScrollLock",
-            Key.Pause => "Pause",
-            Key.NumLock => "NumLock",
-            Key.CapsLock => "CapsLock",
-            Key.Add => "Add",
-            Key.Subtract => "Subtract",
-            Key.Multiply => "Multiply",
-            Key.Divide => "Divide",
-            Key.Decimal => "Decimal",
-            Key.Oem1 or Key.OemSemicolon => "Semicolon",
-            Key.OemPlus => "Equals",
-            Key.OemComma => "Comma",
-            Key.OemMinus => "Minus",
-            Key.OemPeriod => "Period",
-            Key.OemQuestion => "Slash",
-            Key.OemTilde => "Grave",
-            Key.OemOpenBrackets => "OpenBracket",
-            Key.OemPipe => "Backslash",
-            Key.OemCloseBrackets => "CloseBracket",
-            Key.OemQuotes => "Quote",
-            _ => string.Empty
-        };
-    }
 }
 
 /// <summary>
@@ -199,7 +124,8 @@ public partial class SettingsWindowViewModel : ObservableObject
     /// <summary>
     /// Available key actions for the picker.
     /// </summary>
-    public IReadOnlyList<KeyActionDefinition> KeyActionOptions { get; }
+    public IReadOnlyList<KeyActionDefinition> KeyActionOptions { get; } =
+        [.. PieAction.KeyActions, CustomKeyActionOption];
 
     /// <summary>
     /// Whether an action is currently selected.
@@ -209,7 +135,6 @@ public partial class SettingsWindowViewModel : ObservableObject
     public SettingsWindowViewModel(Settings settings)
     {
         Settings = settings;
-        KeyActionOptions = BuildKeyActionOptions();
         TrackExistingDefaults();
         if (Settings.Actions.Count > 0)
         {
@@ -371,40 +296,6 @@ public partial class SettingsWindowViewModel : ObservableObject
         SelectedActionIndex = index + 1;
     }
 
-    /// <summary>
-    /// Resets actions to the default configuration.
-    /// </summary>
-    [RelayCommand]
-    public void ResetActions()
-    {
-        var result = MessageBox.Show(
-            "This will replace all your actions with the default set. Continue?",
-            "Reset Actions",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
-
-        if (result != MessageBoxResult.Yes)
-            return;
-
-        Settings.Actions.Clear();
-        _autoKeyDefaults.Clear();
-        _autoShellDefaults.Clear();
-        foreach (var action in Settings.CreateDefaultActions())
-        {
-            Settings.Actions.Add(action);
-        }
-
-        TrackExistingDefaults();
-
-        if (Settings.Actions.Count > 0)
-        {
-            SelectedActionIndex = 0;
-            SelectedAction = Settings.Actions[0];
-        }
-
-        Log.Information("Actions reset to defaults");
-    }
-
     [RelayCommand]
     public void BrowseShellTarget()
     {
@@ -546,16 +437,6 @@ public partial class SettingsWindowViewModel : ObservableObject
         }
     }
 
-    private static IReadOnlyList<KeyActionDefinition> BuildKeyActionOptions()
-    {
-        var options = new List<KeyActionDefinition>(PieAction.KeyActions)
-        {
-            CustomKeyActionOption
-        };
-
-        return options;
-    }
-
     private void TrackExistingDefaults()
     {
         _autoKeyDefaults.Clear();
@@ -578,17 +459,6 @@ public partial class SettingsWindowViewModel : ObservableObject
                     _autoShellDefaults[action] = defaults.Value;
                 }
             }
-        }
-    }
-
-    private void TrackKeyDefaults(PieAction action)
-    {
-        if (action.Type != ActionType.Key)
-            return;
-
-        if (PieAction.TryGetKeyAction(action.Parameter, out var definition))
-        {
-            _autoKeyDefaults[action] = definition;
         }
     }
 

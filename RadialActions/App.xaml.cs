@@ -13,12 +13,7 @@ public partial class App : Application
     /// <summary>
     /// The main executable file of the application.
     /// </summary>
-    public static FileInfo MainFileInfo = new(Process.GetCurrentProcess().MainModule.FileName);
-
-    /// <summary>
-    /// The name used in file paths, registry keys, etc.
-    /// </summary>
-    public static string AssemblyName { get; } = "RadialActions";
+    public static FileInfo MainFileInfo { get; } = new(Environment.ProcessPath);
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -38,20 +33,25 @@ public partial class App : Application
     /// </summary>
     public static bool SetRunOnStartup(bool enable)
     {
-        var keyName = AssemblyName;
+        var keyName = "RadialActions";
         using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+        if (key == null)
+        {
+            Log.Error("Failed to open startup registry key");
+            return false;
+        }
 
         try
         {
             if (enable)
             {
                 Log.Information($"Setting to run on startup under key named {keyName}");
-                key?.SetValue(keyName, MainFileInfo.FullName);
+                key.SetValue(keyName, MainFileInfo.FullName);
             }
             else
             {
                 Log.Information($"Removing from startup under key named {keyName}");
-                key?.DeleteValue(keyName, false);
+                key.DeleteValue(keyName, false);
             }
 
             return true;
@@ -70,7 +70,7 @@ public partial class App : Application
     /// </summary>
     /// <typeparam name="T">The type of the window to show.</typeparam>
     /// <param name="owner">Optional owner window for the singleton window.</param>
-    public static void ShowSingletonWindow<T>(Window? owner = null) where T : Window, new()
+    public static void ShowSingletonWindow<T>(Window owner = null) where T : Window, new()
     {
         var window = Current.Windows.OfType<T>().FirstOrDefault() ?? new T();
         window.Owner = owner;

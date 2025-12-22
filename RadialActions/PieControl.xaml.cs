@@ -23,18 +23,22 @@ public partial class PieControl : UserControl
     public PieControl()
     {
         InitializeComponent();
-        Loaded += (s, e) => CreatePieMenu();
+        Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
         SizeChanged += (s, e) => CreatePieMenu();
-        Loaded += (s, e) =>
-        {
-            SystemParameters.StaticPropertyChanged += OnSystemParametersChanged;
-            SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
-        };
-        Unloaded += (s, e) =>
-        {
-            SystemParameters.StaticPropertyChanged -= OnSystemParametersChanged;
-            SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
-        };
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        CreatePieMenu();
+        SystemParameters.StaticPropertyChanged += OnSystemParametersChanged;
+        SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        SystemParameters.StaticPropertyChanged -= OnSystemParametersChanged;
+        SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
     }
 
     public static readonly DependencyProperty SlicesProperty =
@@ -118,7 +122,7 @@ public partial class PieControl : UserControl
         PieCanvas.Height = canvasSize;
 
         // Parse colors from settings
-        var accentColor = GetWindowsAccentColor();
+        var accentColor = SystemParameters.WindowGlassColor;
         var sliceColor = ParseColor(settings.SliceColor, accentColor);
         if (IsDefaultColor(settings.SliceColor, DefaultSliceColorHex))
         {
@@ -324,11 +328,6 @@ public partial class PieControl : UserControl
         return luminance > 0.6
             ? Color.FromRgb(28, 28, 28)
             : Color.FromRgb(245, 245, 245);
-    }
-
-    private static Color GetWindowsAccentColor()
-    {
-        return SystemParameters.WindowGlassColor;
     }
 
     private void OnSystemParametersChanged(object sender, PropertyChangedEventArgs e)

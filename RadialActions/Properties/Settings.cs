@@ -90,13 +90,13 @@ public sealed partial class Settings
     /// </summary>
     public static ObservableCollection<PieAction> CreateDefaultActions()
     {
-        return new ObservableCollection<PieAction>
-        {
+        return
+        [
             PieAction.CreateKeyAction("PlayPause"),
             PieAction.CreateKeyAction("PreviousTrack"),
             PieAction.CreateKeyAction("NextTrack"),
             PieAction.CreateKeyAction("Mute"),
             PieAction.CreateShellAction("File Explorer", "explorer.exe", "📁"),
-        };
+        ];
     }
 }

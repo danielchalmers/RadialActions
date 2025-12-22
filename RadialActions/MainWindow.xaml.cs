@@ -14,7 +14,6 @@ namespace RadialActions;
 public partial class MainWindow : Window
 {
     private readonly TaskbarIcon _tray;
-    private IntPtr _handle;
     private HotkeyManager _hotkeys;
 
     public MainWindow()
@@ -22,7 +21,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = this;
 
-        Settings.Default.PropertyChanged += (s, e) => Dispatcher.Invoke(() => Settings_PropertyChanged(s, e));
+        Settings.Default.PropertyChanged += Settings_PropertyChanged;
 
         // Construct the tray from the resources defined.
         _tray = Resources["TrayIcon"] as TaskbarIcon;
@@ -39,6 +38,12 @@ public partial class MainWindow : Window
     /// </summary>
     private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
     {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.Invoke(() => Settings_PropertyChanged(sender, e));
+            return;
+        }
+
         Log.Debug($"Setting changed <{e.PropertyName}>");
 
         switch (e.PropertyName)
@@ -55,9 +60,17 @@ public partial class MainWindow : Window
     [RelayCommand]
     public void OpenSettingsWindow(string tabIndex)
     {
+        if (!int.TryParse(tabIndex, out var index))
+            index = 0;
+
+        OpenSettingsWindow(index);
+    }
+
+    private void OpenSettingsWindow(int tabIndex)
+    {
         Log.Debug($"Opening settings window to tab {tabIndex}");
-        Settings.Default.SettingsTabIndex = int.Parse(tabIndex);
-        App.ShowSingletonWindow<SettingsWindow>();
+        Settings.Default.SettingsTabIndex = tabIndex;
+        App.ShowSingletonWindow<SettingsWindow>(this);
     }
 
     /// <summary>
@@ -83,8 +96,8 @@ public partial class MainWindow : Window
     {
         HideMenu();
 
-        _handle = new WindowInteropHelper(this).Handle;
-        _hotkeys = new(_handle);
+        var handle = new WindowInteropHelper(this).Handle;
+        _hotkeys = new(handle);
         _hotkeys.HotkeyPressed += OnHotkeyPressed;
         SetHotkey();
 
@@ -95,6 +108,7 @@ public partial class MainWindow : Window
 
     private void Window_Unloaded(object sender, RoutedEventArgs e)
     {
+        Settings.Default.PropertyChanged -= Settings_PropertyChanged;
         _hotkeys?.Dispose();
     }
 
@@ -154,7 +168,7 @@ public partial class MainWindow : Window
     private void OnTrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)
     {
         Log.Debug("Tray icon left double clicked");
-        OpenSettingsWindow("0");
+        OpenSettingsWindow(0);
     }
 
     private void Window_Closing(object sender, CancelEventArgs e)
@@ -172,8 +186,7 @@ public partial class MainWindow : Window
     private void OnSliceEditRequested(object sender, SliceClickEventArgs e)
     {
         Log.Debug($"Slice edit requested: {e.Slice.Name}");
-        Settings.Default.SettingsTabIndex = 1;
-        App.ShowSingletonWindow<SettingsWindow>();
+        OpenSettingsWindow(1);
         var settingsWindow = Application.Current.Windows.OfType<SettingsWindow>().FirstOrDefault();
         settingsWindow?.SelectAction(e.Slice);
         HideMenu();
