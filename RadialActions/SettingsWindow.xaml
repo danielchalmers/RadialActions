@@ -5,11 +5,9 @@
         xmlns:local="clr-namespace:RadialActions"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:p="clr-namespace:RadialActions.Properties"
-        Title="Settings" Width="600"
-        MinHeight="400"
+        Title="Settings" Width="1200" Height="800"
         d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
         ResizeMode="CanResize"
-        SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
     <Window.Resources>
@@ -76,65 +74,76 @@
 
             <TabItem Header="_Actions">
                 <Grid Margin="0,12,0,12">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" MinHeight="150" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="1.5*" />
+                    </Grid.ColumnDefinitions>
 
-                    <!--  Actions List  -->
-                    <ListBox Grid.Row="0" MinHeight="150"
-                             MaxHeight="250"
-                             ItemsSource="{Binding Settings.Actions}"
-                             SelectedIndex="{Binding SelectedActionIndex}"
-                             SelectedItem="{Binding SelectedAction}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="4,2" Orientation="Horizontal">
-                                    <TextBlock Width="24" FontSize="16"
-                                               Text="{Binding Icon}" />
-                                    <TextBlock Margin="4,0,8,0"
-                                               VerticalAlignment="Center"
-                                               Text="{Binding Name}" />
-                                    <TextBlock VerticalAlignment="Center" FontSize="11"
-                                               Foreground="Gray"
-                                               Text="{Binding Type}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" MinHeight="150" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                    <!--  List Controls  -->
-                    <Grid Grid.Row="1" Margin="0,12,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="4" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="4" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="4" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0"
-                                HorizontalAlignment="Stretch"
-                                Command="{Binding AddActionCommand}"
-                                Content="Add" />
-                        <Button Grid.Column="2"
-                                HorizontalAlignment="Stretch"
-                                Command="{Binding RemoveActionCommand}"
-                                Content="Remove" />
-                        <Button Grid.Column="4"
-                                HorizontalAlignment="Stretch"
-                                Command="{Binding MoveUpCommand}"
-                                Content="Move Up" />
-                        <Button Grid.Column="6"
-                                HorizontalAlignment="Stretch"
-                                Command="{Binding MoveDownCommand}"
-                                Content="Move Down" />
+                        <!--  Actions List  -->
+                        <ListBox Grid.Row="0" MinHeight="150"
+                                 ItemsSource="{Binding Settings.Actions}"
+                                 SelectedIndex="{Binding SelectedActionIndex}"
+                                 SelectedItem="{Binding SelectedAction}">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="4,2" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0" Orientation="Horizontal">
+                                        <TextBlock Width="22" FontSize="14"
+                                                   Text="{Binding Icon}" />
+                                        <TextBlock Margin="4,0,6,0"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding Name}" />
+                                        <TextBlock VerticalAlignment="Center" FontSize="10"
+                                                   Foreground="Gray"
+                                                   Text="{Binding Type}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!--  List Controls  -->
+                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="4" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="4" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="4" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding AddActionCommand}"
+                                    Content="Add" />
+                            <Button Grid.Column="2"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding RemoveActionCommand}"
+                                    Content="Remove" />
+                            <Button Grid.Column="4"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding MoveUpCommand}"
+                                    Content="Move Up" />
+                            <Button Grid.Column="6"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding MoveDownCommand}"
+                                    Content="Move Down" />
+                        </Grid>
                     </Grid>
 
                     <!--  Action Editor  -->
-                    <GroupBox Grid.Row="2" Margin="0,0,0,12"
+                    <GroupBox Grid.Column="2"
                               Header="Edit Action"
                               IsEnabled="{Binding HasSelectedAction}">
                         <Grid Margin="8" Grid.IsSharedSizeScope="True">
