@@ -59,14 +59,6 @@
                                 <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 <TextBlock Style="{StaticResource DescriptionTextBlock}"
                                            Text="Recommended: 300-500" />
-
-                                <CheckBox Margin="0,0,0,4"
-                                          Content="Show center hole"
-                                          IsChecked="{Binding Settings.ShowCenterHole, Mode=TwoWay}" />
-                                <CheckBox Margin="0,0,0,4" Content="Show icons"
-                                          IsChecked="{Binding Settings.ShowIcons, Mode=TwoWay}" />
-                                <CheckBox Content="Show labels"
-                                          IsChecked="{Binding Settings.ShowLabels, Mode=TwoWay}" />
                             </StackPanel>
                         </GroupBox>
 
