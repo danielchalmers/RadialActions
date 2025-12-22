@@ -92,12 +92,12 @@ public sealed partial class Settings
     {
         return new ObservableCollection<PieAction>
         {
-            PieAction.CreateMediaAction(MediaKeyType.PlayPause),
-            PieAction.CreateMediaAction(MediaKeyType.PreviousTrack),
-            PieAction.CreateMediaAction(MediaKeyType.NextTrack),
-            PieAction.CreateVolumeAction(VolumeKeyType.Mute),
-            PieAction.CreateVolumeAction(VolumeKeyType.VolumeDown),
-            PieAction.CreateVolumeAction(VolumeKeyType.VolumeUp),
+            PieAction.CreateKeyAction("PlayPause"),
+            PieAction.CreateKeyAction("PreviousTrack"),
+            PieAction.CreateKeyAction("NextTrack"),
+            PieAction.CreateKeyAction("Mute"),
+            PieAction.CreateKeyAction("VolumeDown"),
+            PieAction.CreateKeyAction("VolumeUp"),
         };
     }
 }

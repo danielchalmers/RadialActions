@@ -144,20 +144,16 @@
                     <GroupBox Grid.Row="2" Margin="0,0,0,12"
                               Header="Edit Action"
                               IsEnabled="{Binding HasSelectedAction}">
-                        <Grid Margin="8">
+                        <Grid Margin="8" Grid.IsSharedSizeScope="True">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
-                                <RowDefinition Height="4" />
                                 <RowDefinition Height="Auto" />
-                                <RowDefinition Height="4" />
                                 <RowDefinition Height="Auto" />
-                                <RowDefinition Height="4" />
                                 <RowDefinition Height="Auto" />
-                                <RowDefinition Height="4" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
@@ -169,37 +165,129 @@
                                      Margin="0,0,0,4"
                                      Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0"
+                            <TextBlock Grid.Row="1" Grid.Column="0"
                                        Margin="0,0,8,4"
                                        VerticalAlignment="Center"
                                        FontWeight="SemiBold" Text="Icon:" />
-                            <TextBox Grid.Row="2" Grid.Column="1"
+                            <TextBox Grid.Row="1" Grid.Column="1"
                                      Margin="0,0,0,4"
                                      Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                            <TextBlock Grid.Row="4" Grid.Column="0"
+                            <TextBlock Grid.Row="2" Grid.Column="0"
                                        Margin="0,0,8,4"
                                        VerticalAlignment="Center"
                                        FontWeight="SemiBold" Text="Type:" />
-                            <ComboBox Grid.Row="4" Grid.Column="1"
+                            <ComboBox Grid.Row="2" Grid.Column="1"
                                       Margin="0,0,0,4"
                                       ItemsSource="{Binding ActionTypes}"
-                                      SelectedItem="{Binding SelectedAction.Type, Mode=TwoWay}" />
+                                      SelectedItem="{Binding SelectedActionType, Mode=TwoWay}" />
 
-                            <TextBlock Grid.Row="6" Grid.Column="0"
-                                       Margin="0,0,8,4"
-                                       VerticalAlignment="Center"
-                                       FontWeight="SemiBold" Text="Parameter:" />
-                            <TextBox Grid.Row="6" Grid.Column="1"
-                                     Margin="0,0,0,4"
-                                     Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Grid Grid.Row="3" Grid.ColumnSpan="2"
+                                  Margin="0,8,0,0"
+                                  Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="8" Grid.Column="0"
-                                       Margin="0,0,8,0"
-                                       VerticalAlignment="Center"
-                                       FontWeight="SemiBold" Text="Arguments:" />
-                            <TextBox Grid.Row="8" Grid.Column="1"
-                                     Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                           Margin="0,0,8,4"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold" Text="Key Action:" />
+                                <ComboBox Grid.Row="0" Grid.Column="1"
+                                          Margin="0,0,0,4"
+                                          ItemsSource="{Binding KeyActionOptions}"
+                                          IsTextSearchEnabled="True"
+                                          SelectedValuePath="Id"
+                                          SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Width="20" FontSize="14"
+                                                           Text="{Binding Icon}" />
+                                                <TextBlock Margin="4,0,0,0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Name}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0"
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold"
+                                           Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}"
+                                           Text="Shortcut:" />
+                                <TextBox Grid.Row="1" Grid.Column="1"
+                                         Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}"
+                                         Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </Grid>
+
+                            <Grid Grid.Row="4" Grid.ColumnSpan="2"
+                                  Margin="0,8,0,0"
+                                  Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Shell}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                           Margin="0,0,8,4"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold"
+                                           Text="Target:" />
+                                <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="6" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button Grid.Column="2"
+                                            Padding="10,2"
+                                            Command="{Binding BrowseShellTargetCommand}"
+                                            Content="Browse..." />
+                                </Grid>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0"
+                                           Margin="0,0,8,4"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold"
+                                           Text="Arguments:" />
+                                <TextBox Grid.Row="1" Grid.Column="1"
+                                         Margin="0,0,0,4"
+                                         Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="2" Grid.Column="0"
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold"
+                                           Text="Working Directory:" />
+                                <Grid Grid.Row="2" Grid.Column="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="6" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button Grid.Column="2"
+                                            Padding="10,2"
+                                            Command="{Binding BrowseWorkingDirectoryCommand}"
+                                            Content="Browse..." />
+                                </Grid>
+                            </Grid>
                         </Grid>
                     </GroupBox>
                 </Grid>
