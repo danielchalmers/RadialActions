@@ -96,8 +96,7 @@ public sealed partial class Settings
             PieAction.CreateKeyAction("PreviousTrack"),
             PieAction.CreateKeyAction("NextTrack"),
             PieAction.CreateKeyAction("Mute"),
-            PieAction.CreateKeyAction("VolumeDown"),
-            PieAction.CreateKeyAction("VolumeUp"),
+            PieAction.CreateShellAction("File Explorer", "explorer.exe", "📁"),
         };
     }
 }
