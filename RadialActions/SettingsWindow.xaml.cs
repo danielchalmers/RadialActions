@@ -24,6 +24,17 @@ public partial class SettingsWindow : Window
         Closed += (s, e) => SaveSettings();
     }
 
+    public void SelectAction(PieAction action)
+    {
+        if (action == null)
+            return;
+
+        if (DataContext is SettingsWindowViewModel viewModel)
+        {
+            viewModel.SelectAction(action);
+        }
+    }
+
     private void SaveSettings()
     {
         if (Settings.CanBeSaved)
@@ -205,6 +216,19 @@ public partial class SettingsWindowViewModel : ObservableObject
             SelectedActionIndex = 0;
             SelectedAction = Settings.Actions[0];
         }
+    }
+
+    public void SelectAction(PieAction action)
+    {
+        if (action == null)
+            return;
+
+        var index = Settings.Actions.IndexOf(action);
+        if (index < 0)
+            return;
+
+        SelectedActionIndex = index;
+        SelectedAction = action;
     }
 
     public ActionType SelectedActionType

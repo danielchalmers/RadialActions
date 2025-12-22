@@ -169,6 +169,16 @@ public partial class MainWindow : Window
         HideMenu();
     }
 
+    private void OnSliceEditRequested(object sender, SliceClickEventArgs e)
+    {
+        Log.Debug($"Slice edit requested: {e.Slice.Name}");
+        Settings.Default.SettingsTabIndex = 1;
+        App.ShowSingletonWindow<SettingsWindow>(this);
+        var settingsWindow = Application.Current.Windows.OfType<SettingsWindow>().FirstOrDefault();
+        settingsWindow?.SelectAction(e.Slice);
+        HideMenu();
+    }
+
     private void Window_Deactivated(object sender, EventArgs e)
     {
         Log.Debug("Lost focus");

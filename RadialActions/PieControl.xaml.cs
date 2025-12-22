@@ -183,6 +183,12 @@ public partial class PieControl : UserControl
                 }
             };
 
+            var contextMenu = new ContextMenu();
+            var editMenuItem = new MenuItem { Header = "Edit..." };
+            editMenuItem.Click += (s, e) => SliceEditRequested?.Invoke(this, new SliceClickEventArgs(sliceAction));
+            contextMenu.Items.Add(editMenuItem);
+            slice.ContextMenu = contextMenu;
+
             PieCanvas.Children.Add(slice);
 
             // Calculate the center position of the slice for icon/text
@@ -375,6 +381,11 @@ public partial class PieControl : UserControl
     /// Occurs when a slice is clicked.
     /// </summary>
     public event EventHandler<SliceClickEventArgs> SliceClicked;
+
+    /// <summary>
+    /// Occurs when a slice edit is requested from the context menu.
+    /// </summary>
+    public event EventHandler<SliceClickEventArgs> SliceEditRequested;
 }
 
 /// <summary>
