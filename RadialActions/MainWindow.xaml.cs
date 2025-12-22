@@ -57,7 +57,7 @@ public partial class MainWindow : Window
     {
         Log.Debug($"Opening settings window to tab {tabIndex}");
         Settings.Default.SettingsTabIndex = int.Parse(tabIndex);
-        App.ShowSingletonWindow<SettingsWindow>(this);
+        App.ShowSingletonWindow<SettingsWindow>();
     }
 
     /// <summary>
@@ -173,7 +173,7 @@ public partial class MainWindow : Window
     {
         Log.Debug($"Slice edit requested: {e.Slice.Name}");
         Settings.Default.SettingsTabIndex = 1;
-        App.ShowSingletonWindow<SettingsWindow>(this);
+        App.ShowSingletonWindow<SettingsWindow>();
         var settingsWindow = Application.Current.Windows.OfType<SettingsWindow>().FirstOrDefault();
         settingsWindow?.SelectAction(e.Slice);
         HideMenu();

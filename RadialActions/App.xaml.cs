@@ -69,8 +69,8 @@ public partial class App : Application
     /// Otherwise, it creates and shows a new instance of the window.
     /// </summary>
     /// <typeparam name="T">The type of the window to show.</typeparam>
-    /// <param name="owner">The owner window for the singleton window.</param>
-    public static void ShowSingletonWindow<T>(Window owner) where T : Window, new()
+    /// <param name="owner">Optional owner window for the singleton window.</param>
+    public static void ShowSingletonWindow<T>(Window? owner = null) where T : Window, new()
     {
         var window = Current.Windows.OfType<T>().FirstOrDefault() ?? new T();
         window.Owner = owner;
