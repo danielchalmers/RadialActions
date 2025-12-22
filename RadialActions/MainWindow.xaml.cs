@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -150,6 +149,12 @@ public partial class MainWindow : Window
     {
         Log.Debug("Tray icon left clicked");
         ShowMenu(true);
+    }
+
+    private void OnTrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)
+    {
+        Log.Debug("Tray icon left double clicked");
+        OpenSettingsWindow("0");
     }
 
     private void Window_Closing(object sender, CancelEventArgs e)

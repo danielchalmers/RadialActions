@@ -70,7 +70,8 @@
         <tb:TaskbarIcon x:Key="TrayIcon" x:Shared="False"
                         IconSource="RadialActions.ico"
                         MenuActivation="RightClick"
-                        TrayLeftMouseDown="OnTrayLeftMouseDown" />
+                        TrayLeftMouseDown="OnTrayLeftMouseDown"
+                        TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick" />
     </Window.Resources>
 
     <Window.Style>
