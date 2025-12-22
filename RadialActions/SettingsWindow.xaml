@@ -45,7 +45,8 @@
                             <StackPanel Margin="8">
                                 <TextBlock Style="{StaticResource LabelTextBlock}"
                                            Text="Hotkey:" />
-                                <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBox PreviewKeyDown="ActivationHotkey_PreviewKeyDown"
+                                         Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 <TextBlock Style="{StaticResource DescriptionTextBlock}"
                                            Text="Examples: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z" />
                             </StackPanel>

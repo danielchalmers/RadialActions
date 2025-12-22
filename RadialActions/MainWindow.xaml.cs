@@ -73,6 +73,7 @@ public partial class MainWindow : Window
     private void SetHotkey()
     {
         var hotkey = Settings.Default.ActivationHotkey;
+        _hotkeys?.UnregisterAll();
         if (!string.IsNullOrWhiteSpace(hotkey))
         {
             _hotkeys?.RegisterHotkey(hotkey);

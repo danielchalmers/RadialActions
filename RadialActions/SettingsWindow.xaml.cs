@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -35,6 +37,120 @@ public partial class SettingsWindow : Window
     {
         Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
         e.Handled = true;
+    }
+
+    private void ActivationHotkey_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (sender is not TextBox textBox)
+            return;
+
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (key == Key.None)
+            return;
+
+        if (key is Key.Back or Key.Delete)
+        {
+            textBox.Clear();
+            textBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+            e.Handled = true;
+            return;
+        }
+
+        if (IsModifierKey(key))
+        {
+            e.Handled = true;
+            return;
+        }
+
+        var hotkey = BuildHotkeyString(key, Keyboard.Modifiers);
+        if (string.IsNullOrWhiteSpace(hotkey))
+            return;
+
+        textBox.Text = hotkey;
+        textBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+        e.Handled = true;
+    }
+
+    private static bool IsModifierKey(Key key)
+    {
+        return key is Key.LeftCtrl or Key.RightCtrl or Key.LeftShift or Key.RightShift or Key.LeftAlt or Key.RightAlt
+            or Key.LWin or Key.RWin;
+    }
+
+    private static string BuildHotkeyString(Key key, ModifierKeys modifiers)
+    {
+        var parts = new List<string>(4);
+        if ((modifiers & ModifierKeys.Control) != 0)
+            parts.Add("Ctrl");
+        if ((modifiers & ModifierKeys.Alt) != 0)
+            parts.Add("Alt");
+        if ((modifiers & ModifierKeys.Shift) != 0)
+            parts.Add("Shift");
+        if ((modifiers & ModifierKeys.Windows) != 0)
+            parts.Add("Win");
+
+        var keyName = GetKeyName(key);
+        if (string.IsNullOrWhiteSpace(keyName))
+            return string.Empty;
+
+        parts.Add(keyName);
+        return string.Join("+", parts);
+    }
+
+    private static string GetKeyName(Key key)
+    {
+        if (key is >= Key.A and <= Key.Z)
+            return key.ToString();
+
+        if (key is >= Key.D0 and <= Key.D9)
+            return ((int)(key - Key.D0)).ToString();
+
+        if (key is >= Key.NumPad0 and <= Key.NumPad9)
+            return key.ToString();
+
+        if (key is >= Key.F1 and <= Key.F24)
+            return key.ToString();
+
+        return key switch
+        {
+            Key.Space => "Space",
+            Key.Enter => "Enter",
+            Key.Tab => "Tab",
+            Key.Back => "Backspace",
+            Key.Escape => "Escape",
+            Key.Insert => "Insert",
+            Key.Delete => "Delete",
+            Key.Home => "Home",
+            Key.End => "End",
+            Key.PageUp => "PageUp",
+            Key.PageDown => "PageDown",
+            Key.Up => "Up",
+            Key.Down => "Down",
+            Key.Left => "Left",
+            Key.Right => "Right",
+            Key.PrintScreen => "PrintScreen",
+            Key.Scroll => "ScrollLock",
+            Key.Pause => "Pause",
+            Key.NumLock => "NumLock",
+            Key.CapsLock => "CapsLock",
+            Key.Add => "Add",
+            Key.Subtract => "Subtract",
+            Key.Multiply => "Multiply",
+            Key.Divide => "Divide",
+            Key.Decimal => "Decimal",
+            Key.Oem1 or Key.OemSemicolon => "Semicolon",
+            Key.OemPlus => "Equals",
+            Key.OemComma => "Comma",
+            Key.OemMinus => "Minus",
+            Key.OemPeriod => "Period",
+            Key.OemQuestion => "Slash",
+            Key.OemTilde => "Grave",
+            Key.OemOpenBrackets => "OpenBracket",
+            Key.OemPipe => "Backslash",
+            Key.OemCloseBrackets => "CloseBracket",
+            Key.OemQuotes => "Quote",
+            _ => string.Empty
+        };
     }
 }
 
