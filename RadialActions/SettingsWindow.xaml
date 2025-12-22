@@ -293,6 +293,26 @@
                 </Grid>
             </TabItem>
 
+            <TabItem Header="_Advanced">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0">
+                        <GroupBox Header="Tools">
+                            <StackPanel Margin="8">
+                                <Button Margin="0,0,0,8"
+                                        Command="{Binding OpenExeFolderCommand}"
+                                        Content="Open Exe Folder" />
+                                <Button Margin="0,0,0,8"
+                                        Command="{Binding OpenSettingsFileCommand}"
+                                        Content="Open Settings File"
+                                        IsEnabled="{x:Static p:Settings.CanBeSaved}" />
+                                <Button Command="{Binding CheckForUpdatesCommand}"
+                                        Content="Check for Updates" />
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
             <TabItem Header="_Help">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0">

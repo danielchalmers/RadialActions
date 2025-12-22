@@ -49,12 +49,12 @@
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Command="{Binding OpenSettingsFileCommand}"
-                      Header="Open settings _file"
-                      IsEnabled="{x:Static p:Settings.CanBeSaved}">
+            <MenuItem Command="{Binding OpenSettingsWindowCommand}"
+                      CommandParameter="3"
+                      Header="_Advanced">
                 <MenuItem.Icon>
                     <TextBlock FontFamily="Segoe MDL2 Assets"
-                               Text="&#xE8A5;" />
+                               Text="&#xE9CE;" />
                 </MenuItem.Icon>
             </MenuItem>
 

@@ -45,6 +45,7 @@ public partial class SettingsWindowViewModel : ObservableObject
 {
     public const string CustomKeyActionId = "__custom__";
     private const string LegacyDefaultIcon = "⭐";
+    private const string UpdatesUrl = "https://github.com/danielchalmers/RadialActions/releases";
 
     private static readonly KeyActionDefinition CustomKeyActionOption =
         new(CustomKeyActionId, "Custom Shortcut...", "⌨️", 0);
@@ -308,6 +309,57 @@ public partial class SettingsWindowViewModel : ObservableObject
             return;
 
         SelectedAction.WorkingDirectory = dialog.FolderName;
+    }
+
+    [RelayCommand]
+    public void OpenExeFolder()
+    {
+        var directory = App.MainFileInfo.DirectoryName;
+        if (string.IsNullOrWhiteSpace(directory))
+            return;
+
+        Process.Start(new ProcessStartInfo("explorer.exe", directory) { UseShellExecute = true });
+    }
+
+    [RelayCommand]
+    public void OpenSettingsFile()
+    {
+        if (Settings.CanBeSaved)
+        {
+            Settings.Default.Save();
+        }
+
+        if (!Settings.Exists)
+        {
+            MessageBox.Show(
+                "Settings file doesn't exist and couldn't be created.",
+                "Settings",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            return;
+        }
+
+        try
+        {
+            Process.Start("notepad", Settings.FilePath);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Couldn't open notepad");
+            MessageBox.Show(
+                "Couldn't open settings file.\n\n" +
+                "This app may have been reuploaded without permission. If you paid for it, ask for a refund and download it for free from the original source: https://github.com/danielchalmers/RadialActions.\n\n" +
+                $"If it still doesn't work, create a new Issue at that link with details on what happened and include this error: \"{ex.Message}\"",
+                "Settings",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
+    public void CheckForUpdates()
+    {
+        Process.Start(new ProcessStartInfo(UpdatesUrl) { UseShellExecute = true });
     }
 
     partial void OnSelectedActionChanged(PieAction oldValue, PieAction newValue)

@@ -62,43 +62,6 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Opens the settings file in Notepad.
-    /// </summary>
-    [RelayCommand]
-    public void OpenSettingsFile()
-    {
-        // Save first if we can so it's up-to-date.
-        if (Settings.CanBeSaved)
-        {
-            Settings.Default.Save();
-        }
-
-        // If it doesn't even exist then it's probably somewhere that requires special access.
-        if (!Settings.Exists)
-        {
-            MessageBox.Show(this,
-                "Settings file doesn't exist and couldn't be created.",
-                Title, MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
-        }
-
-        // Open settings file in notepad.
-        try
-        {
-            Process.Start("notepad", Settings.FilePath);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Couldn't open notepad");
-            MessageBox.Show(this,
-                "Couldn't open settings file.\n\n" +
-                "This app may have been reuploaded without permission. If you paid for it, ask for a refund and download it for free from the original source: https://github.com/danielchalmers/RadialActions.\n\n" +
-                $"If it still doesn't work, create a new Issue at that link with details on what happened and include this error: \"{ex.Message}\"",
-                Title, MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
-    /// <summary>
     /// Closes the app.
     /// </summary>
     [RelayCommand]
