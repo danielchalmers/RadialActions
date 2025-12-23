@@ -15,6 +15,7 @@
         KeyDown="Window_KeyDown"
         Loaded="Window_Loaded" Opacity="0"
         ResizeMode="NoResize"
+        ShowActivated="False"
         ShowInTaskbar="False"
         SizeToContent="WidthAndHeight"
         SnapsToDevicePixels="True"
