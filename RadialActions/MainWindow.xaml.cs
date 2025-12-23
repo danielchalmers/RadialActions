@@ -131,6 +131,7 @@ public partial class MainWindow : Window
 
 
         Show();
+        Activate();
     }
 
     public void HideMenu()
@@ -148,7 +149,7 @@ public partial class MainWindow : Window
     {
         Log.Debug("Hotkey pressed");
 
-        if (IsVisible)
+        if (IsActive)
         {
             HideMenu();
         }
