@@ -70,7 +70,7 @@ public partial class MainWindow : Window
     {
         Log.Debug($"Opening settings window to tab {tabIndex}");
         Settings.Default.SettingsTabIndex = tabIndex;
-        App.ShowSingletonWindow<SettingsWindow>(this);
+        App.ShowSingletonWindow<SettingsWindow>();
     }
 
     /// <summary>
