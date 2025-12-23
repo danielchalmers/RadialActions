@@ -32,6 +32,12 @@ public sealed partial class Settings
     private bool _runOnStartup;
 
     /// <summary>
+    /// Keeps the menu open after clicking a slice until focus is lost.
+    /// </summary>
+    [ObservableProperty]
+    private bool _keepMenuOpenAfterSliceClick;
+
+    /// <summary>
     /// The collection of actions displayed in the pie menu.
     /// </summary>
     [ObservableProperty]

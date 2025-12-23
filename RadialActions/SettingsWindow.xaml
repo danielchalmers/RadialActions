@@ -60,6 +60,15 @@
                             </StackPanel>
                         </GroupBox>
 
+                        <GroupBox Margin="0,0,0,12" Header="Behavior">
+                            <StackPanel Margin="8">
+                                <CheckBox Content="Keep menu open after clicking a slice"
+                                          IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
+                                <TextBlock Style="{StaticResource DescriptionTextBlock}"
+                                           Text="The menu stays open until you click another app or press Escape." />
+                            </StackPanel>
+                        </GroupBox>
+
                         <GroupBox Header="Startup">
                             <StackPanel Margin="8">
                                 <CheckBox Content="Run on Windows startup"

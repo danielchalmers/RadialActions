@@ -180,7 +180,10 @@ public partial class MainWindow : Window
     {
         Log.Debug($"Slice clicked: {e.Slice.Name}");
         e.Slice.Execute();
-        HideMenu();
+        if (!Settings.Default.KeepMenuOpenAfterSliceClick)
+        {
+            HideMenu();
+        }
     }
 
     private void OnSliceEditRequested(object sender, SliceClickEventArgs e)
