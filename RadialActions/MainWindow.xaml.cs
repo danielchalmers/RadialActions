@@ -168,7 +168,7 @@ public partial class MainWindow : Window
     private void OnTrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)
     {
         Log.Debug("Tray icon left double clicked");
-        OpenSettingsWindow(0);
+        OpenSettingsWindow(1);
     }
 
     private void Window_Closing(object sender, CancelEventArgs e)
