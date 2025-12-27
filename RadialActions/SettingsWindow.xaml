@@ -32,6 +32,19 @@
                BasedOn="{StaticResource {x:Type Hyperlink}}">
             <Setter Property="TextDecorations" Value="None" />
         </Style>
+
+        <Style x:Key="ProjectTitleTextBlock"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="18" />
+        </Style>
+
+        <Style x:Key="ProjectDescriptionTextBlock"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
     </Window.Resources>
     <Grid>
         <TabControl Padding="12,12,12,0"
@@ -309,7 +322,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="_Advanced">
+            <TabItem Header="Ad_vanced">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0">
                         <GroupBox Header="Tools">
@@ -321,9 +334,51 @@
                                         Command="{Binding OpenSettingsFileCommand}"
                                         Margin="0,0,0,8"
                                         IsEnabled="{x:Static p:Settings.CanBeSaved}" />
-                                <Button Content="Check for Updates"
-                                        Command="{Binding CheckForUpdatesCommand}" />
                             </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="App Info"
+                                  Margin="0,12,0,0">
+                            <Grid Margin="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                           FontWeight="SemiBold"
+                                           Text="File Version" />
+                                <TextBlock Grid.Row="0" Grid.Column="2"
+                                           Text="{Binding FileVersion}" />
+                                <TextBlock Grid.Row="1" Grid.Column="0"
+                                           FontWeight="SemiBold"
+                                           Text="Architecture" />
+                                <TextBlock Grid.Row="1" Grid.Column="2"
+                                           Text="{Binding Architecture}" />
+                                <TextBlock Grid.Row="2" Grid.Column="0"
+                                           FontWeight="SemiBold"
+                                           Text="Runtime" />
+                                <TextBlock Grid.Row="2" Grid.Column="2"
+                                           Text="{Binding RuntimeDescription}" />
+                                <TextBlock Grid.Row="3" Grid.Column="0"
+                                           FontWeight="SemiBold"
+                                           Text="OS" />
+                                <TextBlock Grid.Row="3" Grid.Column="2"
+                                           Text="{Binding OsDescription}" />
+                                <TextBlock Grid.Row="4" Grid.Column="0"
+                                           FontWeight="SemiBold"
+                                           Text="Executable" />
+                                <TextBlock Grid.Row="4" Grid.Column="2"
+                                           Text="{Binding ExecutablePath}"
+                                           TextWrapping="Wrap" />
+                            </Grid>
                         </GroupBox>
                     </StackPanel>
                 </ScrollViewer>
@@ -331,9 +386,29 @@
 
             <TabItem Header="_Help">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0">
+                    <Grid Margin="0"
+                          MinHeight="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportHeight}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="Radial Actions"
+                                       FontSize="24"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,4,0,0"
+                                       Text="Summon a radial launcher for your everyday shortcuts."
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
                         <GroupBox Header="Quick Start"
-                                  Margin="0,0,0,12">
+                                  Grid.Row="2">
                             <StackPanel Margin="8">
                                 <TextBlock Margin="0,0,0,4"
                                            TextWrapping="Wrap">
@@ -358,32 +433,111 @@
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Header="Links"
-                                  Margin="0,0,0,12">
+                        <GroupBox Header="Support"
+                                  Grid.Row="4">
                             <StackPanel Margin="8">
-                                <TextBlock Margin="0,0,0,4"
-                                           TextWrapping="Wrap">
+                                <TextBlock Margin="0,0,12,8">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions"
-                                               RequestNavigate="Hyperlink_RequestNavigate">
-                                        📦 GitHub Repository
+                                                RequestNavigate="Hyperlink_RequestNavigate">
+                                        📦 View on GitHub
                                     </Hyperlink>
                                 </TextBlock>
-                                <TextBlock Margin="0,0,0,4"
-                                           TextWrapping="Wrap">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
-                                               RequestNavigate="Hyperlink_RequestNavigate">
-                                        🚀 Check for Updates
-                                    </Hyperlink>
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap">
+                                <TextBlock Margin="0,0,12,8">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues"
-                                               RequestNavigate="Hyperlink_RequestNavigate">
-                                        🐛 Report a Bug / Request a Feature
+                                                RequestNavigate="Hyperlink_RequestNavigate">
+                                        🐛 Report a Bug
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock Margin="0,0,12,8">
+                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
+                                            RequestNavigate="Hyperlink_RequestNavigate">
+                                        🚀 Check for Updates
                                     </Hyperlink>
                                 </TextBlock>
                             </StackPanel>
                         </GroupBox>
-                    </StackPanel>
+
+                        <GroupBox Header="More from the Author"
+                                  Grid.Row="6">
+                            <StackPanel Margin="8">
+                                <UniformGrid Columns="3"
+                                             Margin="0,4,0,0">
+                                    <StackPanel Margin="0,0,12,12">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                Good Diary
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Margin="0,4,0,8"
+                                                   Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="Track your daily activities and moods on Android." />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,12">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                DesktopClock
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Margin="0,4,0,8"
+                                                   Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="A digital clock for your desktop." />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,12">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                SentryReplay
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Margin="0,4,0,8"
+                                                   Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="Review Tesla dashcam clips on Windows." />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,12">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/SteamAccountSwitcher"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                SteamAccountSwitcher
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Margin="0,4,0,8"
+                                                   Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="Swap Steam accounts from the system tray." />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,12">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/Network-Monitor"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                Network Monitor
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Margin="0,4,0,8"
+                                                   Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="Live latency and bandwidth in a desktop widget." />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,12">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/Teichos"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                Teichos
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Margin="0,4,0,8"
+                                                   Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="Stay focused with URL blocking and schedules." />
+                                    </StackPanel>
+                                </UniformGrid>
+                                <TextBlock Margin="0,0,0,8">
+                                    <Hyperlink NavigateUri="https://github.com/danielchalmers"
+                                               RequestNavigate="Hyperlink_RequestNavigate">
+                                        View all projects on GitHub
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
                 </ScrollViewer>
             </TabItem>
         </TabControl>

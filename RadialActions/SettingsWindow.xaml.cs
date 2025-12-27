@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -46,6 +48,7 @@ public partial class SettingsWindow : Window
 
     private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {
+        Log.Information("Opening link from Settings/Help: {Url}", e.Uri.AbsoluteUri);
         Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
         e.Handled = true;
     }
@@ -97,7 +100,6 @@ public partial class SettingsWindowViewModel : ObservableObject
 {
     public const string CustomKeyActionId = "__custom__";
     private const string LegacyDefaultIcon = "⭐";
-    private const string UpdatesUrl = "https://github.com/danielchalmers/RadialActions/releases";
 
     private static readonly KeyActionDefinition CustomKeyActionOption =
         new(CustomKeyActionId, "Custom Shortcut...", "⌨️", 0);
@@ -115,6 +117,11 @@ public partial class SettingsWindowViewModel : ObservableObject
     private int _selectedActionIndex = -1;
 
     public Settings Settings { get; }
+    public string FileVersion { get; } = FileVersionInfo.GetVersionInfo(App.MainFileInfo.FullName)?.FileVersion ?? "Unknown";
+    public string Architecture { get; } = RuntimeInformation.ProcessArchitecture.ToString();
+    public string RuntimeDescription { get; } = RuntimeInformation.FrameworkDescription;
+    public string OsDescription { get; } = RuntimeInformation.OSDescription;
+    public string ExecutablePath { get; } = App.MainFileInfo.FullName;
 
     /// <summary>
     /// Available action types for the dropdown.
@@ -387,11 +394,6 @@ public partial class SettingsWindowViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
-    public void CheckForUpdates()
-    {
-        Process.Start(new ProcessStartInfo(UpdatesUrl) { UseShellExecute = true });
-    }
 
     partial void OnSelectedActionChanged(PieAction oldValue, PieAction newValue)
     {
@@ -577,4 +579,3 @@ public partial class SettingsWindowViewModel : ObservableObject
 
     private readonly record struct ShellDefaults(string Name, string Icon, string WorkingDirectory);
 }
-

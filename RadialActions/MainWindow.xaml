@@ -27,7 +27,7 @@
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Header="_Configure actions"
+            <MenuItem Header="_Actions"
                       Command="{Binding OpenSettingsWindowCommand}"
                       CommandParameter="1">
                 <MenuItem.Icon>
@@ -36,20 +36,20 @@
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Header="_Help and shortcuts"
+            <MenuItem Header="Ad_vanced"
                       Command="{Binding OpenSettingsWindowCommand}"
                       CommandParameter="2">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE897;"
-                               FontFamily="Segoe MDL2 Assets" />
+                    <TextBlock Text="&#xE9CE;"
+                               FontFamily="Segoe MDL2 Assets"/>
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Header="_Advanced"
+            <MenuItem Header="_Help"
                       Command="{Binding OpenSettingsWindowCommand}"
                       CommandParameter="3">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE9CE;"
+                    <TextBlock Text="&#xE897;"
                                FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>

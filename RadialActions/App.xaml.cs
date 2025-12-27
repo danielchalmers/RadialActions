@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using Microsoft.Win32;
 
@@ -25,7 +26,8 @@ public partial class App : Application
             .WriteTo.Debug()
             .CreateLogger();
 
-        Log.Information($"Starting Radial Actions");
+        Log.Information($"Starting Radial Actions {FileVersionInfo.GetVersionInfo(MainFileInfo.FullName).FileVersion}");
+        Log.Information($"Runtime: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture}");
     }
 
     /// <summary>
