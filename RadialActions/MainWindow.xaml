@@ -8,70 +8,65 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         Title="Radial Actions"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
-        AllowsTransparency="True"
-        Background="Transparent"
-        Closing="Window_Closing"
-        Deactivated="Window_Deactivated"
-        KeyDown="Window_KeyDown"
-        Loaded="Window_Loaded" Opacity="0"
-        ResizeMode="NoResize"
-        ShowInTaskbar="False"
-        SizeToContent="WidthAndHeight"
-        SnapsToDevicePixels="True"
-        Topmost="True"
-        Unloaded="Window_Unloaded"
-        WindowStyle="None" mc:Ignorable="d">
+        AllowsTransparency="True" Background="Transparent"
+        Closing="Window_Closing" Deactivated="Window_Deactivated"
+        KeyDown="Window_KeyDown" Loaded="Window_Loaded"
+        Opacity="0" ResizeMode="NoResize"
+        ShowInTaskbar="False" SizeToContent="WidthAndHeight"
+        SnapsToDevicePixels="True" Topmost="True"
+        Unloaded="Window_Unloaded" WindowStyle="None"
+        mc:Ignorable="d">
     <Window.Resources>
         <ContextMenu x:Key="MainContextMenu" x:Shared="False">
-            <MenuItem Command="{Binding OpenSettingsWindowCommand}"
-                      CommandParameter="0" Header="_Settings">
+            <MenuItem Header="_Settings"
+                      Command="{Binding OpenSettingsWindowCommand}"
+                      CommandParameter="0">
                 <MenuItem.Icon>
-                    <TextBlock FontFamily="Segoe MDL2 Assets"
-                               Text="&#xE713;" />
+                    <TextBlock Text="&#xE713;"
+                               FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Command="{Binding OpenSettingsWindowCommand}"
-                      CommandParameter="1"
-                      Header="_Configure actions">
+            <MenuItem Header="_Configure actions"
+                      Command="{Binding OpenSettingsWindowCommand}"
+                      CommandParameter="1">
                 <MenuItem.Icon>
-                    <TextBlock FontFamily="Segoe MDL2 Assets"
-                               Text="&#xE7FC;" />
+                    <TextBlock Text="&#xE7FC;"
+                               FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Command="{Binding OpenSettingsWindowCommand}"
-                      CommandParameter="2"
-                      Header="_Help and shortcuts">
+            <MenuItem Header="_Help and shortcuts"
+                      Command="{Binding OpenSettingsWindowCommand}"
+                      CommandParameter="2">
                 <MenuItem.Icon>
-                    <TextBlock FontFamily="Segoe MDL2 Assets"
-                               Text="&#xE897;" />
+                    <TextBlock Text="&#xE897;"
+                               FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Command="{Binding OpenSettingsWindowCommand}"
-                      CommandParameter="3"
-                      Header="_Advanced">
+            <MenuItem Header="_Advanced"
+                      Command="{Binding OpenSettingsWindowCommand}"
+                      CommandParameter="3">
                 <MenuItem.Icon>
-                    <TextBlock FontFamily="Segoe MDL2 Assets"
-                               Text="&#xE9CE;" />
+                    <TextBlock Text="&#xE9CE;"
+                               FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Command="{Binding ExitCommand}"
-                      Header="E_xit">
+            <MenuItem Header="E_xit"
+                      Command="{Binding ExitCommand}">
                 <MenuItem.Icon>
-                    <TextBlock FontFamily="Segoe MDL2 Assets"
-                               Text="&#xE8BB;" />
+                    <TextBlock Text="&#xE8BB;"
+                               FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>
         </ContextMenu>
 
         <tb:TaskbarIcon x:Key="TrayIcon" x:Shared="False"
-                        IconSource="RadialActions.ico"
-                        MenuActivation="RightClick"
-                        TrayLeftMouseDown="OnTrayLeftMouseDown"
-                        TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick" />
+                        IconSource="RadialActions.ico" MenuActivation="RightClick"
+                        TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick"
+                        TrayLeftMouseDown="OnTrayLeftMouseDown" />
     </Window.Resources>
 
     <Window.Style>
@@ -83,7 +78,8 @@
                         <BeginStoryboard>
                             <Storyboard>
                                 <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                 From="0" To="1" Duration="0:0:0.08" />
+                                                 From="0" To="1"
+                                                 Duration="0:0:0.08" />
                             </Storyboard>
                         </BeginStoryboard>
                     </DataTrigger.EnterActions>
@@ -95,8 +91,7 @@
     <Grid>
         <local:PieControl Width="{Binding Size, Source={x:Static p:Settings.Default}}"
                           Height="{Binding Size, Source={x:Static p:Settings.Default}}"
-                          SliceClicked="OnSliceClicked"
-                          SliceEditRequested="OnSliceEditRequested"
+                          SliceClicked="OnSliceClicked" SliceEditRequested="OnSliceEditRequested"
                           Slices="{Binding Actions, Source={x:Static p:Settings.Default}}" />
     </Grid>
 </Window>

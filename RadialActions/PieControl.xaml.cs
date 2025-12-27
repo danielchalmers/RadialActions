@@ -324,7 +324,7 @@ public partial class PieControl : UserControl
 
     private static Color GetReadableTextColor(Color background)
     {
-        var luminance = (0.2126 * background.R + 0.7152 * background.G + 0.0722 * background.B) / 255.0;
+        var luminance = ((0.2126 * background.R) + (0.7152 * background.G) + (0.0722 * background.B)) / 255.0;
         return luminance > 0.6
             ? Color.FromRgb(28, 28, 28)
             : Color.FromRgb(245, 245, 245);

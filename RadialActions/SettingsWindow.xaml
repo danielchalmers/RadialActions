@@ -5,22 +5,22 @@
         xmlns:local="clr-namespace:RadialActions"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:p="clr-namespace:RadialActions.Properties"
-        Title="Settings" Width="1200" Height="800"
+        Title="Settings"
+        Width="1200" Height="800"
         d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
-        ResizeMode="CanResize"
-        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
     <Window.Resources>
         <Style x:Key="LabelTextBlock"
-               BasedOn="{StaticResource {x:Type TextBlock}}"
-               TargetType="TextBlock">
+               TargetType="TextBlock"
+               BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Margin" Value="0,0,0,4" />
         </Style>
 
         <Style x:Key="DescriptionTextBlock"
-               BasedOn="{StaticResource {x:Type TextBlock}}"
-               TargetType="TextBlock">
+               TargetType="TextBlock"
+               BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="FontStyle" Value="Italic" />
             <Setter Property="FontSize" Value="11" />
             <Setter Property="Margin" Value="0,2,0,12" />
@@ -28,8 +28,8 @@
             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
         </Style>
 
-        <Style BasedOn="{StaticResource {x:Type Hyperlink}}"
-               TargetType="Hyperlink">
+        <Style TargetType="Hyperlink"
+               BasedOn="{StaticResource {x:Type Hyperlink}}">
             <Setter Property="TextDecorations" Value="None" />
         </Style>
     </Window.Resources>
@@ -39,33 +39,36 @@
             <TabItem Header="_General">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0">
-                        <GroupBox Margin="0,0,0,12" Header="Activation">
+                        <GroupBox Header="Activation"
+                                  Margin="0,0,0,12">
                             <StackPanel Margin="8">
-                                <TextBlock Style="{StaticResource LabelTextBlock}"
-                                           Text="Hotkey:" />
-                                <TextBox PreviewKeyDown="ActivationHotkey_PreviewKeyDown"
-                                         Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Style="{StaticResource DescriptionTextBlock}"
-                                           Text="Examples: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z" />
+                                <TextBlock Text="Hotkey:"
+                                           Style="{StaticResource LabelTextBlock}" />
+                                <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         PreviewKeyDown="ActivationHotkey_PreviewKeyDown" />
+                                <TextBlock Text="Examples: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z"
+                                           Style="{StaticResource DescriptionTextBlock}" />
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Margin="0,0,0,12" Header="Appearance">
+                        <GroupBox Header="Appearance"
+                                  Margin="0,0,0,12">
                             <StackPanel Margin="8">
-                                <TextBlock Style="{StaticResource LabelTextBlock}"
-                                           Text="Menu Size (pixels):" />
+                                <TextBlock Text="Menu Size (pixels):"
+                                           Style="{StaticResource LabelTextBlock}" />
                                 <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Style="{StaticResource DescriptionTextBlock}"
-                                           Text="Recommended: 300-500" />
+                                <TextBlock Text="Recommended: 300-500"
+                                           Style="{StaticResource DescriptionTextBlock}" />
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Margin="0,0,0,12" Header="Behavior">
+                        <GroupBox Header="Behavior"
+                                  Margin="0,0,0,12">
                             <StackPanel Margin="8">
                                 <CheckBox Content="Keep menu open after clicking a slice"
                                           IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
-                                <TextBlock Style="{StaticResource DescriptionTextBlock}"
-                                           Text="The menu stays open until you click another app or press Escape." />
+                                <TextBlock Text="The menu stays open until you click another app or press Escape."
+                                           Style="{StaticResource DescriptionTextBlock}" />
                             </StackPanel>
                         </GroupBox>
 
@@ -73,8 +76,8 @@
                             <StackPanel Margin="8">
                                 <CheckBox Content="Run on Windows startup"
                                           IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
-                                <TextBlock Style="{StaticResource DescriptionTextBlock}"
-                                           Text="Starts the app minimized to tray when you log in." />
+                                <TextBlock Text="Starts the app minimized to tray when you log in."
+                                           Style="{StaticResource DescriptionTextBlock}" />
                             </StackPanel>
                         </GroupBox>
                     </StackPanel>
@@ -96,7 +99,8 @@
                         </Grid.RowDefinitions>
 
                         <!--  Actions List  -->
-                        <ListBox Grid.Row="0" MinHeight="150"
+                        <ListBox Grid.Row="0"
+                                 MinHeight="150"
                                  ItemsSource="{Binding Settings.Actions}"
                                  SelectedIndex="{Binding SelectedActionIndex}"
                                  SelectedItem="{Binding SelectedAction}">
@@ -107,22 +111,25 @@
                             </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Margin="0" Orientation="Horizontal">
-                                        <TextBlock Width="22" FontSize="14"
-                                                   Text="{Binding Icon}" />
-                                        <TextBlock Margin="4,0,6,0"
+                                    <StackPanel Margin="0"
+                                                Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Icon}"
+                                                   Width="22"
+                                                   FontSize="14" />
+                                        <TextBlock Text="{Binding Name}"
+                                                   Margin="4,0,6,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Type}"
                                                    VerticalAlignment="Center"
-                                                   Text="{Binding Name}" />
-                                        <TextBlock VerticalAlignment="Center" FontSize="10"
-                                                   Foreground="Gray"
-                                                   Text="{Binding Type}" />
+                                                   FontSize="10"
+                                                   Foreground="Gray" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
 
                         <!--  List Controls  -->
-                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                        <Grid Grid.Row="1"
+                              Margin="0,12,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="4" />
@@ -133,21 +140,21 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0"
-                                    HorizontalAlignment="Stretch"
+                                    Content="Add"
                                     Command="{Binding AddActionCommand}"
-                                    Content="Add" />
+                                    HorizontalAlignment="Stretch" />
                             <Button Grid.Column="2"
-                                    HorizontalAlignment="Stretch"
+                                    Content="Remove"
                                     Command="{Binding RemoveActionCommand}"
-                                    Content="Remove" />
+                                    HorizontalAlignment="Stretch" />
                             <Button Grid.Column="4"
-                                    HorizontalAlignment="Stretch"
+                                    Content="Move Up"
                                     Command="{Binding MoveUpCommand}"
-                                    Content="Move Up" />
+                                    HorizontalAlignment="Stretch" />
                             <Button Grid.Column="6"
-                                    HorizontalAlignment="Stretch"
+                                    Content="Move Down"
                                     Command="{Binding MoveDownCommand}"
-                                    Content="Move Down" />
+                                    HorizontalAlignment="Stretch" />
                         </Grid>
                     </Grid>
 
@@ -155,7 +162,8 @@
                     <GroupBox Grid.Column="2"
                               Header="Edit Action"
                               IsEnabled="{Binding HasSelectedAction}">
-                        <Grid Margin="8" Grid.IsSharedSizeScope="True">
+                        <Grid Grid.IsSharedSizeScope="True"
+                              Margin="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
                                 <ColumnDefinition Width="*" />
@@ -169,25 +177,25 @@
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0"
-                                       Margin="0,0,8,4"
-                                       VerticalAlignment="Center"
-                                       FontWeight="SemiBold" Text="Name:" />
+                                       Text="Name:"
+                                       Margin="0,0,8,4" VerticalAlignment="Center"
+                                       FontWeight="SemiBold" />
                             <TextBox Grid.Row="0" Grid.Column="1"
-                                     Margin="0,0,0,4"
-                                     Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                     Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,0,4" />
 
                             <TextBlock Grid.Row="1" Grid.Column="0"
-                                       Margin="0,0,8,4"
-                                       VerticalAlignment="Center"
-                                       FontWeight="SemiBold" Text="Icon:" />
+                                       Text="Icon:"
+                                       Margin="0,0,8,4" VerticalAlignment="Center"
+                                       FontWeight="SemiBold" />
                             <TextBox Grid.Row="1" Grid.Column="1"
-                                     Margin="0,0,0,4"
-                                     Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                     Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,0,4" />
 
                             <TextBlock Grid.Row="2" Grid.Column="0"
-                                       Margin="0,0,8,4"
-                                       VerticalAlignment="Center"
-                                       FontWeight="SemiBold" Text="Type:" />
+                                       Text="Type:"
+                                       Margin="0,0,8,4" VerticalAlignment="Center"
+                                       FontWeight="SemiBold" />
                             <ComboBox Grid.Row="2" Grid.Column="1"
                                       Margin="0,0,0,4"
                                       ItemsSource="{Binding ActionTypes}"
@@ -206,37 +214,36 @@
                                 </Grid.RowDefinitions>
 
                                 <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Margin="0,0,8,4"
-                                           VerticalAlignment="Center"
-                                           FontWeight="SemiBold" Text="Key Action:" />
+                                           Text="Key Action:"
+                                           Margin="0,0,8,4" VerticalAlignment="Center"
+                                           FontWeight="SemiBold" />
                                 <ComboBox Grid.Row="0" Grid.Column="1"
-                                          Margin="0,0,0,4"
-                                          ItemsSource="{Binding KeyActionOptions}"
-                                          IsTextSearchEnabled="True"
+                                          SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
                                           SelectedValuePath="Id"
-                                          SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}">
+                                          Margin="0,0,0,4"
+                                          IsTextSearchEnabled="True"
+                                          ItemsSource="{Binding KeyActionOptions}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Width="20" FontSize="14"
-                                                           Text="{Binding Icon}" />
-                                                <TextBlock Margin="4,0,0,0"
-                                                           VerticalAlignment="Center"
-                                                           Text="{Binding Name}" />
+                                                <TextBlock Text="{Binding Icon}"
+                                                           Width="20"
+                                                           FontSize="14" />
+                                                <TextBlock Text="{Binding Name}"
+                                                           Margin="4,0,0,0" VerticalAlignment="Center" />
                                             </StackPanel>
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
 
                                 <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Margin="0,0,8,0"
-                                           VerticalAlignment="Center"
+                                           Text="Shortcut:"
+                                           Margin="0,0,8,0" VerticalAlignment="Center"
                                            FontWeight="SemiBold"
-                                           Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}"
-                                           Text="Shortcut:" />
+                                           Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
                                 <TextBox Grid.Row="1" Grid.Column="1"
-                                         Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}"
-                                         Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                         Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
                             </Grid>
 
                             <Grid Grid.Row="4" Grid.ColumnSpan="2"
@@ -253,11 +260,11 @@
                                 </Grid.RowDefinitions>
 
                                 <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Margin="0,0,8,4"
-                                           VerticalAlignment="Center"
-                                           FontWeight="SemiBold"
-                                           Text="Target:" />
-                                <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,0,4">
+                                           Text="Target:"
+                                           Margin="0,0,8,4" VerticalAlignment="Center"
+                                           FontWeight="SemiBold" />
+                                <Grid Grid.Row="0" Grid.Column="1"
+                                      Margin="0,0,0,4">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="6" />
@@ -266,25 +273,23 @@
                                     <TextBox Grid.Column="0"
                                              Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button Grid.Column="2"
-                                            Padding="10,2"
+                                            Content="Browse..."
                                             Command="{Binding BrowseShellTargetCommand}"
-                                            Content="Browse..." />
+                                            Padding="10,2" />
                                 </Grid>
 
                                 <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Margin="0,0,8,4"
-                                           VerticalAlignment="Center"
-                                           FontWeight="SemiBold"
-                                           Text="Arguments:" />
+                                           Text="Arguments:"
+                                           Margin="0,0,8,4" VerticalAlignment="Center"
+                                           FontWeight="SemiBold" />
                                 <TextBox Grid.Row="1" Grid.Column="1"
-                                         Margin="0,0,0,4"
-                                         Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                         Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,0,0,4" />
 
                                 <TextBlock Grid.Row="2" Grid.Column="0"
-                                           Margin="0,0,8,0"
-                                           VerticalAlignment="Center"
-                                           FontWeight="SemiBold"
-                                           Text="Working Directory:" />
+                                           Text="Working Directory:"
+                                           Margin="0,0,8,0" VerticalAlignment="Center"
+                                           FontWeight="SemiBold" />
                                 <Grid Grid.Row="2" Grid.Column="1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -294,9 +299,9 @@
                                     <TextBox Grid.Column="0"
                                              Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button Grid.Column="2"
-                                            Padding="10,2"
+                                            Content="Browse..."
                                             Command="{Binding BrowseWorkingDirectoryCommand}"
-                                            Content="Browse..." />
+                                            Padding="10,2" />
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -309,15 +314,15 @@
                     <StackPanel Margin="0">
                         <GroupBox Header="Tools">
                             <StackPanel Margin="8">
-                                <Button Margin="0,0,0,8"
+                                <Button Content="Open Exe Folder"
                                         Command="{Binding OpenExeFolderCommand}"
-                                        Content="Open Exe Folder" />
-                                <Button Margin="0,0,0,8"
+                                        Margin="0,0,0,8" />
+                                <Button Content="Open Settings File"
                                         Command="{Binding OpenSettingsFileCommand}"
-                                        Content="Open Settings File"
+                                        Margin="0,0,0,8"
                                         IsEnabled="{x:Static p:Settings.CanBeSaved}" />
-                                <Button Command="{Binding CheckForUpdatesCommand}"
-                                        Content="Check for Updates" />
+                                <Button Content="Check for Updates"
+                                        Command="{Binding CheckForUpdatesCommand}" />
                             </StackPanel>
                         </GroupBox>
                     </StackPanel>
@@ -327,17 +332,20 @@
             <TabItem Header="_Help">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0">
-                        <GroupBox Margin="0,0,0,12" Header="Quick Start">
+                        <GroupBox Header="Quick Start"
+                                  Margin="0,0,0,12">
                             <StackPanel Margin="8">
-                                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap">
+                                <TextBlock Margin="0,0,0,4"
+                                           TextWrapping="Wrap">
                                     <Run FontWeight="Bold">
                                         1.
                                     </Run>
                                     Press
-                                    <Run FontWeight="Bold"
-                                         Text="{Binding Settings.ActivationHotkey, Mode=OneWay}" />
+                                    <Run Text="{Binding Settings.ActivationHotkey, Mode=OneWay}"
+                                         FontWeight="Bold" />
                                     to open the radial menu</TextBlock>
-                                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap">
+                                <TextBlock Margin="0,0,0,4"
+                                           TextWrapping="Wrap">
                                     <Run FontWeight="Bold">
                                         2.
                                     </Run>
@@ -350,15 +358,18 @@
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Margin="0,0,0,12" Header="Links">
+                        <GroupBox Header="Links"
+                                  Margin="0,0,0,12">
                             <StackPanel Margin="8">
-                                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap">
+                                <TextBlock Margin="0,0,0,4"
+                                           TextWrapping="Wrap">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions"
                                                RequestNavigate="Hyperlink_RequestNavigate">
                                         📦 GitHub Repository
                                     </Hyperlink>
                                 </TextBlock>
-                                <TextBlock Margin="0,0,0,4" TextWrapping="Wrap">
+                                <TextBlock Margin="0,0,0,4"
+                                           TextWrapping="Wrap">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
                                                RequestNavigate="Hyperlink_RequestNavigate">
                                         🚀 Check for Updates
