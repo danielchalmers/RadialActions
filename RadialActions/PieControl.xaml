@@ -6,11 +6,5 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DesignHeight="300" d:DesignWidth="300"
              mc:Ignorable="d">
-    <Canvas Name="PieCanvas">
-        <Canvas.Effect>
-            <DropShadowEffect BlurRadius="20" Opacity="0.6"
-                              ShadowDepth="0"
-                              Color="Black" />
-        </Canvas.Effect>
-    </Canvas>
+    <Canvas Name="PieCanvas" />
 </UserControl>

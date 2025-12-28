@@ -236,55 +236,60 @@ public partial class PieControl : UserControl
                 : canvasRadius * 0.6;
             var textPosition = GetTextPosition(center, textRadius, startAngle, endAngle);
 
-            // Add icon if enabled
-            if (settings.ShowIcons && !string.IsNullOrEmpty(sliceAction.Icon))
+            var showIcon = settings.ShowIcons && !string.IsNullOrEmpty(sliceAction.Icon);
+            var showLabel = settings.ShowLabels;
+
+            if (showIcon || showLabel)
             {
-                var iconText = new TextBlock
+                var contentPanel = new StackPanel
                 {
-                    Text = sliceAction.Icon,
-                    Foreground = new SolidColorBrush(textColor),
-                    FontSize = settings.ShowLabels ? 20 : 28,
-                    TextAlignment = TextAlignment.Center,
+                    Orientation = Orientation.Vertical,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     IsHitTestVisible = false,
                 };
 
-                iconText.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                var iconSize = iconText.DesiredSize;
-
-                var iconOffset = settings.ShowLabels ? -12 : 0;
-                Canvas.SetLeft(iconText, textPosition.X - (iconSize.Width / 2));
-                Canvas.SetTop(iconText, textPosition.Y - (iconSize.Height / 2) + iconOffset);
-
-                PieCanvas.Children.Add(iconText);
-            }
-
-            // Add text label if enabled
-            if (settings.ShowLabels)
-            {
-                var text = new TextBlock
+                if (showIcon)
                 {
-                    Text = sliceAction.Name,
-                    Foreground = new SolidColorBrush(textColor),
-                    FontSize = 11,
-                    FontWeight = FontWeights.SemiBold,
-                    TextAlignment = TextAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    IsHitTestVisible = false,
-                    TextWrapping = TextWrapping.Wrap,
-                    MaxWidth = canvasRadius * 0.4,
-                };
+                    var iconText = new TextBlock
+                    {
+                        Text = sliceAction.Icon,
+                        Foreground = new SolidColorBrush(textColor),
+                        FontSize = showLabel ? 20 : 28,
+                        TextAlignment = TextAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Margin = showLabel ? new Thickness(0, 0, 0, 4) : new Thickness(0),
+                    };
 
-                text.Measure(new Size(text.MaxWidth, double.PositiveInfinity));
-                var textSize = text.DesiredSize;
+                    contentPanel.Children.Add(iconText);
+                }
 
-                var textOffset = settings.ShowIcons ? 10 : 0;
-                Canvas.SetLeft(text, textPosition.X - (textSize.Width / 2));
-                Canvas.SetTop(text, textPosition.Y - (textSize.Height / 2) + textOffset);
+                if (showLabel)
+                {
+                    var text = new TextBlock
+                    {
+                        Text = sliceAction.Name,
+                        Foreground = new SolidColorBrush(textColor),
+                        FontSize = 11,
+                        FontWeight = FontWeights.SemiBold,
+                        TextAlignment = TextAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        TextWrapping = TextWrapping.Wrap,
+                        MaxWidth = canvasRadius * 0.4,
+                    };
 
-                PieCanvas.Children.Add(text);
+                    contentPanel.Children.Add(text);
+                }
+
+                contentPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                var contentSize = contentPanel.DesiredSize;
+
+                Canvas.SetLeft(contentPanel, textPosition.X - (contentSize.Width / 2));
+                Canvas.SetTop(contentPanel, textPosition.Y - (contentSize.Height / 2));
+
+                PieCanvas.Children.Add(contentPanel);
             }
         }
     }
