@@ -6,7 +6,6 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
-using RadialActions.Properties;
 
 namespace RadialActions;
 
@@ -15,10 +14,7 @@ namespace RadialActions;
 /// </summary>
 public partial class PieControl : UserControl
 {
-    private const string DefaultSliceColorHex = "#2D2D30";
-    private const string DefaultSliceHoverColorHex = "#3E3E42";
-    private const string DefaultSliceBorderColorHex = "#1E1E1E";
-    private const string DefaultTextColorHex = "#FFFFFF";
+    private const double DefaultCenterHoleRatio = 0.25;
 
     public PieControl()
     {
@@ -116,41 +112,23 @@ public partial class PieControl : UserControl
         var canvasSize = Math.Min(ActualWidth, ActualHeight);
         var canvasRadius = canvasSize / 2;
         var center = new Point(canvasRadius, canvasRadius);
-        var settings = Settings.Default;
+        var accentColor = SystemParameters.WindowGlassColor;
+        var sliceColor = accentColor;
+        var hoverColor = BlendColor(sliceColor, Colors.White, 0.15);
+        var borderColor = BlendColor(sliceColor, Colors.Black, 0.35);
+        var textColor = GetReadableTextColor(sliceColor);
+        var showCenterHole = true;
+        var showIcons = true;
+        var showLabels = true;
 
         PieCanvas.Width = canvasSize;
         PieCanvas.Height = canvasSize;
 
-        // Parse colors from settings
-        var accentColor = SystemParameters.WindowGlassColor;
-        var sliceColor = ParseColor(settings.SliceColor, accentColor);
-        if (IsDefaultColor(settings.SliceColor, DefaultSliceColorHex))
-        {
-            sliceColor = accentColor;
-        }
-
-        var hoverColor = ParseColor(settings.SliceHoverColor, BlendColor(sliceColor, Colors.White, 0.15));
-        if (IsDefaultColor(settings.SliceHoverColor, DefaultSliceHoverColorHex))
-        {
-            hoverColor = BlendColor(sliceColor, Colors.White, 0.15);
-        }
-
-        var borderColor = ParseColor(settings.SliceBorderColor, BlendColor(sliceColor, Colors.Black, 0.35));
-        if (IsDefaultColor(settings.SliceBorderColor, DefaultSliceBorderColorHex))
-        {
-            borderColor = BlendColor(sliceColor, Colors.Black, 0.35);
-        }
-        var textColor = ParseColor(settings.TextColor, GetReadableTextColor(sliceColor));
-        if (IsDefaultColor(settings.TextColor, DefaultTextColorHex))
-        {
-            textColor = GetReadableTextColor(sliceColor);
-        }
-
-        var innerRadius = settings.ShowCenterHole ? canvasRadius * settings.CenterHoleRatio : 0;
+        var innerRadius = showCenterHole ? canvasRadius * DefaultCenterHoleRatio : 0;
         var angleStep = 360.0 / Slices.Count;
 
         // Draw center hole background if enabled
-        if (settings.ShowCenterHole && innerRadius > 0)
+        if (showCenterHole && innerRadius > 0)
         {
             var centerHole = new Ellipse
             {
@@ -236,8 +214,8 @@ public partial class PieControl : UserControl
                 : canvasRadius * 0.6;
             var textPosition = GetTextPosition(center, textRadius, startAngle, endAngle);
 
-            var showIcon = settings.ShowIcons && !string.IsNullOrEmpty(sliceAction.Icon);
-            var showLabel = settings.ShowLabels;
+            var showIcon = showIcons && !string.IsNullOrEmpty(sliceAction.Icon);
+            var showLabel = showLabels;
 
             if (showIcon || showLabel)
             {
@@ -292,30 +270,6 @@ public partial class PieControl : UserControl
                 PieCanvas.Children.Add(contentPanel);
             }
         }
-    }
-
-    private static Color ParseColor(string hex, Color fallback)
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(hex))
-                return fallback;
-
-            var color = ColorConverter.ConvertFromString(hex);
-            return color is Color c ? c : fallback;
-        }
-        catch
-        {
-            return fallback;
-        }
-    }
-
-    private static bool IsDefaultColor(string hex, string defaultHex)
-    {
-        if (string.IsNullOrWhiteSpace(hex))
-            return true;
-
-        return string.Equals(hex.Trim(), defaultHex, StringComparison.OrdinalIgnoreCase);
     }
 
     private static Color BlendColor(Color from, Color to, double amount)
