@@ -17,6 +17,27 @@
         Unloaded="Window_Unloaded" WindowStyle="None"
         mc:Ignorable="d">
     <Window.Resources>
+        <Storyboard x:Key="FadeInStoryboard">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             To="1"
+                             Duration="0:0:0.250">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="FadeOutStoryboard"
+                    Completed="FadeOutStoryboard_Completed">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             To="0"
+                             Duration="0:0:0.1">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
         <ContextMenu x:Key="MainContextMenu" x:Shared="False">
             <MenuItem Header="_Settings"
                       Command="{Binding OpenSettingsWindowCommand}"
@@ -68,25 +89,6 @@
                         TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick"
                         TrayLeftMouseDown="OnTrayLeftMouseDown" />
     </Window.Resources>
-
-    <Window.Style>
-        <Style TargetType="Window">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Visibility}"
-                             Value="Visible">
-                    <DataTrigger.EnterActions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                 From="0" To="1"
-                                                 Duration="0:0:0.08" />
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </DataTrigger.EnterActions>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-    </Window.Style>
 
     <Grid>
         <local:PieControl Width="{Binding Size, Source={x:Static p:Settings.Default}}"

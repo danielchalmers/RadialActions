@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Media.Animation;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using RadialActions.Properties;
@@ -15,6 +16,10 @@ public partial class MainWindow : Window
 {
     private readonly TaskbarIcon _tray;
     private HotkeyManager _hotkeys;
+    private bool _isFadingOut;
+
+    private Storyboard FadeInStoryboard => (Storyboard)Resources["FadeInStoryboard"];
+    private Storyboard FadeOutStoryboard => (Storyboard)Resources["FadeOutStoryboard"];
 
     public MainWindow()
     {
@@ -94,7 +99,7 @@ public partial class MainWindow : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        HideMenu();
+        HideMenu(animate: false);
 
         var handle = new WindowInteropHelper(this).Handle;
         _hotkeys = new(handle);
@@ -129,20 +134,36 @@ public partial class MainWindow : Window
             this.CenterOnScreen();
         }
 
+        if (!IsVisible)
+        {
+            Opacity = 0;
+            Show();
+        }
 
-        Show();
         Activate();
+        IsHitTestVisible = true;
+        BeginFadeIn();
     }
 
-    public void HideMenu()
+    public void HideMenu(bool animate = true)
     {
-        if (Visibility != Visibility.Visible)
+        if (!IsVisible)
         {
             return;
         }
 
         Log.Information("Dismissing menu");
-        Hide();
+
+        if (!animate)
+        {
+            StopFadeAnimations();
+            _isFadingOut = false;
+            Opacity = 0;
+            Hide();
+            return;
+        }
+
+        BeginFadeOut();
     }
 
     private void OnHotkeyPressed(object sender, EventArgs e)
@@ -209,5 +230,35 @@ public partial class MainWindow : Window
             HideMenu();
             e.Handled = true;
         }
+    }
+
+    private void BeginFadeIn()
+    {
+        _isFadingOut = false;
+        FadeInStoryboard.Begin(this, HandoffBehavior.SnapshotAndReplace, true);
+    }
+
+    private void BeginFadeOut()
+    {
+        _isFadingOut = true;
+        IsHitTestVisible = false;
+        FadeOutStoryboard.Begin(this, HandoffBehavior.SnapshotAndReplace, true);
+    }
+
+    private void StopFadeAnimations()
+    {
+        FadeInStoryboard.Remove(this);
+        FadeOutStoryboard.Remove(this);
+    }
+
+    private void FadeOutStoryboard_Completed(object sender, EventArgs e)
+    {
+        if (!_isFadingOut)
+        {
+            return;
+        }
+
+        Opacity = 0;
+        Hide();
     }
 }
