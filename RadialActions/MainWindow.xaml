@@ -9,7 +9,7 @@
         Title="Radial Actions"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         AllowsTransparency="True" Background="Transparent"
-        Deactivated="Window_Deactivated" KeyDown="Window_KeyDown"
+        Deactivated="Window_Deactivated" PreviewKeyDown="Window_KeyDown"
         Loaded="Window_Loaded" Opacity="0"
         ResizeMode="NoResize" ShowInTaskbar="False"
         SizeToContent="WidthAndHeight"
@@ -84,7 +84,8 @@
                         TrayLeftMouseDown="OnTrayLeftMouseDown" />
     </Window.Resources>
 
-    <local:PieControl Width="{Binding Size, Source={x:Static p:Settings.Default}}"
+    <local:PieControl x:Name="PieMenu"
+                      Width="{Binding Size, Source={x:Static p:Settings.Default}}"
                       Height="{Binding Size, Source={x:Static p:Settings.Default}}"
                       Margin="28"
                       CenterClicked="OnCenterClicked"

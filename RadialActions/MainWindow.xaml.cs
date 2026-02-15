@@ -2,7 +2,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Input;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using RadialActions.Properties;
@@ -144,6 +146,8 @@ public partial class MainWindow : Window
         }
 
         Activate();
+        FocusMenuForKeyboardInput();
+        PieMenu.ResetInputState();
         IsHitTestVisible = true;
         BeginFadeIn();
     }
@@ -157,7 +161,7 @@ public partial class MainWindow : Window
 
         Log.Information("Dismissing menu");
 
-        if (!animate)
+        if (!animate || IsReducedMotionEnabled())
         {
             StopFadeAnimations();
             _isFadingOut = false;
@@ -226,24 +230,71 @@ public partial class MainWindow : Window
         HideMenu();
     }
 
-    private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == System.Windows.Input.Key.Escape)
+        if (e.Key == Key.Escape)
         {
             Log.Debug("Escape pressed");
             HideMenu();
             e.Handled = true;
+            return;
         }
+
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (PieMenu.HandleMenuKey(key, Keyboard.Modifiers))
+        {
+            e.Handled = true;
+        }
+    }
+
+    private void FocusMenuForKeyboardInput()
+    {
+        if (!IsVisible)
+        {
+            return;
+        }
+
+        Focus();
+        Keyboard.Focus(PieMenu);
+
+        Dispatcher.BeginInvoke(() =>
+        {
+            if (!IsVisible)
+            {
+                return;
+            }
+
+            Activate();
+            Focus();
+            Keyboard.Focus(PieMenu);
+        }, DispatcherPriority.Input);
     }
 
     private void BeginFadeIn()
     {
+        if (IsReducedMotionEnabled())
+        {
+            StopFadeAnimations();
+            _isFadingOut = false;
+            Opacity = 1;
+            return;
+        }
+
         _isFadingOut = false;
         FadeInStoryboard.Begin(this, HandoffBehavior.SnapshotAndReplace, true);
     }
 
     private void BeginFadeOut()
     {
+        if (IsReducedMotionEnabled())
+        {
+            StopFadeAnimations();
+            _isFadingOut = false;
+            Opacity = 0;
+            Hide();
+            return;
+        }
+
         _isFadingOut = true;
         IsHitTestVisible = false;
         FadeOutStoryboard.Begin(this, HandoffBehavior.SnapshotAndReplace, true);
@@ -264,5 +315,10 @@ public partial class MainWindow : Window
 
         Opacity = 0;
         Hide();
+    }
+
+    private static bool IsReducedMotionEnabled()
+    {
+        return !SystemParameters.ClientAreaAnimation;
     }
 }
