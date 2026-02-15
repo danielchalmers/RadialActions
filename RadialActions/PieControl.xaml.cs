@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
@@ -18,23 +17,8 @@ namespace RadialActions;
 public partial class PieControl : UserControl
 {
     private const double DefaultCenterHoleRatio = 0.25;
-    private const int SliceZIndex = 10;
-    private const int HoveredSliceZIndex = 14;
-    private const int ContentZIndex = 15;
-    private const int CenterZIndex = 20;
-
-    private readonly List<SliceVisual> _sliceVisuals = [];
-    private int _keyboardSelectedIndex = -1;
     private bool _themeRefreshPending;
     private bool _themeRefreshQueued;
-    private Color _sliceColor = SystemColors.ControlColor;
-    private Color _hoverColor = SystemColors.ControlLightColor;
-    private Color _pressedColor = SystemColors.ControlDarkColor;
-    private Color _borderColor = SystemColors.ControlDarkColor;
-    private Color _borderHoverColor = SystemColors.ControlDarkColor;
-    private Duration _hoverDuration = new(TimeSpan.FromMilliseconds(100));
-    private Duration _pressDuration = new(TimeSpan.FromMilliseconds(75));
-    private IEasingFunction _standardEasing = new QuadraticEase { EasingMode = EasingMode.EaseOut };
 
     public PieControl()
     {
@@ -144,86 +128,19 @@ public partial class PieControl : UserControl
         CreatePieMenu();
     }
 
-    public void ResetKeyboardSelection()
-    {
-        _keyboardSelectedIndex = -1;
-        RefreshAllSliceVisuals();
-    }
-
-    public bool MoveKeyboardSelection(int step)
-    {
-        if (_sliceVisuals.Count == 0)
-        {
-            return false;
-        }
-
-        if (step == 0)
-        {
-            return false;
-        }
-
-        var normalizedStep = step >= 0 ? 1 : -1;
-
-        if (_keyboardSelectedIndex < 0 || _keyboardSelectedIndex >= _sliceVisuals.Count)
-        {
-            _keyboardSelectedIndex = normalizedStep > 0 ? 0 : _sliceVisuals.Count - 1;
-        }
-        else
-        {
-            _keyboardSelectedIndex = (_keyboardSelectedIndex + normalizedStep + _sliceVisuals.Count) % _sliceVisuals.Count;
-        }
-
-        RefreshAllSliceVisuals();
-        return true;
-    }
-
-    public bool OpenSelectedSliceContextMenu()
-    {
-        if (_keyboardSelectedIndex < 0 || _keyboardSelectedIndex >= _sliceVisuals.Count)
-        {
-            return false;
-        }
-
-        var selectedSlice = _sliceVisuals[_keyboardSelectedIndex];
-        if (selectedSlice.ContextMenu == null)
-        {
-            return false;
-        }
-
-        selectedSlice.ContextMenu.PlacementTarget = selectedSlice.SlicePath;
-        selectedSlice.ContextMenu.Placement = PlacementMode.Center;
-        selectedSlice.ContextMenu.IsOpen = true;
-        return true;
-    }
-
-    public bool ActivateSelectedSlice()
-    {
-        if (Slices == null
-            || _keyboardSelectedIndex < 0
-            || _keyboardSelectedIndex >= Slices.Count)
-        {
-            return false;
-        }
-
-        SliceClicked?.Invoke(this, new SliceClickEventArgs(Slices[_keyboardSelectedIndex]));
-        return true;
-    }
-
     private void CreatePieMenu()
     {
+        const int sliceZIndex = 10;
+        const int hoveredSliceZIndex = 14;
+        const int contentZIndex = 15;
+        const int centerZIndex = 20;
+
         PieCanvas.Children.Clear();
-        _sliceVisuals.Clear();
         _themeRefreshPending = false;
 
         if (Slices == null || Slices.Count == 0 || ActualWidth <= 0 || ActualHeight <= 0)
         {
-            _keyboardSelectedIndex = -1;
             return;
-        }
-
-        if (_keyboardSelectedIndex >= Slices.Count)
-        {
-            _keyboardSelectedIndex = -1;
         }
 
         var canvasSize = SnapToDevicePixel(Math.Min(ActualWidth, ActualHeight), isXAxis: true);
@@ -293,14 +210,6 @@ public partial class PieControl : UserControl
 
         var borderHoverColor = BlendColor(borderColor, accentColor, 0.40);
         var centerHoverBorderColor = BlendColor(hubBorderColor, accentColor, 0.45);
-        _sliceColor = sliceColor;
-        _hoverColor = hoverColor;
-        _pressedColor = pressedColor;
-        _borderColor = borderColor;
-        _borderHoverColor = borderHoverColor;
-        _hoverDuration = hoverDuration;
-        _pressDuration = pressDuration;
-        _standardEasing = standardEasing;
 
         var innerRadius = canvasRadius * DefaultCenterHoleRatio;
         var outerRadius = Math.Max(0, canvasRadius - (sliceStrokeThickness / 2));
@@ -405,7 +314,7 @@ public partial class PieControl : UserControl
 
             Canvas.SetLeft(centerCloseTarget, SnapToDevicePixel(center.X - innerRadius, isXAxis: true));
             Canvas.SetTop(centerCloseTarget, SnapToDevicePixel(center.Y - innerRadius, isXAxis: false));
-            Panel.SetZIndex(centerCloseTarget, CenterZIndex);
+            Panel.SetZIndex(centerCloseTarget, centerZIndex);
             PieCanvas.Children.Add(centerCloseTarget);
         }
 
@@ -430,54 +339,61 @@ public partial class PieControl : UserControl
             slice.Cursor = System.Windows.Input.Cursors.Hand;
             slice.SnapsToDevicePixels = true;
 
+            var isMouseDown = false;
+
+            slice.MouseLeftButtonDown += (_, e) =>
+            {
+                isMouseDown = true;
+                AnimateSliceColor(fillBrush, pressedColor, pressDuration, standardEasing);
+                AnimateSliceColor(strokeBrush, borderHoverColor, pressDuration, standardEasing);
+                AnimateSliceClickDown(slice, pressDuration, standardEasing);
+                e.Handled = true;
+            };
+
+            slice.MouseLeftButtonUp += (_, e) =>
+            {
+                if (!isMouseDown)
+                {
+                    return;
+                }
+
+                isMouseDown = false;
+                AnimateSliceClickUp(slice, pressDuration, standardEasing);
+                AnimateSliceColor(fillBrush, slice.IsMouseOver ? hoverColor : sliceColor, hoverDuration, standardEasing);
+                AnimateSliceColor(strokeBrush, slice.IsMouseOver ? borderHoverColor : borderColor, hoverDuration, standardEasing);
+                SliceClicked?.Invoke(this, new SliceClickEventArgs(sliceAction));
+                e.Handled = true;
+            };
+
+            slice.MouseEnter += (_, _) =>
+            {
+                Panel.SetZIndex(slice, hoveredSliceZIndex);
+                AnimateSliceColor(fillBrush, hoverColor, hoverDuration, standardEasing);
+                AnimateSliceColor(strokeBrush, borderHoverColor, hoverDuration, standardEasing);
+            };
+
+            slice.MouseLeave += (_, _) =>
+            {
+                Panel.SetZIndex(slice, sliceZIndex);
+                AnimateSliceColor(fillBrush, sliceColor, hoverDuration, standardEasing);
+                AnimateSliceColor(strokeBrush, borderColor, hoverDuration, standardEasing);
+
+                if (!isMouseDown)
+                {
+                    return;
+                }
+
+                isMouseDown = false;
+                AnimateSliceClickUp(slice, pressDuration, standardEasing);
+            };
+
             var contextMenu = new ContextMenu();
             var editMenuItem = new MenuItem { Header = "Edit..." };
             editMenuItem.Click += (_, _) => SliceEditRequested?.Invoke(this, new SliceClickEventArgs(sliceAction));
             contextMenu.Items.Add(editMenuItem);
             slice.ContextMenu = contextMenu;
 
-            var sliceVisual = new SliceVisual(slice, fillBrush, strokeBrush, contextMenu);
-            _sliceVisuals.Add(sliceVisual);
-
-            slice.MouseLeftButtonDown += (_, e) =>
-            {
-                sliceVisual.IsMousePressed = true;
-                AnimateSliceClickDown(sliceVisual.SlicePath, _pressDuration, _standardEasing);
-                RefreshAllSliceVisuals();
-                e.Handled = true;
-            };
-
-            slice.MouseLeftButtonUp += (_, e) =>
-            {
-                if (!sliceVisual.IsMousePressed)
-                {
-                    return;
-                }
-
-                sliceVisual.IsMousePressed = false;
-                AnimateSliceClickUp(sliceVisual.SlicePath, _pressDuration, _standardEasing);
-                RefreshAllSliceVisuals();
-                SliceClicked?.Invoke(this, new SliceClickEventArgs(sliceAction));
-                e.Handled = true;
-            };
-
-            slice.MouseEnter += (_, _) => RefreshAllSliceVisuals();
-
-            slice.MouseLeave += (_, _) =>
-            {
-                RefreshAllSliceVisuals();
-
-                if (!sliceVisual.IsMousePressed)
-                {
-                    return;
-                }
-
-                sliceVisual.IsMousePressed = false;
-                AnimateSliceClickUp(sliceVisual.SlicePath, _pressDuration, _standardEasing);
-                RefreshAllSliceVisuals();
-            };
-
-            Panel.SetZIndex(slice, SliceZIndex);
+            Panel.SetZIndex(slice, sliceZIndex);
             PieCanvas.Children.Add(slice);
 
             var textRadius = innerRadius > 0 ? (outerRadius + innerRadius) / 2 : outerRadius * 0.6;
@@ -541,11 +457,9 @@ public partial class PieControl : UserControl
             Canvas.SetLeft(contentPanel, SnapToDevicePixel(textPosition.X - (contentSize.Width / 2), isXAxis: true));
             Canvas.SetTop(contentPanel, SnapToDevicePixel(textPosition.Y - (contentSize.Height / 2), isXAxis: false));
 
-            Panel.SetZIndex(contentPanel, ContentZIndex);
+            Panel.SetZIndex(contentPanel, contentZIndex);
             PieCanvas.Children.Add(contentPanel);
         }
-
-        RefreshAllSliceVisuals();
     }
 
     private void AddSurfaceRing(
@@ -711,61 +625,6 @@ public partial class PieControl : UserControl
 
             CreatePieMenu();
         }, DispatcherPriority.Background);
-    }
-
-    private void RefreshAllSliceVisuals()
-    {
-        var hoveredIndex = GetHoveredSliceIndex();
-
-        for (var i = 0; i < _sliceVisuals.Count; i++)
-        {
-            RefreshSliceVisual(i, hoveredIndex);
-        }
-    }
-
-    private int GetHoveredSliceIndex()
-    {
-        for (var i = 0; i < _sliceVisuals.Count; i++)
-        {
-            if (_sliceVisuals[i].SlicePath.IsMouseOver)
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    private void RefreshSliceVisual(int index, int hoveredIndex)
-    {
-        if (index < 0 || index >= _sliceVisuals.Count)
-        {
-            return;
-        }
-
-        var visual = _sliceVisuals[index];
-        if (visual.IsMousePressed)
-        {
-            Panel.SetZIndex(visual.SlicePath, HoveredSliceZIndex);
-            AnimateSliceColor(visual.FillBrush, _pressedColor, _pressDuration, _standardEasing);
-            AnimateSliceColor(visual.StrokeBrush, _borderHoverColor, _pressDuration, _standardEasing);
-            return;
-        }
-
-        var isHovered = index == hoveredIndex;
-        var isKeyboardSelected = hoveredIndex == -1 && index == _keyboardSelectedIndex;
-        if (isHovered || isKeyboardSelected)
-        {
-            Panel.SetZIndex(visual.SlicePath, HoveredSliceZIndex);
-            AnimateSliceColor(visual.FillBrush, _hoverColor, _hoverDuration, _standardEasing);
-            AnimateSliceColor(visual.StrokeBrush, _borderHoverColor, _hoverDuration, _standardEasing);
-        }
-        else
-        {
-            Panel.SetZIndex(visual.SlicePath, SliceZIndex);
-            AnimateSliceColor(visual.FillBrush, _sliceColor, _hoverDuration, _standardEasing);
-            AnimateSliceColor(visual.StrokeBrush, _borderColor, _hoverDuration, _standardEasing);
-        }
     }
 
     private void AnimateSliceColor(
@@ -1038,23 +897,6 @@ public partial class PieControl : UserControl
         var g = ChannelToLinear(color.G);
         var b = ChannelToLinear(color.B);
         return (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
-    }
-
-    private sealed class SliceVisual
-    {
-        public SliceVisual(Path slicePath, SolidColorBrush fillBrush, SolidColorBrush strokeBrush, ContextMenu contextMenu)
-        {
-            SlicePath = slicePath;
-            FillBrush = fillBrush;
-            StrokeBrush = strokeBrush;
-            ContextMenu = contextMenu;
-        }
-
-        public Path SlicePath { get; }
-        public SolidColorBrush FillBrush { get; }
-        public SolidColorBrush StrokeBrush { get; }
-        public ContextMenu ContextMenu { get; }
-        public bool IsMousePressed { get; set; }
     }
 
     /// <summary>

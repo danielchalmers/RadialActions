@@ -2,7 +2,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
-using System.Windows.Input;
 using System.Windows.Media.Animation;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
@@ -145,7 +144,6 @@ public partial class MainWindow : Window
         }
 
         Activate();
-        PieMenuControl.ResetKeyboardSelection();
         IsHitTestVisible = true;
         BeginFadeIn();
     }
@@ -228,53 +226,12 @@ public partial class MainWindow : Window
         HideMenu();
     }
 
-    private void Window_KeyDown(object sender, KeyEventArgs e)
+    private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
-        if (e.Key == Key.Escape)
+        if (e.Key == System.Windows.Input.Key.Escape)
         {
             Log.Debug("Escape pressed");
             HideMenu();
-            e.Handled = true;
-            return;
-        }
-
-        if (e.Key is Key.Right or Key.Down)
-        {
-            if (PieMenuControl.MoveKeyboardSelection(+1))
-            {
-                e.Handled = true;
-            }
-
-            return;
-        }
-
-        if (e.Key is Key.Left or Key.Up)
-        {
-            if (PieMenuControl.MoveKeyboardSelection(-1))
-            {
-                e.Handled = true;
-            }
-
-            return;
-        }
-
-        var modifiers = Keyboard.Modifiers;
-        var isMenuKey = e.Key == Key.Apps;
-        var isShiftF10 = e.Key == Key.F10 && modifiers == ModifierKeys.Shift;
-        if (isMenuKey || isShiftF10)
-        {
-            if (PieMenuControl.OpenSelectedSliceContextMenu())
-            {
-                e.Handled = true;
-            }
-
-            return;
-        }
-
-        if (modifiers == ModifierKeys.None
-            && e.Key is Key.Enter or Key.Return or Key.Space
-            && PieMenuControl.ActivateSelectedSlice())
-        {
             e.Handled = true;
         }
     }

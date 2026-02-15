@@ -84,8 +84,7 @@
                         TrayLeftMouseDown="OnTrayLeftMouseDown" />
     </Window.Resources>
 
-    <local:PieControl x:Name="PieMenuControl"
-                      Width="{Binding Size, Source={x:Static p:Settings.Default}}"
+    <local:PieControl Width="{Binding Size, Source={x:Static p:Settings.Default}}"
                       Height="{Binding Size, Source={x:Static p:Settings.Default}}"
                       Margin="28"
                       CenterClicked="OnCenterClicked"
