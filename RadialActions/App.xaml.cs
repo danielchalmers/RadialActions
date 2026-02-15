@@ -1,9 +1,8 @@
 ﻿using System.Diagnostics;
-using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
 
 namespace RadialActions;
@@ -11,7 +10,8 @@ namespace RadialActions;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application, INotifyPropertyChanged
+[INotifyPropertyChanged]
+public partial class App : Application
 {
     /// <summary>
     /// The main executable file of the application.
@@ -19,27 +19,16 @@ public partial class App : Application, INotifyPropertyChanged
     public static FileInfo MainFileInfo { get; } = new(Environment.ProcessPath);
     public static App CurrentApp => (App)Current;
 
+    [ObservableProperty]
     private Version _latestVersion;
-    private bool _isUpdateAvailable;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    [ObservableProperty]
+    private bool _isUpdateAvailable;
 
     public Version CurrentVersion { get; } =
         Version.TryParse(FileVersionInfo.GetVersionInfo(MainFileInfo.FullName)?.FileVersion, out var parsedVersion)
             ? parsedVersion
             : null;
-
-    public Version LatestVersion
-    {
-        get => _latestVersion;
-        set => SetProperty(ref _latestVersion, value);
-    }
-
-    public bool IsUpdateAvailable
-    {
-        get => _isUpdateAvailable;
-        set => SetProperty(ref _isUpdateAvailable, value);
-    }
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -53,17 +42,6 @@ public partial class App : Application, INotifyPropertyChanged
 
         Log.Information($"Starting Radial Actions {FileVersionInfo.GetVersionInfo(MainFileInfo.FullName).FileVersion}");
         Log.Information($"Runtime: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture}");
-    }
-
-    private void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value))
-        {
-            return;
-        }
-
-        field = value;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     /// <summary>
