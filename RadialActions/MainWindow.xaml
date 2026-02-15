@@ -85,8 +85,10 @@
     </Window.Resources>
 
     <local:PieControl Width="{Binding Size, Source={x:Static p:Settings.Default}}"
-                        Height="{Binding Size, Source={x:Static p:Settings.Default}}"
-                        CenterClicked="OnCenterClicked"
-                        SliceClicked="OnSliceClicked" SliceEditRequested="OnSliceEditRequested"
-                        Slices="{Binding Actions, Source={x:Static p:Settings.Default}}" />
+                      Height="{Binding Size, Source={x:Static p:Settings.Default}}"
+                      Margin="28"
+                      CenterClicked="OnCenterClicked"
+                      SliceClicked="OnSliceClicked"
+                      SliceEditRequested="OnSliceEditRequested"
+                      Slices="{Binding Actions, Source={x:Static p:Settings.Default}}" />
 </Window>

@@ -105,11 +105,12 @@
 
     <!-- Effects -->
     <DropShadowEffect x:Key="RadialMenuAmbientShadowEffect"
-                      BlurRadius="24"
+                      BlurRadius="20"
                       Color="{StaticResource RadialMenuShadowColor}"
                       Direction="270"
-                      Opacity="0.30"
-                      ShadowDepth="3" />
+                      Opacity="0.24"
+                      RenderingBias="Quality"
+                      ShadowDepth="0" />
 
     <!-- Reusable styles -->
     <Style x:Key="RadialMenuSlicePathStyle"
