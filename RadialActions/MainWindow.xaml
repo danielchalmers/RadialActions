@@ -12,28 +12,24 @@
         Deactivated="Window_Deactivated" KeyDown="Window_KeyDown"
         Loaded="Window_Loaded" Opacity="0"
         ResizeMode="NoResize" ShowInTaskbar="False"
-        SizeToContent="WidthAndHeight" SnapsToDevicePixels="True"
+        SizeToContent="WidthAndHeight"
         Topmost="True" Unloaded="Window_Unloaded"
         WindowStyle="None"
         mc:Ignorable="d">
     <Window.Resources>
         <Storyboard x:Key="FadeInStoryboard">
             <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             To="1" Duration="0:0:0.250">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
+                             Duration="{StaticResource RadialMenuFadeInDuration}"
+                             EasingFunction="{StaticResource RadialMenuEaseOut}"
+                             To="1" />
         </Storyboard>
 
         <Storyboard x:Key="FadeOutStoryboard"
                     Completed="FadeOutStoryboard_Completed">
             <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             To="0" Duration="0:0:0.1">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseIn" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
+                             Duration="{StaticResource RadialMenuFadeOutDuration}"
+                             EasingFunction="{StaticResource RadialMenuEaseIn}"
+                             To="0" />
         </Storyboard>
 
         <ContextMenu x:Key="MainContextMenu" x:Shared="False">
@@ -88,11 +84,11 @@
                         TrayLeftMouseDown="OnTrayLeftMouseDown" />
     </Window.Resources>
 
-    <Grid>
-        <local:PieControl Width="{Binding Size, Source={x:Static p:Settings.Default}}"
-                          Height="{Binding Size, Source={x:Static p:Settings.Default}}"
-                          CenterClicked="OnCenterClicked"
-                          SliceClicked="OnSliceClicked" SliceEditRequested="OnSliceEditRequested"
-                          Slices="{Binding Actions, Source={x:Static p:Settings.Default}}" />
-    </Grid>
+    <local:PieControl Width="{Binding Size, Source={x:Static p:Settings.Default}}"
+                      Height="{Binding Size, Source={x:Static p:Settings.Default}}"
+                      Margin="28"
+                      CenterClicked="OnCenterClicked"
+                      SliceClicked="OnSliceClicked"
+                      SliceEditRequested="OnSliceEditRequested"
+                      Slices="{Binding Actions, Source={x:Static p:Settings.Default}}" />
 </Window>
