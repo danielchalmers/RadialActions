@@ -203,7 +203,7 @@ public partial class PieControl : UserControl
             };
 
             var contextMenu = new ContextMenu();
-            var editMenuItem = new MenuItem { Header = "Edit action..." };
+            var editMenuItem = new MenuItem { Header = "Edit..." };
             editMenuItem.Click += (s, e) => SliceEditRequested?.Invoke(this, new SliceClickEventArgs(sliceAction));
             contextMenu.Items.Add(editMenuItem);
             slice.ContextMenu = contextMenu;
