@@ -387,42 +387,73 @@ public partial class PieControl : UserControl
                 TextHoverColor: highlightText);
         }
 
-        var isDark = IsDarkTheme();
-        var accent = NormalizeAccentColor(SystemParameters.WindowGlassColor, isDark);
+        var windowBackground = GetThemeColor(
+            Color.FromRgb(32, 32, 36),
+            "WindowBackgroundBrush",
+            "SolidBackgroundFillColorBaseBrush",
+            "SolidBackgroundFillColorBase",
+            SystemColors.WindowBrushKey);
 
-        var menuBackdropInner = isDark ? Color.FromArgb(126, 28, 28, 32) : Color.FromArgb(166, 255, 255, 255);
-        var menuBackdropOuter = isDark ? Color.FromArgb(84, 12, 12, 14) : Color.FromArgb(100, 245, 247, 250);
-        var menuBackdropBorder = isDark ? Color.FromArgb(112, 255, 255, 255) : Color.FromArgb(62, 16, 24, 38);
+        var layerColor = GetThemeColor(
+            BlendColor(windowBackground, Colors.White, 0.08),
+            "LayerFillColorDefaultBrush",
+            "CardBackgroundFillColorDefaultBrush",
+            "ControlFillColorDefaultBrush");
 
-        var sliceFill = isDark ? Color.FromArgb(214, 42, 42, 47) : Color.FromArgb(228, 250, 250, 252);
-        var sliceFillHover = isDark
-            ? BlendColor(sliceFill, Colors.White, 0.10)
-            : BlendColor(sliceFill, Colors.Black, 0.06);
-        var sliceFillPressed = isDark
-            ? BlendColor(sliceFill, Colors.White, 0.18)
-            : BlendColor(sliceFill, Colors.Black, 0.11);
+        var layerAltColor = GetThemeColor(
+            layerColor,
+            "LayerFillColorAltBrush",
+            "CardBackgroundFillColorSecondaryBrush",
+            "ControlFillColorSecondaryBrush");
 
-        var sliceBorder = isDark ? Color.FromArgb(122, 255, 255, 255) : Color.FromArgb(70, 18, 26, 40);
-        var sliceBorderHover = WithAlpha(accent, isDark ? (byte)184 : (byte)146);
+        var strokeColor = GetThemeColor(
+            Color.FromRgb(122, 122, 122),
+            "CardStrokeColorDefaultBrush",
+            "ControlStrokeColorDefaultBrush",
+            "SurfaceStrokeColorDefaultBrush");
 
-        var centerFill = isDark ? Color.FromArgb(228, 33, 33, 38) : Color.FromArgb(238, 253, 253, 255);
-        var centerStroke = WithAlpha(accent, isDark ? (byte)168 : (byte)126);
+        var textPrimary = GetThemeColor(
+            Color.FromRgb(240, 240, 240),
+            "TextFillColorPrimaryBrush",
+            SystemColors.ControlTextBrushKey);
+
+        var accentResourceColor = GetThemeColor(
+            SystemParameters.WindowGlassColor,
+            "AccentTextFillColorPrimaryBrush",
+            "AccentFillColorDefaultBrush");
+
+        var isDark = IsDarkColor(windowBackground);
+        var accent = NormalizeAccentColor(accentResourceColor, isDark);
+
+        var menuBackdropInner = WithAlpha(BlendColor(windowBackground, layerColor, 0.35), isDark ? (byte)188 : (byte)176);
+        var menuBackdropOuter = WithAlpha(BlendColor(windowBackground, layerAltColor, 0.10), isDark ? (byte)112 : (byte)96);
+        var menuBackdropBorder = WithAlpha(strokeColor, isDark ? (byte)132 : (byte)92);
+
+        var sliceFill = WithAlpha(layerColor, isDark ? (byte)222 : (byte)232);
+        var sliceFillHover = BlendColor(sliceFill, accent, isDark ? 0.16 : 0.10);
+        var sliceFillPressed = BlendColor(sliceFill, accent, isDark ? 0.24 : 0.16);
+
+        var sliceBorder = WithAlpha(strokeColor, isDark ? (byte)160 : (byte)120);
+        var sliceBorderHover = WithAlpha(accent, isDark ? (byte)210 : (byte)182);
+
+        var centerFill = WithAlpha(BlendColor(windowBackground, layerAltColor, 0.45), isDark ? (byte)236 : (byte)242);
+        var centerStroke = WithAlpha(strokeColor, isDark ? (byte)176 : (byte)132);
 
         var iconColor = EnsureContrast(accent, sliceFill, 3.0, shouldLighten: isDark);
         var iconHover = EnsureContrast(
-            BlendColor(accent, isDark ? Colors.White : Colors.Black, isDark ? 0.22 : 0.18),
+            BlendColor(accent, textPrimary, isDark ? 0.22 : 0.18),
             sliceFillHover,
             3.5,
             shouldLighten: isDark);
 
         var textColor = EnsureContrast(
-            BlendColor(accent, isDark ? Colors.White : Colors.Black, isDark ? 0.30 : 0.24),
+            BlendColor(accent, textPrimary, 0.52),
             sliceFill,
             3.2,
             shouldLighten: isDark);
 
         var textHover = EnsureContrast(
-            BlendColor(accent, isDark ? Colors.White : Colors.Black, isDark ? 0.16 : 0.16),
+            BlendColor(accent, textPrimary, 0.36),
             sliceFillHover,
             3.6,
             shouldLighten: isDark);
@@ -464,24 +495,17 @@ public partial class PieControl : UserControl
         return GetRelativeLuminance(color) < 0.45;
     }
 
-    private static bool IsDarkTheme()
+    private static Color GetThemeColor(Color fallback, params object[] keys)
     {
-        if (TryGetThemeColor(SystemColors.WindowBrushKey, out var systemWindowColor))
+        foreach (var key in keys)
         {
-            return IsDarkColor(systemWindowColor);
+            if (TryGetThemeColor(key, out var color))
+            {
+                return color;
+            }
         }
 
-        if (TryGetThemeColor("WindowBackgroundBrush", out var windowBackgroundColor))
-        {
-            return IsDarkColor(windowBackgroundColor);
-        }
-
-        if (TryGetThemeColor("ControlFillColorDefaultBrush", out var controlFillColor))
-        {
-            return IsDarkColor(controlFillColor);
-        }
-
-        return IsDarkColor(SystemColors.WindowColor);
+        return fallback;
     }
 
     private static bool TryGetThemeColor(object key, out Color color)
