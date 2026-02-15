@@ -127,9 +127,6 @@ public partial class PieControl : UserControl
         PieCanvas.Height = canvasSize;
 
         var isHighContrast = SystemParameters.HighContrast;
-        var showCenterHole = true;
-        var showIcons = true;
-        var showLabels = true;
 
         var sliceStrokeThickness = Math.Max(1, GetDoubleResource("RadialMenuSliceStrokeThickness", 1.5));
         var hubStrokeThickness = Math.Max(1, GetDoubleResource("RadialMenuHubStrokeThickness", 1.5));
@@ -141,6 +138,11 @@ public partial class PieControl : UserControl
         var standardEasing = GetEasingResource(
             "RadialMenuEaseStandard",
             new QuadraticEase { EasingMode = EasingMode.EaseOut });
+        var slicePathStyle = TryFindResource("RadialMenuSlicePathStyle") as Style;
+        var hubEllipseStyle = TryFindResource("RadialMenuHubEllipseStyle") as Style;
+        var hubContainerStyle = TryFindResource("RadialMenuHubContainerStyle") as Style;
+        var iconTextStyle = TryFindResource("RadialMenuIconTextStyle") as Style;
+        var labelTextStyle = TryFindResource("RadialMenuLabelTextStyle") as Style;
 
         var accentColor = GetBrushResource("RadialMenuSliceAccentBrush", SystemParameters.WindowGlassColor).Color;
         var surfaceColor = GetBrushResource("RadialMenuSurfaceBrush", SystemColors.ControlColor).Color;
@@ -180,21 +182,21 @@ public partial class PieControl : UserControl
         var borderHoverColor = BlendColor(borderColor, accentColor, 0.40);
         var centerHoverBorderColor = BlendColor(hubBorderColor, accentColor, 0.45);
 
-        var innerRadius = showCenterHole ? canvasRadius * DefaultCenterHoleRatio : 0;
+        var innerRadius = canvasRadius * DefaultCenterHoleRatio;
         var outerRadius = Math.Max(0, canvasRadius - (sliceStrokeThickness / 2));
 
         AddSurfaceRing(center, outerRadius, innerRadius, surfaceColor, surfaceBorderColor, sliceStrokeThickness, isHighContrast);
 
         var angleStep = 360.0 / Slices.Count;
 
-        if (showCenterHole && innerRadius > 0)
+        if (innerRadius > 0)
         {
             var centerFillBrush = new SolidColorBrush(hubColor);
             var centerStrokeBrush = new SolidColorBrush(hubBorderColor);
-            var hubStyle = TryFindResource("PieHubEllipseStyle") as Style;
 
             var centerHole = new Ellipse
             {
+                Style = hubEllipseStyle,
                 Width = innerRadius * 2,
                 Height = innerRadius * 2,
                 Fill = centerFillBrush,
@@ -204,17 +206,9 @@ public partial class PieControl : UserControl
                 SnapsToDevicePixels = true,
             };
 
-            if (hubStyle != null)
-            {
-                centerHole.Style = hubStyle;
-                centerHole.Fill = centerFillBrush;
-                centerHole.Stroke = centerStrokeBrush;
-                centerHole.StrokeThickness = hubStrokeThickness;
-            }
-
-            var iconStyle = TryFindResource("PieIconTextStyle") as Style;
             var centerCloseIcon = new TextBlock
             {
+                Style = iconTextStyle,
                 Text = "\uE8BB",
                 FontFamily = new FontFamily("Segoe MDL2 Assets"),
                 Foreground = new SolidColorBrush(iconTextColor),
@@ -225,28 +219,13 @@ public partial class PieControl : UserControl
                 IsHitTestVisible = false,
             };
 
-            if (iconStyle != null)
-            {
-                centerCloseIcon.Style = iconStyle;
-                centerCloseIcon.FontFamily = new FontFamily("Segoe MDL2 Assets");
-                centerCloseIcon.Foreground = new SolidColorBrush(iconTextColor);
-                centerCloseIcon.FontSize = Math.Max(innerRadius * 0.40, 11);
-                centerCloseIcon.Margin = new Thickness(0, -1, 0, 0);
-                centerCloseIcon.Opacity = 0;
-                centerCloseIcon.Visibility = Visibility.Collapsed;
-            }
-
             var centerCloseTarget = new Grid
             {
+                Style = hubContainerStyle,
                 Width = innerRadius * 2,
                 Height = innerRadius * 2,
                 Cursor = System.Windows.Input.Cursors.Hand,
             };
-
-            if (TryFindResource("PieHubContainerStyle") is Style hubContainerStyle)
-            {
-                centerCloseTarget.Style = hubContainerStyle;
-            }
 
             centerCloseTarget.Children.Add(centerHole);
             centerCloseTarget.Children.Add(centerCloseIcon);
@@ -317,9 +296,9 @@ public partial class PieControl : UserControl
             var endAngle = startAngle + angleStep;
 
             var slice = CreateSlice(center, outerRadius, innerRadius, startAngle, endAngle);
-            if (TryFindResource("PieSlicePathStyle") is Style pathStyle)
+            if (slicePathStyle != null)
             {
-                slice.Style = pathStyle;
+                slice.Style = slicePathStyle;
             }
 
             var fillBrush = new SolidColorBrush(sliceColor);
@@ -389,10 +368,8 @@ public partial class PieControl : UserControl
             var textRadius = innerRadius > 0 ? (outerRadius + innerRadius) / 2 : outerRadius * 0.6;
             var textPosition = GetTextPosition(center, textRadius, startAngle, endAngle);
 
-            var showIcon = showIcons && !string.IsNullOrEmpty(sliceAction.Icon);
-            var showLabel = showLabels;
-
-            if (!showIcon && !showLabel)
+            var showIcon = !string.IsNullOrEmpty(sliceAction.Icon);
+            if (!showIcon && string.IsNullOrWhiteSpace(sliceAction.Name))
             {
                 continue;
             }
@@ -415,27 +392,21 @@ public partial class PieControl : UserControl
             {
                 var iconText = new TextBlock
                 {
+                    Style = iconTextStyle,
                     Text = sliceAction.Icon,
                     Foreground = new SolidColorBrush(iconTextColor),
-                    FontSize = showLabel ? 20 : 27,
-                    Margin = showLabel ? new Thickness(0, 0, 0, iconToLabelSpacing) : new Thickness(0),
+                    FontSize = 20,
+                    Margin = new Thickness(0, 0, 0, iconToLabelSpacing),
                 };
-
-                if (TryFindResource("PieIconTextStyle") is Style iconStyle)
-                {
-                    iconText.Style = iconStyle;
-                    iconText.Foreground = new SolidColorBrush(iconTextColor);
-                    iconText.FontSize = showLabel ? 20 : 27;
-                    iconText.Margin = showLabel ? new Thickness(0, 0, 0, iconToLabelSpacing) : new Thickness(0);
-                }
 
                 contentPanel.Children.Add(iconText);
             }
 
-            if (showLabel)
+            if (!string.IsNullOrWhiteSpace(sliceAction.Name))
             {
                 var text = new TextBlock
                 {
+                    Style = labelTextStyle,
                     Text = sliceAction.Name,
                     Foreground = new SolidColorBrush(labelTextColor),
                     FontSize = 11,
@@ -445,13 +416,6 @@ public partial class PieControl : UserControl
                     TextTrimming = TextTrimming.CharacterEllipsis,
                     MaxWidth = Math.Max(56, outerRadius * contentMaxWidthRatio),
                 };
-
-                if (TryFindResource("PieLabelTextStyle") is Style labelStyle)
-                {
-                    text.Style = labelStyle;
-                    text.Foreground = new SolidColorBrush(labelTextColor);
-                    text.MaxWidth = Math.Max(56, outerRadius * contentMaxWidthRatio);
-                }
 
                 contentPanel.Children.Add(text);
             }
@@ -545,11 +509,6 @@ public partial class PieControl : UserControl
         if (value is Color color)
         {
             return new SolidColorBrush(color);
-        }
-
-        if (value is Brush brush && brush is SolidColorBrush solid)
-        {
-            return solid;
         }
 
         return new SolidColorBrush(fallbackColor);

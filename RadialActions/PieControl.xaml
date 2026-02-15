@@ -8,36 +8,6 @@
              SnapsToDevicePixels="True"
              UseLayoutRounding="True"
              mc:Ignorable="d">
-    <UserControl.Resources>
-        <Style x:Key="PieSlicePathStyle"
-               BasedOn="{StaticResource RadialMenuSlicePathStyle}"
-               TargetType="{x:Type Path}" />
-
-        <Style x:Key="PieHubContainerStyle"
-               BasedOn="{StaticResource RadialMenuHubContainerStyle}"
-               TargetType="{x:Type Grid}" />
-
-        <Style x:Key="PieIconTextStyle"
-               BasedOn="{StaticResource RadialMenuIconTextStyle}"
-               TargetType="{x:Type TextBlock}" />
-
-        <Style x:Key="PieLabelTextStyle"
-               BasedOn="{StaticResource RadialMenuLabelTextStyle}"
-               TargetType="{x:Type TextBlock}" />
-
-        <Style x:Key="PieHubEllipseStyle"
-               TargetType="{x:Type Ellipse}">
-            <Setter Property="Fill"
-                    Value="{DynamicResource RadialMenuHubFillBrush}" />
-            <Setter Property="Stroke"
-                    Value="{DynamicResource RadialMenuHubBorderBrush}" />
-            <Setter Property="StrokeThickness"
-                    Value="{DynamicResource RadialMenuHubStrokeThickness}" />
-            <Setter Property="SnapsToDevicePixels"
-                    Value="True" />
-        </Style>
-    </UserControl.Resources>
-
     <Canvas Name="PieCanvas"
             ClipToBounds="False"
             RenderOptions.EdgeMode="Aliased"

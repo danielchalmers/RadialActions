@@ -84,21 +84,12 @@
     <SolidColorBrush x:Key="RadialMenuTextBrush.Dark"
                      Color="#FFE6ECF8" />
 
-    <SolidColorBrush x:Key="RadialMenuSubtleTextBrush"
-                     Color="#FF5A6475" />
-    <SolidColorBrush x:Key="RadialMenuSubtleTextBrush.Light"
-                     Color="#FF5A6475" />
-    <SolidColorBrush x:Key="RadialMenuSubtleTextBrush.Dark"
-                     Color="#FFB1BCCE" />
-
     <!-- Geometry and spacing -->
     <sys:Double x:Key="RadialMenuSliceStrokeThickness">1.5</sys:Double>
     <sys:Double x:Key="RadialMenuHubStrokeThickness">1.5</sys:Double>
     <sys:Double x:Key="RadialMenuSliceContentMaxWidthRatio">0.38</sys:Double>
     <sys:Double x:Key="RadialMenuIconToLabelSpacing">3</sys:Double>
     <Thickness x:Key="RadialMenuSliceContentPadding">2,2,2,2</Thickness>
-    <CornerRadius x:Key="RadialMenuCornerRadiusSmall">8</CornerRadius>
-    <CornerRadius x:Key="RadialMenuCornerRadiusMedium">14</CornerRadius>
 
     <!-- Motion -->
     <Duration x:Key="RadialMenuFadeInDuration">0:0:0.22</Duration>
@@ -144,6 +135,18 @@
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
         <Setter Property="UseLayoutRounding"
+                Value="True" />
+    </Style>
+
+    <Style x:Key="RadialMenuHubEllipseStyle"
+           TargetType="{x:Type Ellipse}">
+        <Setter Property="Fill"
+                Value="{DynamicResource RadialMenuHubFillBrush}" />
+        <Setter Property="Stroke"
+                Value="{DynamicResource RadialMenuHubBorderBrush}" />
+        <Setter Property="StrokeThickness"
+                Value="{DynamicResource RadialMenuHubStrokeThickness}" />
+        <Setter Property="SnapsToDevicePixels"
                 Value="True" />
     </Style>
 
