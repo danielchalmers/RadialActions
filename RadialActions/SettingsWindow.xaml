@@ -55,8 +55,11 @@
         <Border Grid.Row="0"
                 Margin="12,12,12,0"
                 Padding="14,10"
+                Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"
+                BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"
                 CornerRadius="10"
                 BorderThickness="1"
+                TextElement.Foreground="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"
                 Visibility="{Binding IsUpdateAvailable, Source={x:Static local:App.CurrentApp}, Converter={local:BooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -134,12 +137,8 @@
                                           IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
                                 <TextBlock Text="Starts the app minimized to tray when you log in."
                                            Style="{StaticResource DescriptionTextBlock}" />
-                            </StackPanel>
-                        </GroupBox>
-
-                        <GroupBox Header="Updates">
-                            <StackPanel Margin="8">
-                                <CheckBox Content="Automatically check for updates"
+                                <CheckBox Margin="0,8,0,0"
+                                          Content="Check for updates"
                                           IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
                                 <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
                                            Style="{StaticResource DescriptionTextBlock}" />
