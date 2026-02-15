@@ -633,6 +633,13 @@ public partial class PieControl : UserControl
         Duration duration,
         IEasingFunction easingFunction)
     {
+        if (IsReducedMotionEnabled())
+        {
+            brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
+            brush.Color = toColor;
+            return;
+        }
+
         var colorAnimation = new ColorAnimation
         {
             To = toColor,
@@ -650,6 +657,14 @@ public partial class PieControl : UserControl
         IEasingFunction easingFunction,
         Action onCompleted = null)
     {
+        if (IsReducedMotionEnabled())
+        {
+            element.BeginAnimation(UIElement.OpacityProperty, null);
+            element.Opacity = toOpacity;
+            onCompleted?.Invoke();
+            return;
+        }
+
         var opacityAnimation = new DoubleAnimation
         {
             To = toOpacity,
@@ -674,6 +689,15 @@ public partial class PieControl : UserControl
             target.RenderTransformOrigin = new Point(0.5, 0.5);
         }
 
+        if (IsReducedMotionEnabled())
+        {
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+            scaleTransform.ScaleX = 0.95;
+            scaleTransform.ScaleY = 0.95;
+            return;
+        }
+
         var scaleAnimation = new DoubleAnimation
         {
             To = 0.95,
@@ -693,6 +717,15 @@ public partial class PieControl : UserControl
             return;
         }
 
+        if (IsReducedMotionEnabled())
+        {
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+            scaleTransform.ScaleX = 1;
+            scaleTransform.ScaleY = 1;
+            return;
+        }
+
         var scaleAnimation = new DoubleAnimation
         {
             To = 1,
@@ -702,6 +735,11 @@ public partial class PieControl : UserControl
 
         scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
         scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
+    }
+
+    private static bool IsReducedMotionEnabled()
+    {
+        return !SystemParameters.ClientAreaAnimation;
     }
 
     private Point GetTextPosition(Point center, double radius, double startAngle, double endAngle)

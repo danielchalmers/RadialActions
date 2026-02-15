@@ -157,7 +157,7 @@ public partial class MainWindow : Window
 
         Log.Information("Dismissing menu");
 
-        if (!animate)
+        if (!animate || IsReducedMotionEnabled())
         {
             StopFadeAnimations();
             _isFadingOut = false;
@@ -238,12 +238,29 @@ public partial class MainWindow : Window
 
     private void BeginFadeIn()
     {
+        if (IsReducedMotionEnabled())
+        {
+            StopFadeAnimations();
+            _isFadingOut = false;
+            Opacity = 1;
+            return;
+        }
+
         _isFadingOut = false;
         FadeInStoryboard.Begin(this, HandoffBehavior.SnapshotAndReplace, true);
     }
 
     private void BeginFadeOut()
     {
+        if (IsReducedMotionEnabled())
+        {
+            StopFadeAnimations();
+            _isFadingOut = false;
+            Opacity = 0;
+            Hide();
+            return;
+        }
+
         _isFadingOut = true;
         IsHitTestVisible = false;
         FadeOutStoryboard.Begin(this, HandoffBehavior.SnapshotAndReplace, true);
@@ -264,5 +281,10 @@ public partial class MainWindow : Window
 
         Opacity = 0;
         Hide();
+    }
+
+    private static bool IsReducedMotionEnabled()
+    {
+        return !SystemParameters.ClientAreaAnimation;
     }
 }
