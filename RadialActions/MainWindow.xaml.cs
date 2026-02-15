@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private readonly TrayService _trayService;
     private readonly HotkeyService _hotkeyService = new();
     private readonly MenuService _menuService;
+    private readonly UpdateCheckService _updateCheckService = UpdateCheckService.Instance;
 
     public MainWindow()
     {
@@ -31,6 +32,8 @@ public partial class MainWindow : Window
             PieMenu,
             (System.Windows.Media.Animation.Storyboard)Resources["FadeInStoryboard"],
             (System.Windows.Media.Animation.Storyboard)Resources["FadeOutStoryboard"]);
+
+        _ = RunStartupUpdateCheckAsync();
     }
 
     /// <summary>
@@ -235,5 +238,26 @@ public partial class MainWindow : Window
     private void FadeOutStoryboard_Completed(object sender, EventArgs e)
     {
         _menuService.OnFadeOutCompleted();
+    }
+
+    private async Task RunStartupUpdateCheckAsync()
+    {
+        try
+        {
+            var result = await _updateCheckService.CheckOnceAsync(Settings.Default.CheckForUpdatesOnStartup);
+            if (!result.IsUpdateAvailable)
+            {
+                return;
+            }
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                _trayService.ShowUpdateAvailableNotification(result.LatestVersion);
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Startup update check failed");
+        }
     }
 }

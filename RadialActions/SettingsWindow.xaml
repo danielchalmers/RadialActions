@@ -11,6 +11,8 @@
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
         <Style x:Key="LabelTextBlock"
                TargetType="TextBlock"
                BasedOn="{StaticResource {x:Type TextBlock}}">
@@ -47,7 +49,56 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <TabControl Padding="12,12,12,0"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Margin="12,12,12,0"
+                Padding="14,10"
+                CornerRadius="10"
+                BorderBrush="#FF7AB58C"
+                BorderThickness="1"
+                Visibility="{Binding IsUpdateBannerVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FFF5FFF8" Offset="0" />
+                    <GradientStop Color="#FFEAF7EF" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="18"
+                           VerticalAlignment="Top"
+                           Text="&#xE896;" />
+                <StackPanel Grid.Column="2">
+                    <TextBlock FontWeight="SemiBold"
+                               FontSize="13"
+                               TextWrapping="Wrap">
+                        <Run Text="Update available: " />
+                        <Run Text="{Binding UpdateBannerVersionLabel}" />
+                    </TextBlock>
+                    <TextBlock Margin="0,2,0,0"
+                               TextWrapping="Wrap">
+                        A newer version of Radial Actions is ready.
+                        <Hyperlink NavigateUri="{Binding UpdateReleaseUrl}"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            Open GitHub Releases
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TabControl Grid.Row="1"
+                    Padding="12,12,12,0"
                     SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
             <TabItem Header="_General">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -85,11 +136,21 @@
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Header="Startup">
+                        <GroupBox Header="Startup"
+                                  Margin="0,0,0,12">
                             <StackPanel Margin="8">
                                 <CheckBox Content="Run on Windows startup"
                                           IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
                                 <TextBlock Text="Starts the app minimized to tray when you log in."
+                                           Style="{StaticResource DescriptionTextBlock}" />
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Updates">
+                            <StackPanel Margin="8">
+                                <CheckBox Content="Check GitHub for updates at startup"
+                                          IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
+                                <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
                                            Style="{StaticResource DescriptionTextBlock}" />
                             </StackPanel>
                         </GroupBox>

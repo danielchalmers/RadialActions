@@ -26,7 +26,7 @@ public partial class SettingsWindow : Window
         InitializeComponent();
         _viewModel = new SettingsWindowViewModel(Settings.Default);
         DataContext = _viewModel;
-        Closed += (s, e) => SaveSettings();
+        Closed += OnClosed;
     }
 
     public void SelectAction(PieAction action)
@@ -91,12 +91,17 @@ public partial class SettingsWindow : Window
             or Key.LWin or Key.RWin;
     }
 
+    private void OnClosed(object sender, EventArgs e)
+    {
+        _viewModel.Dispose();
+        SaveSettings();
+    }
 }
 
 /// <summary>
 /// ViewModel for the settings window.
 /// </summary>
-public partial class SettingsWindowViewModel : ObservableObject
+public partial class SettingsWindowViewModel : ObservableObject, IDisposable
 {
     public const string CustomKeyActionId = "__custom__";
     private const string LegacyDefaultIcon = "⭐";
@@ -106,6 +111,7 @@ public partial class SettingsWindowViewModel : ObservableObject
 
     private readonly Dictionary<PieAction, KeyActionDefinition> _autoKeyDefaults = [];
     private readonly Dictionary<PieAction, ShellDefaults> _autoShellDefaults = [];
+    private readonly UpdateCheckService _updateCheckService = UpdateCheckService.Instance;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedAction))]
@@ -138,16 +144,25 @@ public partial class SettingsWindowViewModel : ObservableObject
     /// Whether an action is currently selected.
     /// </summary>
     public bool HasSelectedAction => SelectedAction != null;
+    public bool IsUpdateBannerVisible => _updateCheckService.CachedResult.IsUpdateAvailable;
+    public string UpdateBannerVersionLabel => _updateCheckService.CachedResult.LatestVersion;
+    public string UpdateReleaseUrl => _updateCheckService.CachedResult.ReleaseUrl;
 
     public SettingsWindowViewModel(Settings settings)
     {
         Settings = settings;
+        _updateCheckService.CheckCompleted += OnUpdateCheckCompleted;
         TrackExistingDefaults();
         if (Settings.Actions.Count > 0)
         {
             SelectedActionIndex = 0;
             SelectedAction = Settings.Actions[0];
         }
+    }
+
+    public void Dispose()
+    {
+        _updateCheckService.CheckCompleted -= OnUpdateCheckCompleted;
     }
 
     public void SelectAction(PieAction action)
@@ -392,6 +407,24 @@ public partial class SettingsWindowViewModel : ObservableObject
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+    }
+
+    private void OnUpdateCheckCompleted(UpdateCheckResult _)
+    {
+        if (!Application.Current.Dispatcher.CheckAccess())
+        {
+            Application.Current.Dispatcher.InvokeAsync(RaiseUpdateBannerProperties);
+            return;
+        }
+
+        RaiseUpdateBannerProperties();
+    }
+
+    private void RaiseUpdateBannerProperties()
+    {
+        OnPropertyChanged(nameof(IsUpdateBannerVisible));
+        OnPropertyChanged(nameof(UpdateBannerVersionLabel));
+        OnPropertyChanged(nameof(UpdateReleaseUrl));
     }
 
 
