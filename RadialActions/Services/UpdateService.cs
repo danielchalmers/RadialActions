@@ -5,10 +5,9 @@ using Newtonsoft.Json;
 
 namespace RadialActions;
 
-public static class UpdateService
+public static partial class UpdateService
 {
     private const string GitHubReleasesApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases";
-    private static readonly Regex VersionPattern = new(@"\d+(?:\.\d+){0,3}", RegexOptions.Compiled);
     private static readonly HttpClient HttpClient = CreateHttpClient();
 
     public static async Task<Version> GetLatestVersion()
@@ -110,7 +109,7 @@ public static class UpdateService
             normalized = normalized[1..];
         }
 
-        var match = VersionPattern.Match(normalized);
+        var match = VersionPattern().Match(normalized);
         return match.Success && Version.TryParse(match.Value, out var parsedVersion)
             ? parsedVersion
             : null;
@@ -130,4 +129,7 @@ public static class UpdateService
         [JsonProperty("draft")]
         public bool Draft { get; init; }
     }
+
+    [GeneratedRegex(@"\d+(?:\.\d+){0,3}", RegexOptions.Compiled)]
+    private static partial Regex VersionPattern();
 }
