@@ -171,6 +171,16 @@
                                 <DataTemplate>
                                     <StackPanel Margin="0"
                                                 Orientation="Horizontal">
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsEnabled}"
+                                                                 Value="False">
+                                                        <Setter Property="Opacity" Value="0.45" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
                                         <TextBlock Text="{Binding Icon}"
                                                    Width="22"
                                                    FontSize="14" />
@@ -232,34 +242,44 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0"
+                                       Text="Enabled:"
+                                       Margin="0,0,8,8" VerticalAlignment="Center"
+                                       FontWeight="SemiBold" />
+                            <CheckBox Grid.Row="0" Grid.Column="1"
+                                      Content="Use this action"
+                                      IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}"
+                                      Margin="0,0,0,8" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0"
                                        Text="Name:"
                                        Margin="0,0,8,4" VerticalAlignment="Center"
                                        FontWeight="SemiBold" />
-                            <TextBox Grid.Row="0" Grid.Column="1"
+                            <TextBox Grid.Row="1" Grid.Column="1"
                                      Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,0,4" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0"
+                            <TextBlock Grid.Row="2" Grid.Column="0"
                                        Text="Icon:"
                                        Margin="0,0,8,4" VerticalAlignment="Center"
                                        FontWeight="SemiBold" />
-                            <TextBox Grid.Row="1" Grid.Column="1"
+                            <TextBox Grid.Row="2" Grid.Column="1"
                                      Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,0,4" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0"
+                            <TextBlock Grid.Row="3" Grid.Column="0"
                                        Text="Type:"
                                        Margin="0,0,8,4" VerticalAlignment="Center"
                                        FontWeight="SemiBold" />
-                            <ComboBox Grid.Row="2" Grid.Column="1"
+                            <ComboBox Grid.Row="3" Grid.Column="1"
                                       Margin="0,0,0,4"
                                       ItemsSource="{Binding ActionTypes}"
                                       SelectedItem="{Binding SelectedActionType, Mode=TwoWay}" />
 
-                            <Grid Grid.Row="3" Grid.ColumnSpan="2"
+                            <Grid Grid.Row="4" Grid.ColumnSpan="2"
                                   Margin="0,8,0,0"
                                   Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
                                 <Grid.ColumnDefinitions>
@@ -304,7 +324,7 @@
                                          Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
                             </Grid>
 
-                            <Grid Grid.Row="4" Grid.ColumnSpan="2"
+                            <Grid Grid.Row="5" Grid.ColumnSpan="2"
                                   Margin="0,8,0,0"
                                   Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Shell}}">
                                 <Grid.ColumnDefinitions>

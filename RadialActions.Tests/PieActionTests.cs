@@ -8,6 +8,7 @@ public class PieActionTests
         var action = PieAction.CreateKeyAction("not-a-real-id");
 
         Assert.Equal(ActionType.Key, action.Type);
+        Assert.True(action.IsEnabled);
         Assert.Equal(PieAction.KeyActions[0].Id, action.Parameter);
         Assert.Equal(PieAction.KeyActions[0].Name, action.Name);
         Assert.Equal(PieAction.KeyActions[0].Icon, action.Icon);
@@ -19,6 +20,7 @@ public class PieActionTests
         var action = PieAction.CreateShellAction("Docs", "https://example.com", "*", "--foo", "C:\\");
 
         Assert.Equal(ActionType.Shell, action.Type);
+        Assert.True(action.IsEnabled);
         Assert.Equal("Docs", action.Name);
         Assert.Equal("*", action.Icon);
         Assert.Equal("https://example.com", action.Parameter);
