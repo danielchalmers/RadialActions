@@ -53,6 +53,9 @@ public partial class MainWindow : Window
 
         switch (e.PropertyName)
         {
+            case nameof(Settings.RunOnStartup):
+                App.SetRunOnStartup(Settings.Default.RunOnStartup);
+                break;
             case nameof(Settings.ActivationHotkey):
                 SetHotkey();
                 break;
@@ -190,11 +193,6 @@ public partial class MainWindow : Window
     {
         Log.Debug("Tray icon left double clicked");
         OpenSettingsWindow(1);
-    }
-
-    private void Window_Closing(object sender, CancelEventArgs e)
-    {
-        App.SetRunOnStartup(Settings.Default.RunOnStartup);
     }
 
     private void OnSliceClicked(object sender, SliceClickEventArgs e)
