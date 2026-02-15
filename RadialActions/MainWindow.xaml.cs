@@ -243,22 +243,31 @@ public partial class MainWindow : Window
     {
         if (!Settings.Default.CheckForUpdatesOnStartup)
         {
+            Log.Debug("Startup update check skipped because {SettingName} is disabled", nameof(Settings.CheckForUpdatesOnStartup));
             return;
         }
 
         try
         {
             var app = App.CurrentApp;
+            Log.Information("Checking for updates on startup. Current version: {CurrentVersion}", app.CurrentVersion);
             app.LatestVersion = await UpdateService.GetLatestVersion();
             app.IsUpdateAvailable = UpdateService.IsUpdateAvailable(app.CurrentVersion, app.LatestVersion);
+            Log.Information(
+                "Startup update check completed. Current version: {CurrentVersion}, Latest version: {LatestVersion}, Update available: {IsUpdateAvailable}",
+                app.CurrentVersion,
+                app.LatestVersion,
+                app.IsUpdateAvailable);
 
             if (!app.IsUpdateAvailable || app.LatestVersion == null)
             {
+                Log.Debug("No startup update notification will be shown");
                 return;
             }
 
             await Dispatcher.InvokeAsync(() =>
             {
+                Log.Information("Showing update available tray notification for version {LatestVersion}", app.LatestVersion);
                 _trayService.ShowUpdateAvailableNotification(app.LatestVersion);
             });
         }
