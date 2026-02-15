@@ -58,7 +58,7 @@
                 CornerRadius="10"
                 BorderBrush="#FF7AB58C"
                 BorderThickness="1"
-                Visibility="{Binding IsUpdateAvailable, Source={x:Static local:UpdateService.Instance}, Converter={local:BoolToVisibilityConverter}}">
+                Visibility="{Binding IsUpdateAvailable, Source={x:Static local:App.CurrentApp}, Converter={local:BooleanToVisibilityConverter}}">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                     <GradientStop Color="#FFF5FFF8" Offset="0" />
@@ -81,7 +81,7 @@
                                FontSize="13"
                                TextWrapping="Wrap">
                         <Run Text="Update available: " />
-                        <Run Text="{Binding LatestVersion, Source={x:Static local:UpdateService.Instance}}" />
+                        <Run Text="{Binding LatestVersion, Source={x:Static local:App.CurrentApp}}" />
                     </TextBlock>
                     <TextBlock Margin="0,2,0,0"
                                TextWrapping="Wrap">

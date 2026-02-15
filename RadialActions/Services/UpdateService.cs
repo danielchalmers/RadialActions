@@ -1,28 +1,17 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
-using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
 
 namespace RadialActions;
 
-public sealed partial class UpdateService : ObservableObject
+public static class UpdateService
 {
     private const string GitHubReleasesApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases";
     private static readonly Regex VersionPattern = new(@"\d+(?:\.\d+){0,3}", RegexOptions.Compiled);
     private static readonly HttpClient HttpClient = CreateHttpClient();
 
-    [ObservableProperty]
-    private bool? _isUpdateAvailable;
-
-    [ObservableProperty]
-    private Version _latestVersion;
-
-    private UpdateService() { }
-
-    public static UpdateService Instance { get; } = new();
-
-    public async Task CheckAsync(Version currentVersion)
+    public static async Task<UpdateCheckResult> CheckAsync(Version currentVersion)
     {
         try
         {
@@ -30,52 +19,72 @@ public sealed partial class UpdateService : ObservableObject
             if (!response.IsSuccessStatusCode)
             {
                 Log.Warning("Update check failed with status code {StatusCode}", response.StatusCode);
-                IsUpdateAvailable = null;
-                return;
+                return UpdateCheckResult.None;
             }
 
             var payload = await response.Content.ReadAsStringAsync();
-            var releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(payload);
-            if (releases == null || releases.Count == 0)
+            if (!TryGetLatestReleaseVersion(payload, out var latestVersion, out var hadReleases))
             {
-                Log.Warning("Update check returned no releases");
-                IsUpdateAvailable = null;
-                return;
-            }
-
-            var newestRelease = releases
-                .Where(r => !r.Draft)
-                .Select(r => new
+                if (!hadReleases)
                 {
-                    Release = r,
-                    ParsedVersion = TryParseVersion(r.TagName) ?? TryParseVersion(r.Name),
-                })
-                .Where(r => r.ParsedVersion != null)
-                .OrderByDescending(r => r.ParsedVersion)
-                .FirstOrDefault();
+                    Log.Warning("Update check returned no releases");
+                }
+                else
+                {
+                    Log.Warning("Update check did not find any parseable release versions");
+                }
 
-            if (newestRelease == null)
-            {
-                Log.Warning("Update check did not find any parseable release versions");
-                IsUpdateAvailable = null;
-                return;
+                return UpdateCheckResult.None;
             }
 
-            LatestVersion = newestRelease.ParsedVersion;
-
-            if (currentVersion == null)
-            {
-                IsUpdateAvailable = null;
-                return;
-            }
-
-            IsUpdateAvailable = newestRelease.ParsedVersion > currentVersion;
+            return new UpdateCheckResult(
+                latestVersion,
+                CalculateIsUpdateAvailable(currentVersion, latestVersion));
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Failed to check for updates");
-            IsUpdateAvailable = null;
+            return UpdateCheckResult.None;
         }
+    }
+
+    public static bool CalculateIsUpdateAvailable(Version currentVersion, Version latestVersion)
+    {
+        if (currentVersion == null || latestVersion == null)
+        {
+            return false;
+        }
+
+        return latestVersion > currentVersion;
+    }
+
+    internal static bool TryGetLatestReleaseVersion(string payload, out Version latestVersion, out bool hadReleases)
+    {
+        latestVersion = null;
+        hadReleases = false;
+
+        var releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(payload);
+        if (releases == null || releases.Count == 0)
+        {
+            return false;
+        }
+
+        hadReleases = true;
+
+        var newestRelease = releases
+            .Where(r => !r.Draft)
+            .Select(r => TryParseVersion(r.TagName) ?? TryParseVersion(r.Name))
+            .Where(v => v != null)
+            .OrderByDescending(v => v)
+            .FirstOrDefault();
+
+        if (newestRelease == null)
+        {
+            return false;
+        }
+
+        latestVersion = newestRelease;
+        return true;
     }
 
     private static HttpClient CreateHttpClient()
@@ -90,7 +99,7 @@ public sealed partial class UpdateService : ObservableObject
         return client;
     }
 
-    private static Version TryParseVersion(string value)
+    internal static Version TryParseVersion(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -123,4 +132,9 @@ public sealed partial class UpdateService : ObservableObject
         [JsonProperty("draft")]
         public bool Draft { get; init; }
     }
+}
+
+public readonly record struct UpdateCheckResult(Version LatestVersion, bool IsUpdateAvailable)
+{
+    public static UpdateCheckResult None { get; } = new(null, false);
 }

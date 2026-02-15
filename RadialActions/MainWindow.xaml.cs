@@ -248,16 +248,20 @@ public partial class MainWindow : Window
 
         try
         {
-            var version = Version.TryParse(System.Diagnostics.FileVersionInfo.GetVersionInfo(App.MainFileInfo.FullName)?.FileVersion, out var v) ? v : null; // todo: move this to a property on App.xaml.cs
-            await UpdateService.Instance.CheckAsync(version);
-            if (UpdateService.Instance.IsUpdateAvailable != true || UpdateService.Instance.LatestVersion == null)
+            var app = App.CurrentApp;
+            var updateCheckResult = await UpdateService.CheckAsync(app.CurrentVersion);
+
+            app.LatestVersion = updateCheckResult.LatestVersion;
+            app.IsUpdateAvailable = updateCheckResult.IsUpdateAvailable;
+
+            if (!app.IsUpdateAvailable || app.LatestVersion == null)
             {
                 return;
             }
 
             await Dispatcher.InvokeAsync(() =>
             {
-                _trayService.ShowUpdateAvailableNotification(UpdateService.Instance.LatestVersion);
+                _trayService.ShowUpdateAvailableNotification(app.LatestVersion);
             });
         }
         catch (Exception ex)
