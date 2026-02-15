@@ -18,7 +18,7 @@ public partial class MainWindow : Window
     private readonly TrayService _trayService;
     private readonly HotkeyService _hotkeyService = new();
     private readonly MenuService _menuService;
-    private readonly UpdateCheckService _updateCheckService = UpdateCheckService.Instance;
+    private readonly UpdateService _updateCheckService = UpdateService.Instance;
 
     public MainWindow()
     {

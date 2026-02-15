@@ -111,7 +111,7 @@ public partial class SettingsWindowViewModel : ObservableObject, IDisposable
 
     private readonly Dictionary<PieAction, KeyActionDefinition> _autoKeyDefaults = [];
     private readonly Dictionary<PieAction, ShellDefaults> _autoShellDefaults = [];
-    private readonly UpdateCheckService _updateCheckService = UpdateCheckService.Instance;
+    private readonly UpdateService _updateCheckService = UpdateService.Instance;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedAction))]

@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
+using System.Net.Http;
 using Newtonsoft.Json.Linq;
 
 namespace RadialActions;
 
-internal sealed class UpdateCheckService
+internal sealed class UpdateService
 {
     public const string ReleasesPageUrl = "https://github.com/danielchalmers/RadialActions/releases";
     private const string ReleasesApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases?per_page=32";
@@ -13,7 +14,7 @@ internal sealed class UpdateCheckService
     private bool _hasChecked;
     private UpdateCheckResult _cachedResult = UpdateCheckResult.NotChecked;
 
-    public static UpdateCheckService Instance { get; } = new();
+    public static UpdateService Instance { get; } = new();
 
     public event Action<UpdateCheckResult> CheckCompleted;
 
@@ -118,7 +119,7 @@ internal readonly record struct UpdateCheckResult(
     string LatestVersion,
     string ReleaseUrl)
 {
-    public static UpdateCheckResult NotChecked { get; } = new(true, false, string.Empty, UpdateCheckService.ReleasesPageUrl);
-    public static UpdateCheckResult Disabled { get; } = new(false, false, string.Empty, UpdateCheckService.ReleasesPageUrl);
-    public static UpdateCheckResult NoUpdate { get; } = new(true, false, string.Empty, UpdateCheckService.ReleasesPageUrl);
+    public static UpdateCheckResult NotChecked { get; } = new(true, false, string.Empty, UpdateService.ReleasesPageUrl);
+    public static UpdateCheckResult Disabled { get; } = new(false, false, string.Empty, UpdateService.ReleasesPageUrl);
+    public static UpdateCheckResult NoUpdate { get; } = new(true, false, string.Empty, UpdateService.ReleasesPageUrl);
 }
