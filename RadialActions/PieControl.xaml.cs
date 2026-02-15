@@ -132,6 +132,12 @@ public partial class PieControl : UserControl
         var centerHoleColor = isHighContrast
             ? SystemColors.ControlColor
             : BlendColor(sliceColor, borderTarget, 0.2);
+        var centerHoleHoverColor = isHighContrast
+            ? SystemColors.HighlightColor
+            : BlendColor(centerHoleColor, hoverTarget, 0.2);
+        var centerHoleHoverBorderColor = isHighContrast
+            ? SystemColors.HighlightTextColor
+            : BlendColor(borderColor, borderTarget, 0.35);
 
         if (isHighContrast && hoverColor == sliceColor)
         {
@@ -147,22 +153,98 @@ public partial class PieControl : UserControl
         var innerRadius = showCenterHole ? canvasRadius * DefaultCenterHoleRatio : 0;
         var angleStep = 360.0 / Slices.Count;
 
-        // Draw center hole background if enabled
+        // Draw interactive center close target.
         if (showCenterHole && innerRadius > 0)
         {
+            var centerFillBrush = new SolidColorBrush(centerHoleColor);
+            var centerStrokeBrush = new SolidColorBrush(borderColor);
             var centerHole = new Ellipse
             {
                 Width = innerRadius * 2,
                 Height = innerRadius * 2,
-                Fill = new SolidColorBrush(centerHoleColor),
-                Stroke = new SolidColorBrush(borderColor),
+                Fill = centerFillBrush,
+                Stroke = centerStrokeBrush,
                 StrokeThickness = 2,
+                Cursor = System.Windows.Input.Cursors.Hand
+            };
+
+            var centerCloseIcon = new TextBlock
+            {
+                Text = "\uE8BB",
+                FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                Foreground = new SolidColorBrush(iconAndTextColor),
+                FontSize = Math.Max(innerRadius * 0.42, 11),
+                FontWeight = FontWeights.Normal,
+                TextAlignment = TextAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, -1, 0, 0),
+                Opacity = 0,
+                Visibility = Visibility.Collapsed,
                 IsHitTestVisible = false
             };
-            Canvas.SetLeft(centerHole, center.X - innerRadius);
-            Canvas.SetTop(centerHole, center.Y - innerRadius);
-            Panel.SetZIndex(centerHole, 10);
-            PieCanvas.Children.Add(centerHole);
+
+            var centerCloseTarget = new Grid
+            {
+                Width = innerRadius * 2,
+                Height = innerRadius * 2,
+                Cursor = System.Windows.Input.Cursors.Hand
+            };
+
+            centerCloseTarget.Children.Add(centerHole);
+            centerCloseTarget.Children.Add(centerCloseIcon);
+
+            var isCenterMouseDown = false;
+
+            centerCloseTarget.MouseEnter += (s, e) =>
+            {
+                AnimateSliceColor(centerFillBrush, centerHoleHoverColor, 0.08);
+                AnimateSliceColor(centerStrokeBrush, centerHoleHoverBorderColor, 0.08);
+                centerCloseIcon.Visibility = Visibility.Visible;
+                AnimateOpacity(centerCloseIcon, 1, 0.08);
+            };
+
+            centerCloseTarget.MouseLeave += (s, e) =>
+            {
+                AnimateSliceColor(centerFillBrush, centerHoleColor, 0.1);
+                AnimateSliceColor(centerStrokeBrush, borderColor, 0.1);
+                AnimateOpacity(centerCloseIcon, 0, 0.08, () =>
+                {
+                    if (!centerCloseTarget.IsMouseOver)
+                    {
+                        centerCloseIcon.Visibility = Visibility.Collapsed;
+                    }
+                });
+
+                if (isCenterMouseDown)
+                {
+                    isCenterMouseDown = false;
+                    AnimateSliceClickUp(centerCloseTarget);
+                }
+            };
+
+            centerCloseTarget.MouseLeftButtonDown += (s, e) =>
+            {
+                isCenterMouseDown = true;
+                AnimateSliceClickDown(centerCloseTarget);
+                e.Handled = true;
+            };
+
+            centerCloseTarget.MouseLeftButtonUp += (s, e) =>
+            {
+                if (isCenterMouseDown)
+                {
+                    isCenterMouseDown = false;
+                    AnimateSliceClickUp(centerCloseTarget);
+                    CenterClicked?.Invoke(this, EventArgs.Empty);
+                    e.Handled = true;
+                }
+            };
+
+            Canvas.SetLeft(centerCloseTarget, center.X - innerRadius);
+            Canvas.SetTop(centerCloseTarget, center.Y - innerRadius);
+            Panel.SetZIndex(centerCloseTarget, 10);
+            PieCanvas.Children.Add(centerCloseTarget);
         }
 
         for (var i = 0; i < Slices.Count; i++)
@@ -182,7 +264,6 @@ public partial class PieControl : UserControl
             slice.Cursor = System.Windows.Input.Cursors.Hand;
 
             var isMouseDown = false;
-            var sliceIndex = i;
 
             // Add mouse-down animation
             slice.MouseLeftButtonDown += (s, e) =>
@@ -393,11 +474,31 @@ public partial class PieControl : UserControl
         brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
     }
 
-    private void AnimateSliceClickDown(Path slice)
+    private void AnimateOpacity(UIElement element, double toOpacity, double durationInSeconds, Action? onCompleted = null)
     {
-        var scaleTransform = new ScaleTransform(1, 1);
-        slice.RenderTransform = scaleTransform;
-        slice.RenderTransformOrigin = new Point(0.5, 0.5);
+        var opacityAnimation = new DoubleAnimation
+        {
+            To = toOpacity,
+            Duration = TimeSpan.FromSeconds(durationInSeconds),
+            EasingFunction = new QuadraticEase()
+        };
+
+        if (onCompleted != null)
+        {
+            opacityAnimation.Completed += (s, e) => onCompleted();
+        }
+
+        element.BeginAnimation(UIElement.OpacityProperty, opacityAnimation);
+    }
+
+    private void AnimateSliceClickDown(UIElement target)
+    {
+        if (target.RenderTransform is not ScaleTransform scaleTransform)
+        {
+            scaleTransform = new ScaleTransform(1, 1);
+            target.RenderTransform = scaleTransform;
+            target.RenderTransformOrigin = new Point(0.5, 0.5);
+        }
 
         var scaleAnimation = new DoubleAnimation
         {
@@ -411,9 +512,9 @@ public partial class PieControl : UserControl
         scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation);
     }
 
-    private void AnimateSliceClickUp(Path slice)
+    private void AnimateSliceClickUp(UIElement target)
     {
-        if (slice.RenderTransform is not ScaleTransform scaleTransform)
+        if (target.RenderTransform is not ScaleTransform scaleTransform)
             return;
 
         var scaleAnimation = new DoubleAnimation
@@ -496,6 +597,11 @@ public partial class PieControl : UserControl
     /// Occurs when a slice is clicked.
     /// </summary>
     public event EventHandler<SliceClickEventArgs> SliceClicked;
+
+    /// <summary>
+    /// Occurs when the center close target is clicked.
+    /// </summary>
+    public event EventHandler CenterClicked;
 
     /// <summary>
     /// Occurs when a slice edit is requested from the context menu.

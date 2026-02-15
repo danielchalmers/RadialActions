@@ -205,6 +205,12 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnCenterClicked(object sender, EventArgs e)
+    {
+        Log.Debug("Center close target clicked");
+        HideMenu();
+    }
+
     private void OnSliceEditRequested(object sender, SliceClickEventArgs e)
     {
         Log.Debug($"Slice edit requested: {e.Slice.Name}");
