@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -187,6 +188,16 @@ public partial class MainWindow : Window
     {
         Log.Debug("Center close target clicked");
         _menuService.HideMenu();
+    }
+
+    private void OnCenterContextMenuRequested(object sender, EventArgs e)
+    {
+        Log.Debug("Center close target right clicked");
+        var contextMenu = (ContextMenu)Resources["MainContextMenu"];
+        contextMenu.DataContext = this;
+        contextMenu.PlacementTarget = PieMenu;
+        contextMenu.Placement = PlacementMode.MousePoint;
+        contextMenu.IsOpen = true;
     }
 
     private void OnSliceEditRequested(object sender, SliceClickEventArgs e)

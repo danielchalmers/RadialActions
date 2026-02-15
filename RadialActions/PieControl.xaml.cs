@@ -446,6 +446,13 @@ public partial class PieControl : UserControl
                 e.Handled = true;
             };
 
+            centerElements.Target.MouseRightButtonUp += (_, e) =>
+            {
+                EnterMouseInteractionMode(refreshVisualState: false, animate: false);
+                CenterContextMenuRequested?.Invoke(this, EventArgs.Empty);
+                e.Handled = true;
+            };
+
             Canvas.SetLeft(centerElements.Target, SnapToDevicePixel(center.X - innerRadius, isXAxis: true));
             Canvas.SetTop(centerElements.Target, SnapToDevicePixel(center.Y - innerRadius, isXAxis: false));
             Panel.SetZIndex(centerElements.Target, centerZIndex);
@@ -923,6 +930,11 @@ public partial class PieControl : UserControl
     /// Occurs when a slice edit is requested from the context menu.
     /// </summary>
     public event EventHandler<SliceClickEventArgs> SliceEditRequested;
+
+    /// <summary>
+    /// Occurs when the center target requests the main context menu.
+    /// </summary>
+    public event EventHandler CenterContextMenuRequested;
 }
 
 /// <summary>
