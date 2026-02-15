@@ -8,7 +8,7 @@
         Title="Settings"
         Width="1200" Height="800"
         d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
-        ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
     <Window.Resources>
         <Style x:Key="LabelTextBlock"
