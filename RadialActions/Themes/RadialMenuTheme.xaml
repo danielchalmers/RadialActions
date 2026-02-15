@@ -47,13 +47,6 @@
     <SolidColorBrush x:Key="RadialMenuSliceBorderBrush.Dark"
                      Color="#FF464C58" />
 
-    <SolidColorBrush x:Key="RadialMenuSliceAccentBrush"
-                     Color="#FF0A69C7" />
-    <SolidColorBrush x:Key="RadialMenuSliceAccentBrush.Light"
-                     Color="#FF0A69C7" />
-    <SolidColorBrush x:Key="RadialMenuSliceAccentBrush.Dark"
-                     Color="#FF7CB2FF" />
-
     <!-- Hub -->
     <SolidColorBrush x:Key="RadialMenuHubFillBrush"
                      Color="#FFF6F7F9" />

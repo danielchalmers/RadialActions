@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Interop;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.Input;
@@ -28,32 +28,39 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = this;
 
-        Settings.Default.PropertyChanged += Settings_PropertyChanged;
+        Settings.Default.PropertyChanged += OnSettingsPropertyChanged;
 
-        // Construct the tray from the resources defined.
-        _tray = Resources["TrayIcon"] as TaskbarIcon;
-        _tray.ContextMenu = Resources["MainContextMenu"] as ContextMenu;
-        _tray.ContextMenu.DataContext = this;
+        _tray = (TaskbarIcon)Resources["TrayIcon"];
+        var trayContextMenu = (ContextMenu)Resources["MainContextMenu"];
+        trayContextMenu.DataContext = this;
+        _tray.ContextMenu = trayContextMenu;
         _tray.ToolTipText = "Radial Actions";
         _tray.ForceCreate(enablesEfficiencyMode: false);
-        _tray.ShowNotification("Radial Actions", "Press " + Settings.Default.ActivationHotkey + " to open the menu");
+        _tray.ShowNotification("Radial Actions", $"Press {Settings.Default.ActivationHotkey} to open the menu");
         Log.Debug("Created tray icon");
     }
 
     /// <summary>
     /// Handles setting changes.
     /// </summary>
-    private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    private async void OnSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
         if (!Dispatcher.CheckAccess())
         {
-            Dispatcher.Invoke(() => Settings_PropertyChanged(sender, e));
+            await Dispatcher.InvokeAsync(
+                () => ApplySettingChange(e.PropertyName),
+                DispatcherPriority.Normal);
             return;
         }
 
-        Log.Debug($"Setting changed <{e.PropertyName}>");
+        ApplySettingChange(e.PropertyName);
+    }
 
-        switch (e.PropertyName)
+    private void ApplySettingChange(string propertyName)
+    {
+        Log.Debug("Setting changed <{PropertyName}>", propertyName);
+
+        switch (propertyName)
         {
             case nameof(Settings.RunOnStartup):
                 App.SetRunOnStartup(Settings.Default.RunOnStartup);
@@ -94,11 +101,17 @@ public partial class MainWindow : Window
 
     private void SetHotkey()
     {
+        if (_hotkeys is null)
+        {
+            return;
+        }
+
         var hotkey = Settings.Default.ActivationHotkey;
-        _hotkeys?.UnregisterAll();
+        _hotkeys.UnregisterAll();
+
         if (!string.IsNullOrWhiteSpace(hotkey))
         {
-            _hotkeys?.RegisterHotkey(hotkey);
+            _hotkeys.RegisterHotkey(hotkey);
         }
     }
 
@@ -118,8 +131,14 @@ public partial class MainWindow : Window
 
     private void Window_Unloaded(object sender, RoutedEventArgs e)
     {
-        Settings.Default.PropertyChanged -= Settings_PropertyChanged;
-        _hotkeys?.Dispose();
+        Settings.Default.PropertyChanged -= OnSettingsPropertyChanged;
+
+        if (_hotkeys is not null)
+        {
+            _hotkeys.HotkeyPressed -= OnHotkeyPressed;
+            _hotkeys.Dispose();
+            _hotkeys = null;
+        }
     }
 
     /// <summary>
@@ -154,7 +173,7 @@ public partial class MainWindow : Window
 
     public void HideMenu(bool animate = true)
     {
-        if (!IsVisible)
+        if (!IsVisible || _isFadingOut)
         {
             return;
         }
@@ -163,10 +182,7 @@ public partial class MainWindow : Window
 
         if (!animate || IsReducedMotionEnabled())
         {
-            StopFadeAnimations();
-            _isFadingOut = false;
-            Opacity = 0;
-            Hide();
+            HideMenuImmediately();
             return;
         }
 
@@ -247,7 +263,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void FocusMenuForKeyboardInput()
+    private async void FocusMenuForKeyboardInput()
     {
         if (!IsVisible)
         {
@@ -257,7 +273,7 @@ public partial class MainWindow : Window
         Focus();
         Keyboard.Focus(PieMenu);
 
-        Dispatcher.BeginInvoke(() =>
+        await Dispatcher.InvokeAsync(() =>
         {
             if (!IsVisible)
             {
@@ -272,9 +288,10 @@ public partial class MainWindow : Window
 
     private void BeginFadeIn()
     {
+        StopFadeAnimations();
+
         if (IsReducedMotionEnabled())
         {
-            StopFadeAnimations();
             _isFadingOut = false;
             Opacity = 1;
             return;
@@ -286,12 +303,11 @@ public partial class MainWindow : Window
 
     private void BeginFadeOut()
     {
+        StopFadeAnimations();
+
         if (IsReducedMotionEnabled())
         {
-            StopFadeAnimations();
-            _isFadingOut = false;
-            Opacity = 0;
-            Hide();
+            HideMenuImmediately();
             return;
         }
 
@@ -313,12 +329,20 @@ public partial class MainWindow : Window
             return;
         }
 
-        Opacity = 0;
-        Hide();
+        HideMenuImmediately();
     }
 
     private static bool IsReducedMotionEnabled()
     {
         return !SystemParameters.ClientAreaAnimation;
+    }
+
+    private void HideMenuImmediately()
+    {
+        _isFadingOut = false;
+        StopFadeAnimations();
+        IsHitTestVisible = false;
+        Opacity = 0;
+        Hide();
     }
 }

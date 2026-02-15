@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,6 +20,7 @@ namespace RadialActions;
 public partial class PieControl : UserControl
 {
     private const double DefaultCenterHoleRatio = 0.25;
+    private const int NoSelectedSliceIndex = -1;
     private const int SliceZIndex = 10;
     private const int HoveredSliceZIndex = 14;
     private const double MouseMoveThreshold = 0.25;
@@ -51,10 +53,11 @@ public partial class PieControl : UserControl
     private bool _themeRefreshPending;
     private bool _themeRefreshQueued;
     private readonly List<SliceVisual> _sliceVisuals = [];
-    private CenterVisual? _centerVisual;
+    private CenterVisual _centerVisual;
     private InteractionMode _interactionMode = InteractionMode.Mouse;
-    private int? _selectedSliceIndex;
-    private Point? _keyboardModeMousePosition;
+    private int _selectedSliceIndex = NoSelectedSliceIndex;
+    private Point _keyboardModeMousePosition;
+    private bool _hasKeyboardModeMousePosition;
     private Duration _hoverDuration = new(TimeSpan.FromMilliseconds(100));
     private IEasingFunction _standardEasing = new QuadraticEase { EasingMode = EasingMode.EaseOut };
     private Color _sliceColor = SystemColors.ControlColor;
@@ -72,8 +75,13 @@ public partial class PieControl : UserControl
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
         IsVisibleChanged += OnIsVisibleChanged;
-        SizeChanged += (_, _) => CreatePieMenu();
+        SizeChanged += OnSizeChanged;
         PieCanvas.MouseMove += OnPieCanvasMouseMove;
+    }
+
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        CreatePieMenu();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -110,10 +118,7 @@ public partial class PieControl : UserControl
 
     public void ResetInputState()
     {
-        _interactionMode = InteractionMode.Mouse;
-        _selectedSliceIndex = null;
-        _keyboardModeMousePosition = null;
-        RefreshVisualState(animate: false);
+        EnterMouseInteractionMode(refreshVisualState: true, animate: false);
     }
 
     public bool HandleMenuKey(Key key, ModifierKeys modifiers)
@@ -149,17 +154,14 @@ public partial class PieControl : UserControl
         }
 
         var position = e.GetPosition(PieCanvas);
-        if (_keyboardModeMousePosition is Point keyboardPosition
-            && Math.Abs(position.X - keyboardPosition.X) <= MouseMoveThreshold
-            && Math.Abs(position.Y - keyboardPosition.Y) <= MouseMoveThreshold)
+        if (_hasKeyboardModeMousePosition
+            && Math.Abs(position.X - _keyboardModeMousePosition.X) <= MouseMoveThreshold
+            && Math.Abs(position.Y - _keyboardModeMousePosition.Y) <= MouseMoveThreshold)
         {
             return;
         }
 
-        _interactionMode = InteractionMode.Mouse;
-        _selectedSliceIndex = null;
-        _keyboardModeMousePosition = null;
-        RefreshVisualState(animate: true);
+        EnterMouseInteractionMode(refreshVisualState: true, animate: true);
     }
 
     private void HandleArrowKey(Key key)
@@ -169,7 +171,7 @@ public partial class PieControl : UserControl
             return;
         }
 
-        if (_selectedSliceIndex is null)
+        if (_selectedSliceIndex == NoSelectedSliceIndex)
         {
             _selectedSliceIndex = key switch
             {
@@ -177,26 +179,28 @@ public partial class PieControl : UserControl
                 Key.Right => GetSliceIndexClosestToAngle(0),
                 Key.Down => GetSliceIndexClosestToAngle(90),
                 Key.Left => GetSliceIndexClosestToAngle(180),
-                _ => _selectedSliceIndex
+                _ => NoSelectedSliceIndex
             };
         }
         else if (key is Key.Right or Key.Down)
         {
-            _selectedSliceIndex = (_selectedSliceIndex.Value + 1) % _sliceVisuals.Count;
+            _selectedSliceIndex = (_selectedSliceIndex + 1) % _sliceVisuals.Count;
         }
         else if (key is Key.Left or Key.Up)
         {
-            _selectedSliceIndex = ((_selectedSliceIndex.Value - 1) + _sliceVisuals.Count) % _sliceVisuals.Count;
+            _selectedSliceIndex = (_selectedSliceIndex - 1 + _sliceVisuals.Count) % _sliceVisuals.Count;
         }
 
         _interactionMode = InteractionMode.Keyboard;
         _keyboardModeMousePosition = Mouse.GetPosition(PieCanvas);
+        _hasKeyboardModeMousePosition = true;
         RefreshVisualState(animate: true);
     }
 
     private void ActivateSelectedSlice()
     {
-        if (TryGetSelectedSliceVisual(out var selectedSlice))
+        var selectedSlice = GetSelectedSliceVisual();
+        if (selectedSlice != null)
         {
             SliceClicked?.Invoke(this, new SliceClickEventArgs(selectedSlice.Action));
         }
@@ -204,7 +208,8 @@ public partial class PieControl : UserControl
 
     private void OpenSelectedSliceContextMenu()
     {
-        if (!TryGetSelectedSliceVisual(out var selectedSlice))
+        var selectedSlice = GetSelectedSliceVisual();
+        if (selectedSlice == null)
         {
             return;
         }
@@ -214,17 +219,14 @@ public partial class PieControl : UserControl
         selectedSlice.ContextMenu.IsOpen = true;
     }
 
-    private bool TryGetSelectedSliceVisual(out SliceVisual selectedSlice)
+    private SliceVisual GetSelectedSliceVisual()
     {
-        selectedSlice = default!;
-
-        if (_selectedSliceIndex is null)
+        if (_selectedSliceIndex == NoSelectedSliceIndex)
         {
-            return false;
+            return null;
         }
 
-        selectedSlice = _sliceVisuals.FirstOrDefault(slice => slice.Index == _selectedSliceIndex.Value);
-        return selectedSlice != null;
+        return _sliceVisuals.FirstOrDefault(slice => slice.Index == _selectedSliceIndex);
     }
 
     private int GetSliceIndexClosestToAngle(double targetAngle)
@@ -291,9 +293,9 @@ public partial class PieControl : UserControl
         control.CreatePieMenu();
     }
 
-    private void OnSlicesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    private void OnSlicesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
-        if (e.OldItems != null)
+        if (e.OldItems is not null)
         {
             foreach (PieAction item in e.OldItems)
             {
@@ -301,7 +303,7 @@ public partial class PieControl : UserControl
             }
         }
 
-        if (e.NewItems != null)
+        if (e.NewItems is not null)
         {
             foreach (PieAction item in e.NewItems)
             {
@@ -329,7 +331,7 @@ public partial class PieControl : UserControl
 
         if (Slices == null || Slices.Count == 0 || ActualWidth <= 0 || ActualHeight <= 0)
         {
-            _selectedSliceIndex = null;
+            _selectedSliceIndex = NoSelectedSliceIndex;
             return;
         }
 
@@ -427,7 +429,7 @@ public partial class PieControl : UserControl
                 Fill = centerFillBrush,
                 Stroke = centerStrokeBrush,
                 StrokeThickness = hubStrokeThickness,
-                Cursor = System.Windows.Input.Cursors.Hand,
+                Cursor = Cursors.Hand,
                 SnapsToDevicePixels = true,
             };
 
@@ -449,7 +451,7 @@ public partial class PieControl : UserControl
                 Style = hubContainerStyle,
                 Width = innerRadius * 2,
                 Height = innerRadius * 2,
-                Cursor = System.Windows.Input.Cursors.Hand,
+                Cursor = Cursors.Hand,
             };
 
             centerCloseTarget.Children.Add(centerHole);
@@ -494,9 +496,7 @@ public partial class PieControl : UserControl
 
             centerCloseTarget.MouseLeftButtonDown += (_, e) =>
             {
-                _interactionMode = InteractionMode.Mouse;
-                _selectedSliceIndex = null;
-                _keyboardModeMousePosition = null;
+                EnterMouseInteractionMode(refreshVisualState: false, animate: false);
                 isCenterMouseDown = true;
                 AnimateSliceClickDown(centerCloseTarget, pressDuration, _standardEasing);
                 e.Handled = true;
@@ -551,13 +551,10 @@ public partial class PieControl : UserControl
             slice.Fill = fillBrush;
             slice.Stroke = strokeBrush;
             slice.StrokeThickness = sliceStrokeThickness;
-            slice.Cursor = System.Windows.Input.Cursors.Hand;
+            slice.Cursor = Cursors.Hand;
             slice.SnapsToDevicePixels = true;
 
-            var contextMenu = new ContextMenu();
-            var editMenuItem = new MenuItem { Header = "Edit..." };
-            editMenuItem.Click += (_, _) => SliceEditRequested?.Invoke(this, new SliceClickEventArgs(sliceAction));
-            contextMenu.Items.Add(editMenuItem);
+            var contextMenu = CreateSliceContextMenu(sliceAction);
             slice.ContextMenu = contextMenu;
 
             var sliceVisual = new SliceVisual
@@ -576,9 +573,7 @@ public partial class PieControl : UserControl
 
             slice.MouseLeftButtonDown += (_, e) =>
             {
-                _interactionMode = InteractionMode.Mouse;
-                _selectedSliceIndex = null;
-                _keyboardModeMousePosition = null;
+                EnterMouseInteractionMode(refreshVisualState: false, animate: false);
                 isMouseDown = true;
                 AnimateSliceColor(fillBrush, pressedColor, pressDuration, _standardEasing);
                 AnimateSliceColor(strokeBrush, _borderHoverColor, pressDuration, _standardEasing);
@@ -708,13 +703,34 @@ public partial class PieControl : UserControl
             PieCanvas.Children.Add(contentPanel);
         }
 
-        if (_selectedSliceIndex is int selectedIndex
-            && _sliceVisuals.All(sliceVisual => sliceVisual.Index != selectedIndex))
+        if (_selectedSliceIndex != NoSelectedSliceIndex
+            && _sliceVisuals.All(sliceVisual => sliceVisual.Index != _selectedSliceIndex))
         {
-            _selectedSliceIndex = null;
+            _selectedSliceIndex = NoSelectedSliceIndex;
         }
 
         RefreshVisualState(animate: false);
+    }
+
+    private void EnterMouseInteractionMode(bool refreshVisualState, bool animate)
+    {
+        _interactionMode = InteractionMode.Mouse;
+        _selectedSliceIndex = NoSelectedSliceIndex;
+        _hasKeyboardModeMousePosition = false;
+
+        if (refreshVisualState)
+        {
+            RefreshVisualState(animate);
+        }
+    }
+
+    private ContextMenu CreateSliceContextMenu(PieAction sliceAction)
+    {
+        var contextMenu = new ContextMenu();
+        var editMenuItem = new MenuItem { Header = "Edit..." };
+        editMenuItem.Click += (_, _) => SliceEditRequested?.Invoke(this, new SliceClickEventArgs(sliceAction));
+        contextMenu.Items.Add(editMenuItem);
+        return contextMenu;
     }
 
     private void RefreshVisualState(bool animate)
