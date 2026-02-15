@@ -34,8 +34,8 @@
 
         <ContextMenu x:Key="MainContextMenu" x:Shared="False">
             <MenuItem Header="_Settings"
-                      Command="{Binding OpenSettingsWindowCommand}"
-                      CommandParameter="0">
+                      Click="OnTraySettingsMenuItemClick"
+                      Tag="0">
                 <MenuItem.Icon>
                     <TextBlock Text="&#xE713;"
                                FontFamily="Segoe MDL2 Assets" />
@@ -43,8 +43,8 @@
             </MenuItem>
 
             <MenuItem Header="_Actions"
-                      Command="{Binding OpenSettingsWindowCommand}"
-                      CommandParameter="1">
+                      Click="OnTraySettingsMenuItemClick"
+                      Tag="1">
                 <MenuItem.Icon>
                     <TextBlock Text="&#xE7FC;"
                                FontFamily="Segoe MDL2 Assets" />
@@ -52,8 +52,8 @@
             </MenuItem>
 
             <MenuItem Header="Ad_vanced"
-                      Command="{Binding OpenSettingsWindowCommand}"
-                      CommandParameter="2">
+                      Click="OnTraySettingsMenuItemClick"
+                      Tag="2">
                 <MenuItem.Icon>
                     <TextBlock Text="&#xE9CE;"
                                FontFamily="Segoe MDL2 Assets" />
@@ -61,8 +61,8 @@
             </MenuItem>
 
             <MenuItem Header="_Help"
-                      Command="{Binding OpenSettingsWindowCommand}"
-                      CommandParameter="3">
+                      Click="OnTraySettingsMenuItemClick"
+                      Tag="3">
                 <MenuItem.Icon>
                     <TextBlock Text="&#xE897;"
                                FontFamily="Segoe MDL2 Assets" />
@@ -70,7 +70,7 @@
             </MenuItem>
 
             <MenuItem Header="E_xit"
-                      Command="{Binding ExitCommand}">
+                      Click="OnTrayExitMenuItemClick">
                 <MenuItem.Icon>
                     <TextBlock Text="&#xE8BB;"
                                FontFamily="Segoe MDL2 Assets" />

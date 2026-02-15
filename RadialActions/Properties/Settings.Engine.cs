@@ -66,7 +66,7 @@ public sealed partial class Settings : ObservableObject
 
         try
         {
-            var json = JsonConvert.SerializeObject(this, _jsonSerializerSettings);
+            var json = SerializeToJson();
 
             // Attempt to save multiple times.
             for (var i = 0; i < 4; i++)
@@ -92,16 +92,31 @@ public sealed partial class Settings : ObservableObject
         return false;
     }
 
+    public string SerializeToJson()
+    {
+        return JsonConvert.SerializeObject(this, _jsonSerializerSettings);
+    }
+
+    public static Settings DeserializeFromJson(string json)
+    {
+        var settings = new Settings();
+        if (!string.IsNullOrWhiteSpace(json))
+        {
+            JsonConvert.PopulateObject(json, settings, _jsonSerializerSettings);
+        }
+
+        settings.NormalizeAfterLoad();
+        return settings;
+    }
+
     /// <summary>
-    /// Populates the given settings with values from the default path.
+    /// Reads settings from the default path.
     /// </summary>
-    private static void Populate(Settings settings)
+    private static string ReadJsonFromFile()
     {
         using var fileStream = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         using var streamReader = new StreamReader(fileStream);
-        using var jsonReader = new JsonTextReader(streamReader);
-
-        JsonSerializer.Create(_jsonSerializerSettings).Populate(jsonReader, settings);
+        return streamReader.ReadToEnd();
     }
 
     /// <summary>
@@ -111,15 +126,16 @@ public sealed partial class Settings : ObservableObject
     {
         try
         {
-            var settings = new Settings();
-            Populate(settings);
-            return settings;
+            var json = ReadJsonFromFile();
+            return DeserializeFromJson(json);
         }
         catch (Exception ex)
         {
             Log.Error(ex, $"Failed to load {FilePath}");
             Log.Information("Creating new settings");
-            return new();
+            var settings = new Settings();
+            settings.NormalizeAfterLoad();
+            return settings;
         }
     }
 

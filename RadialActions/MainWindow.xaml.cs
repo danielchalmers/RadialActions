@@ -1,12 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Interop;
 using System.Windows.Input;
-using System.Windows.Media.Animation;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.Input;
-using H.NotifyIcon;
 using RadialActions.Properties;
 
 namespace RadialActions;
@@ -16,50 +14,51 @@ namespace RadialActions;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private readonly TaskbarIcon _tray;
-    private HotkeyManager _hotkeys;
-    private bool _isFadingOut;
-
-    private Storyboard FadeInStoryboard => (Storyboard)Resources["FadeInStoryboard"];
-    private Storyboard FadeOutStoryboard => (Storyboard)Resources["FadeOutStoryboard"];
+    private readonly MainWindowTrayService _trayService;
+    private readonly MainWindowHotkeyService _hotkeyService = new();
+    private readonly MainWindowMenuService _menuService;
 
     public MainWindow()
     {
         InitializeComponent();
         DataContext = this;
 
-        Settings.Default.PropertyChanged += Settings_PropertyChanged;
-
-        // Construct the tray from the resources defined.
-        _tray = Resources["TrayIcon"] as TaskbarIcon;
-        _tray.ContextMenu = Resources["MainContextMenu"] as ContextMenu;
-        _tray.ContextMenu.DataContext = this;
-        _tray.ToolTipText = "Radial Actions";
-        _tray.ForceCreate(enablesEfficiencyMode: false);
-        _tray.ShowNotification("Radial Actions", "Press " + Settings.Default.ActivationHotkey + " to open the menu");
-        Log.Debug("Created tray icon");
+        Settings.Default.PropertyChanged += OnSettingsPropertyChanged;
+        _trayService = new MainWindowTrayService(Resources, this, Settings.Default.ActivationHotkey);
+        _menuService = new MainWindowMenuService(
+            this,
+            PieMenu,
+            (System.Windows.Media.Animation.Storyboard)Resources["FadeInStoryboard"],
+            (System.Windows.Media.Animation.Storyboard)Resources["FadeOutStoryboard"]);
     }
 
     /// <summary>
     /// Handles setting changes.
     /// </summary>
-    private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    private async void OnSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
         if (!Dispatcher.CheckAccess())
         {
-            Dispatcher.Invoke(() => Settings_PropertyChanged(sender, e));
+            await Dispatcher.InvokeAsync(
+                () => ApplySettingChange(e.PropertyName),
+                DispatcherPriority.Normal);
             return;
         }
 
-        Log.Debug($"Setting changed <{e.PropertyName}>");
+        ApplySettingChange(e.PropertyName);
+    }
 
-        switch (e.PropertyName)
+    private void ApplySettingChange(string propertyName)
+    {
+        Log.Debug("Setting changed <{PropertyName}>", propertyName);
+
+        switch (propertyName)
         {
             case nameof(Settings.RunOnStartup):
                 App.SetRunOnStartup(Settings.Default.RunOnStartup);
                 break;
             case nameof(Settings.ActivationHotkey):
-                SetHotkey();
+                _hotkeyService.ApplyHotkey(Settings.Default.ActivationHotkey);
                 break;
         }
     }
@@ -92,85 +91,34 @@ public partial class MainWindow : Window
         Application.Current.Shutdown();
     }
 
-    private void SetHotkey()
+    public void ShowMenu(bool atCursor)
     {
-        var hotkey = Settings.Default.ActivationHotkey;
-        _hotkeys?.UnregisterAll();
-        if (!string.IsNullOrWhiteSpace(hotkey))
-        {
-            _hotkeys?.RegisterHotkey(hotkey);
-        }
+        _menuService.ShowMenu(atCursor);
+    }
+
+    public void HideMenu(bool animate = true)
+    {
+        _menuService.HideMenu(animate);
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        HideMenu(animate: false);
+        _menuService.HideMenu(animate: false);
 
         var handle = new WindowInteropHelper(this).Handle;
-        _hotkeys = new(handle);
-        _hotkeys.HotkeyPressed += OnHotkeyPressed;
-        SetHotkey();
+        _hotkeyService.Initialize(handle, OnHotkeyPressed);
+        _hotkeyService.ApplyHotkey(Settings.Default.ActivationHotkey);
 
 #if DEBUG
-        ShowMenu(false);
+        _menuService.ShowMenu(false);
 #endif
     }
 
     private void Window_Unloaded(object sender, RoutedEventArgs e)
     {
-        Settings.Default.PropertyChanged -= Settings_PropertyChanged;
-        _hotkeys?.Dispose();
-    }
-
-    /// <summary>
-    /// Shows the radial menu.
-    /// </summary>
-    /// <param name="atCursor">If true, centers on cursor; otherwise centers on screen.</param>
-    public void ShowMenu(bool atCursor)
-    {
-        if (atCursor)
-        {
-            Log.Information("Opening at the cursor");
-            this.CenterOnCursor();
-        }
-        else
-        {
-            Log.Information("Opening at the center of the screen");
-            this.CenterOnScreen();
-        }
-
-        if (!IsVisible)
-        {
-            Opacity = 0;
-            Show();
-        }
-
-        Activate();
-        FocusMenuForKeyboardInput();
-        PieMenu.ResetInputState();
-        IsHitTestVisible = true;
-        BeginFadeIn();
-    }
-
-    public void HideMenu(bool animate = true)
-    {
-        if (!IsVisible)
-        {
-            return;
-        }
-
-        Log.Information("Dismissing menu");
-
-        if (!animate || IsReducedMotionEnabled())
-        {
-            StopFadeAnimations();
-            _isFadingOut = false;
-            Opacity = 0;
-            Hide();
-            return;
-        }
-
-        BeginFadeOut();
+        Settings.Default.PropertyChanged -= OnSettingsPropertyChanged;
+        _hotkeyService.Dispose();
+        _trayService.Dispose();
     }
 
     private void OnHotkeyPressed(object sender, EventArgs e)
@@ -179,18 +127,18 @@ public partial class MainWindow : Window
 
         if (IsActive)
         {
-            HideMenu();
+            _menuService.HideMenu();
         }
         else
         {
-            ShowMenu(true);
+            _menuService.ShowMenu(true);
         }
     }
 
     private void OnTrayLeftMouseDown(object sender, RoutedEventArgs e)
     {
         Log.Debug("Tray icon left clicked");
-        ShowMenu(true);
+        _menuService.ShowMenu(true);
     }
 
     private void OnTrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)
@@ -199,20 +147,46 @@ public partial class MainWindow : Window
         OpenSettingsWindow(1);
     }
 
+    private void OnTraySettingsMenuItemClick(object sender, RoutedEventArgs e)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.InvokeAsync(() => OnTraySettingsMenuItemClick(sender, e), DispatcherPriority.Normal);
+            return;
+        }
+
+        var tabIndex = sender is MenuItem { Tag: string tag } && int.TryParse(tag, out var parsedIndex)
+            ? parsedIndex
+            : 0;
+
+        OpenSettingsWindow(tabIndex);
+    }
+
+    private void OnTrayExitMenuItemClick(object sender, RoutedEventArgs e)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.InvokeAsync(() => OnTrayExitMenuItemClick(sender, e), DispatcherPriority.Send);
+            return;
+        }
+
+        Exit();
+    }
+
     private void OnSliceClicked(object sender, SliceClickEventArgs e)
     {
         Log.Debug($"Slice clicked: {e.Slice.Name}");
         e.Slice.Execute();
         if (!Settings.Default.KeepMenuOpenAfterSliceClick)
         {
-            HideMenu();
+            _menuService.HideMenu();
         }
     }
 
     private void OnCenterClicked(object sender, EventArgs e)
     {
         Log.Debug("Center close target clicked");
-        HideMenu();
+        _menuService.HideMenu();
     }
 
     private void OnSliceEditRequested(object sender, SliceClickEventArgs e)
@@ -221,13 +195,13 @@ public partial class MainWindow : Window
         OpenSettingsWindow(1);
         var settingsWindow = Application.Current.Windows.OfType<SettingsWindow>().FirstOrDefault();
         settingsWindow?.SelectAction(e.Slice);
-        HideMenu();
+        _menuService.HideMenu();
     }
 
     private void Window_Deactivated(object sender, EventArgs e)
     {
         Log.Debug("Lost focus");
-        HideMenu();
+        _menuService.HideMenu();
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -235,7 +209,7 @@ public partial class MainWindow : Window
         if (e.Key == Key.Escape)
         {
             Log.Debug("Escape pressed");
-            HideMenu();
+            _menuService.HideMenu();
             e.Handled = true;
             return;
         }
@@ -247,78 +221,8 @@ public partial class MainWindow : Window
         }
     }
 
-    private void FocusMenuForKeyboardInput()
-    {
-        if (!IsVisible)
-        {
-            return;
-        }
-
-        Focus();
-        Keyboard.Focus(PieMenu);
-
-        Dispatcher.BeginInvoke(() =>
-        {
-            if (!IsVisible)
-            {
-                return;
-            }
-
-            Activate();
-            Focus();
-            Keyboard.Focus(PieMenu);
-        }, DispatcherPriority.Input);
-    }
-
-    private void BeginFadeIn()
-    {
-        if (IsReducedMotionEnabled())
-        {
-            StopFadeAnimations();
-            _isFadingOut = false;
-            Opacity = 1;
-            return;
-        }
-
-        _isFadingOut = false;
-        FadeInStoryboard.Begin(this, HandoffBehavior.SnapshotAndReplace, true);
-    }
-
-    private void BeginFadeOut()
-    {
-        if (IsReducedMotionEnabled())
-        {
-            StopFadeAnimations();
-            _isFadingOut = false;
-            Opacity = 0;
-            Hide();
-            return;
-        }
-
-        _isFadingOut = true;
-        IsHitTestVisible = false;
-        FadeOutStoryboard.Begin(this, HandoffBehavior.SnapshotAndReplace, true);
-    }
-
-    private void StopFadeAnimations()
-    {
-        FadeInStoryboard.Remove(this);
-        FadeOutStoryboard.Remove(this);
-    }
-
     private void FadeOutStoryboard_Completed(object sender, EventArgs e)
     {
-        if (!_isFadingOut)
-        {
-            return;
-        }
-
-        Opacity = 0;
-        Hide();
-    }
-
-    private static bool IsReducedMotionEnabled()
-    {
-        return !SystemParameters.ClientAreaAnimation;
+        _menuService.OnFadeOutCompleted();
     }
 }
