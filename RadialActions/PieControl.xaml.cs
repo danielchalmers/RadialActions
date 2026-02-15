@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Microsoft.Win32;
 
 namespace RadialActions;
@@ -16,26 +17,48 @@ namespace RadialActions;
 public partial class PieControl : UserControl
 {
     private const double DefaultCenterHoleRatio = 0.25;
+    private bool _themeRefreshPending;
+    private bool _themeRefreshQueued;
 
     public PieControl()
     {
         InitializeComponent();
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
+        IsVisibleChanged += OnIsVisibleChanged;
         SizeChanged += (_, _) => CreatePieMenu();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        CreatePieMenu();
         SystemParameters.StaticPropertyChanged += OnSystemParametersChanged;
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
+        QueueThemeRefresh();
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
         SystemParameters.StaticPropertyChanged -= OnSystemParametersChanged;
         SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
+    }
+
+    private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is not bool isVisible)
+        {
+            return;
+        }
+
+        if (!isVisible)
+        {
+            _themeRefreshPending = true;
+            return;
+        }
+
+        if (_themeRefreshPending)
+        {
+            CreatePieMenu();
+        }
     }
 
     public static readonly DependencyProperty SlicesProperty =
@@ -113,6 +136,7 @@ public partial class PieControl : UserControl
         const int centerZIndex = 20;
 
         PieCanvas.Children.Clear();
+        _themeRefreshPending = false;
 
         if (Slices == null || Slices.Count == 0 || ActualWidth <= 0 || ActualHeight <= 0)
         {
@@ -149,7 +173,7 @@ public partial class PieControl : UserControl
         var iconTextStyle = TryFindResource("RadialMenuIconTextStyle") as Style;
         var labelTextStyle = TryFindResource("RadialMenuLabelTextStyle") as Style;
 
-        var accentColor = GetBrushResource("RadialMenuSliceAccentBrush", SystemParameters.WindowGlassColor).Color;
+        var accentColor = GetSystemAccentColor();
         var surfaceColor = GetBrushResource("RadialMenuSurfaceBrush", SystemColors.ControlColor).Color;
         var surfaceBorderColor = GetBrushResource("RadialMenuSurfaceBorderBrush", SystemColors.ControlDarkColor).Color;
         var sliceColor = GetBrushResource("RadialMenuSliceFillBrush", SystemColors.ControlColor).Color;
@@ -159,7 +183,7 @@ public partial class PieControl : UserControl
         var hubColor = GetBrushResource("RadialMenuHubFillBrush", SystemColors.ControlColor).Color;
         var hubHoverColor = GetBrushResource("RadialMenuHubHoverBrush", SystemColors.ControlLightColor).Color;
         var hubBorderColor = GetBrushResource("RadialMenuHubBorderBrush", SystemColors.ControlDarkColor).Color;
-        var iconTextColor = GetBrushResource("RadialMenuSliceAccentBrush", SystemColors.WindowTextColor).Color;
+        var iconTextColor = accentColor;
         var labelTextColor = GetBrushResource("RadialMenuTextBrush", SystemColors.WindowTextColor).Color;
 
         if (isHighContrast)
@@ -563,16 +587,44 @@ public partial class PieControl : UserControl
 
     private void OnSystemParametersChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(SystemParameters.WindowGlassColor)
-            or nameof(SystemParameters.HighContrast))
+        var propertyName = e.PropertyName;
+        if (string.IsNullOrEmpty(propertyName)
+            || propertyName.Contains("Color", StringComparison.OrdinalIgnoreCase)
+            || propertyName.Contains("Brush", StringComparison.OrdinalIgnoreCase)
+            || propertyName.Contains("Contrast", StringComparison.OrdinalIgnoreCase)
+            || propertyName.Contains("Theme", StringComparison.OrdinalIgnoreCase))
         {
-            Dispatcher.InvokeAsync(CreatePieMenu);
+            QueueThemeRefresh();
         }
     }
 
     private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
     {
-        Dispatcher.InvokeAsync(CreatePieMenu);
+        QueueThemeRefresh();
+    }
+
+    private void QueueThemeRefresh()
+    {
+        _themeRefreshPending = true;
+
+        if (!IsLoaded || _themeRefreshQueued)
+        {
+            return;
+        }
+
+        _themeRefreshQueued = true;
+
+        Dispatcher.InvokeAsync(() =>
+        {
+            _themeRefreshQueued = false;
+
+            if (!IsLoaded || !IsVisible)
+            {
+                return;
+            }
+
+            CreatePieMenu();
+        }, DispatcherPriority.Background);
     }
 
     private void AnimateSliceColor(
@@ -738,6 +790,16 @@ public partial class PieControl : UserControl
         var g = (byte)Math.Round((from.G * (1 - amount)) + (to.G * amount));
         var b = (byte)Math.Round((from.B * (1 - amount)) + (to.B * amount));
         return Color.FromRgb(r, g, b);
+    }
+
+    private static Color GetSystemAccentColor()
+    {
+        if (SystemParameters.WindowGlassBrush is SolidColorBrush accentBrush)
+        {
+            return accentBrush.Color;
+        }
+
+        return SystemParameters.WindowGlassColor;
     }
 
     private static bool IsAppDarkModeEnabled()
