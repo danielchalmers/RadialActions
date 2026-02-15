@@ -2,7 +2,7 @@
 
 namespace RadialActions;
 
-internal static class HotkeyUtil
+public static class HotkeyUtil
 {
     private static readonly Dictionary<string, ModifierKeys> ModifierMap = new(StringComparer.OrdinalIgnoreCase)
     {
