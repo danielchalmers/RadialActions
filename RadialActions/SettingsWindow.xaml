@@ -86,7 +86,7 @@
                     <TextBlock Margin="0,2,0,0"
                                TextWrapping="Wrap">
                         A newer version of Radial Actions is ready.
-                        <Hyperlink NavigateUri="{Binding ReleaseUrl, Source={x:Static local:UpdateService.Instance}}"
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
                                    RequestNavigate="Hyperlink_RequestNavigate">
                             Open GitHub Releases
                         </Hyperlink>

@@ -6,38 +6,21 @@ using Newtonsoft.Json;
 
 namespace RadialActions;
 
-public sealed class UpdateService : ObservableObject
+public sealed partial class UpdateService : ObservableObject
 {
     private const string GitHubReleasesApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases";
     private static readonly Regex VersionPattern = new(@"\d+(?:\.\d+){0,3}", RegexOptions.Compiled);
-    private static readonly Uri ReleasesPageUri = new("https://github.com/danielchalmers/RadialActions/releases");
     private static readonly HttpClient HttpClient = CreateHttpClient();
 
+    [ObservableProperty]
     private bool? _isUpdateAvailable;
+
+    [ObservableProperty]
     private Version _latestVersion;
-    private Uri _releaseUrl = ReleasesPageUri;
 
     private UpdateService() { }
 
     public static UpdateService Instance { get; } = new();
-
-    public bool? IsUpdateAvailable
-    {
-        get => _isUpdateAvailable;
-        private set => SetProperty(ref _isUpdateAvailable, value);
-    }
-
-    public Version LatestVersion
-    {
-        get => _latestVersion;
-        private set => SetProperty(ref _latestVersion, value);
-    }
-
-    public Uri ReleaseUrl
-    {
-        get => _releaseUrl;
-        private set => SetProperty(ref _releaseUrl, value);
-    }
 
     public async Task CheckAsync(Version currentVersion)
     {
@@ -79,9 +62,6 @@ public sealed class UpdateService : ObservableObject
             }
 
             LatestVersion = newestRelease.ParsedVersion;
-            ReleaseUrl = Uri.TryCreate(newestRelease.Release.HtmlUrl, UriKind.Absolute, out var releaseUri)
-                ? releaseUri
-                : ReleasesPageUri;
 
             if (currentVersion == null)
             {
