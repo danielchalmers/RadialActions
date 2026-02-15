@@ -19,7 +19,7 @@
     <Window.Resources>
         <Storyboard x:Key="FadeInStoryboard">
             <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             To="1" Duration="0:0:0.250">
+                             To="1" Duration="0:0:0.18">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -29,7 +29,7 @@
         <Storyboard x:Key="FadeOutStoryboard"
                     Completed="FadeOutStoryboard_Completed">
             <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             To="0" Duration="0:0:0.1">
+                             To="0" Duration="0:0:0.14">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseIn" />
                 </DoubleAnimation.EasingFunction>
