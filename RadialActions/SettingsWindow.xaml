@@ -53,13 +53,10 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Margin="12,12,12,0"
                 Padding="14,10"
                 Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"
                 BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"
-                CornerRadius="10"
                 BorderThickness="1"
-                TextElement.Foreground="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"
                 Visibility="{Binding IsUpdateAvailable, Source={x:Static local:App.CurrentApp}, Converter={local:BooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -70,7 +67,7 @@
                 <TextBlock Grid.Column="0"
                            FontFamily="Segoe MDL2 Assets"
                            FontSize="18"
-                           VerticalAlignment="Top"
+                           VerticalAlignment="Center"
                            Text="&#xE896;" />
                 <StackPanel Grid.Column="2">
                     <TextBlock FontWeight="SemiBold"
@@ -81,10 +78,10 @@
                     </TextBlock>
                     <TextBlock Margin="0,2,0,0"
                                TextWrapping="Wrap">
-                        A newer version of Radial Actions is ready.
-                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
+                        A newer version of Radial Actions is available.
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases/latest"
                                    RequestNavigate="Hyperlink_RequestNavigate">
-                            Open GitHub Releases
+                            Learn more
                         </Hyperlink>
                     </TextBlock>
                 </StackPanel>
