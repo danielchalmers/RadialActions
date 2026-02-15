@@ -111,7 +111,6 @@ public partial class SettingsWindowViewModel : ObservableObject, IDisposable
 
     private readonly Dictionary<PieAction, KeyActionDefinition> _autoKeyDefaults = [];
     private readonly Dictionary<PieAction, ShellDefaults> _autoShellDefaults = [];
-    private readonly UpdateService _updateCheckService = UpdateService.Instance;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedAction))]
@@ -144,14 +143,14 @@ public partial class SettingsWindowViewModel : ObservableObject, IDisposable
     /// Whether an action is currently selected.
     /// </summary>
     public bool HasSelectedAction => SelectedAction != null;
-    public bool IsUpdateBannerVisible => _updateCheckService.CachedResult.IsUpdateAvailable;
-    public string UpdateBannerVersionLabel => _updateCheckService.CachedResult.LatestVersion;
-    public string UpdateReleaseUrl => _updateCheckService.CachedResult.ReleaseUrl;
+    public bool IsUpdateBannerVisible => UpdateService.Instance.IsUpdateAvailable;
+    public string UpdateBannerVersionLabel => UpdateService.Instance.LatestVersion;
+    public string UpdateReleaseUrl => UpdateService.Instance.ReleaseUrl;
 
     public SettingsWindowViewModel(Settings settings)
     {
         Settings = settings;
-        _updateCheckService.CheckCompleted += OnUpdateCheckCompleted;
+        UpdateService.Instance.CheckCompleted += OnUpdateCheckCompleted;
         TrackExistingDefaults();
         if (Settings.Actions.Count > 0)
         {
@@ -162,7 +161,7 @@ public partial class SettingsWindowViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
-        _updateCheckService.CheckCompleted -= OnUpdateCheckCompleted;
+        UpdateService.Instance.CheckCompleted -= OnUpdateCheckCompleted;
     }
 
     public void SelectAction(PieAction action)

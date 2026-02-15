@@ -18,7 +18,7 @@ public partial class MainWindow : Window
     private readonly TrayService _trayService;
     private readonly HotkeyService _hotkeyService = new();
     private readonly MenuService _menuService;
-    private readonly UpdateService _updateCheckService = UpdateService.Instance;
+    private readonly UpdateService _updateService = UpdateService.Instance;
 
     public MainWindow()
     {
@@ -244,7 +244,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            var result = await _updateCheckService.CheckOnceAsync(Settings.Default.CheckForUpdatesOnStartup);
+            var result = await _updateService.CheckOnceAsync(Settings.Default.CheckForUpdatesOnStartup);
             if (!result.IsUpdateAvailable)
             {
                 return;

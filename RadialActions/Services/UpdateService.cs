@@ -12,28 +12,45 @@ internal sealed class UpdateService
     private static readonly HttpClient HttpClient = CreateHttpClient();
 
     private bool _hasChecked;
-    private UpdateCheckResult _cachedResult = UpdateCheckResult.NotChecked;
+    private bool _isEnabled = true;
+    private bool _isUpdateAvailable;
+    private string _latestVersion = string.Empty;
+    private string _releaseUrl = ReleasesPageUrl;
 
     public static UpdateService Instance { get; } = new();
 
     public event Action<UpdateCheckResult> CheckCompleted;
 
-    public UpdateCheckResult CachedResult => _cachedResult;
+    public bool IsEnabled => _isEnabled;
+    public bool IsUpdateAvailable => _isUpdateAvailable;
+    public string LatestVersion => _latestVersion;
+    public string ReleaseUrl => _releaseUrl;
 
     public async Task<UpdateCheckResult> CheckOnceAsync(bool isEnabled, CancellationToken cancellationToken = default)
     {
         if (_hasChecked)
         {
-            return _cachedResult;
+            return GetCurrentResult();
         }
 
         _hasChecked = true;
-        _cachedResult = isEnabled
+        var result = isEnabled
             ? await CheckForUpdatesAsync(cancellationToken)
             : UpdateCheckResult.Disabled;
+        SetCurrentResult(result);
 
-        CheckCompleted?.Invoke(_cachedResult);
-        return _cachedResult;
+        CheckCompleted?.Invoke(result);
+        return result;
+    }
+
+    private UpdateCheckResult GetCurrentResult() => new(_isEnabled, _isUpdateAvailable, _latestVersion, _releaseUrl);
+
+    private void SetCurrentResult(UpdateCheckResult result)
+    {
+        _isEnabled = result.IsEnabled;
+        _isUpdateAvailable = result.IsUpdateAvailable;
+        _latestVersion = result.LatestVersion ?? string.Empty;
+        _releaseUrl = string.IsNullOrWhiteSpace(result.ReleaseUrl) ? ReleasesPageUrl : result.ReleaseUrl;
     }
 
     private static async Task<UpdateCheckResult> CheckForUpdatesAsync(CancellationToken cancellationToken)
