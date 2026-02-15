@@ -9,7 +9,7 @@
         Title="Radial Actions"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         AllowsTransparency="True" Background="Transparent"
-        Deactivated="Window_Deactivated" KeyDown="Window_KeyDown"
+        Deactivated="Window_Deactivated" PreviewKeyDown="Window_KeyDown"
         Loaded="Window_Loaded" Opacity="0"
         ResizeMode="NoResize" ShowInTaskbar="False"
         SizeToContent="WidthAndHeight"

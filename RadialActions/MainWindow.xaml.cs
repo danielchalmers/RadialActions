@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using RadialActions.Properties;
@@ -145,6 +146,7 @@ public partial class MainWindow : Window
         }
 
         Activate();
+        FocusMenuForKeyboardInput();
         PieMenu.ResetInputState();
         IsHitTestVisible = true;
         BeginFadeIn();
@@ -243,6 +245,29 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
         }
+    }
+
+    private void FocusMenuForKeyboardInput()
+    {
+        if (!IsVisible)
+        {
+            return;
+        }
+
+        Focus();
+        Keyboard.Focus(PieMenu);
+
+        Dispatcher.BeginInvoke(() =>
+        {
+            if (!IsVisible)
+            {
+                return;
+            }
+
+            Activate();
+            Focus();
+            Keyboard.Focus(PieMenu);
+        }, DispatcherPriority.Input);
     }
 
     private void BeginFadeIn()
