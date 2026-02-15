@@ -1,102 +1,11 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
-using H.NotifyIcon;
 
 namespace RadialActions;
 
-internal sealed class MainWindowHotkeyService : IDisposable
-{
-    private HotkeyManager _hotkeys;
-    private EventHandler _hotkeyHandler;
-    private bool _disposed;
-
-    public void Initialize(IntPtr handle, EventHandler hotkeyHandler)
-    {
-        ArgumentNullException.ThrowIfNull(hotkeyHandler);
-        Log.Debug("Initializing hotkey service for handle {Handle}", handle);
-        DisposeHotkeys();
-
-        _hotkeyHandler = hotkeyHandler;
-        _hotkeys = new HotkeyManager(handle);
-        _hotkeys.HotkeyPressed += _hotkeyHandler;
-    }
-
-    public void ApplyHotkey(string hotkey)
-    {
-        if (_hotkeys is null)
-        {
-            Log.Debug("Skipping hotkey apply because service is not initialized");
-            return;
-        }
-
-        _hotkeys.UnregisterAll();
-        if (!string.IsNullOrWhiteSpace(hotkey))
-        {
-            Log.Debug("Applying configured hotkey: {Hotkey}", hotkey);
-            _hotkeys.RegisterHotkey(hotkey);
-            return;
-        }
-
-        Log.Information("No activation hotkey configured; hotkeys are cleared");
-    }
-
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _disposed = true;
-        DisposeHotkeys();
-        GC.SuppressFinalize(this);
-    }
-
-    private void DisposeHotkeys()
-    {
-        if (_hotkeys is null)
-        {
-            return;
-        }
-
-        Log.Debug("Disposing hotkey registrations");
-
-        if (_hotkeyHandler is not null)
-        {
-            _hotkeys.HotkeyPressed -= _hotkeyHandler;
-        }
-
-        _hotkeys.Dispose();
-        _hotkeys = null;
-    }
-}
-
-internal sealed class MainWindowTrayService : IDisposable
-{
-    private readonly TaskbarIcon _trayIcon;
-
-    public MainWindowTrayService(ResourceDictionary resources, object dataContext, string initialHotkey)
-    {
-        _trayIcon = (TaskbarIcon)resources["TrayIcon"];
-        var trayContextMenu = (ContextMenu)resources["MainContextMenu"];
-        trayContextMenu.DataContext = dataContext;
-        _trayIcon.ContextMenu = trayContextMenu;
-        _trayIcon.ToolTipText = "Radial Actions";
-        _trayIcon.ForceCreate(enablesEfficiencyMode: false);
-        _trayIcon.ShowNotification("Radial Actions", $"Press {initialHotkey} to open the menu");
-        Log.Debug("Created tray icon");
-    }
-
-    public void Dispose()
-    {
-        _trayIcon.Dispose();
-    }
-}
-
-internal sealed class MainWindowMenuService
+internal sealed class MenuService
 {
     private readonly Window _window;
     private readonly PieControl _pieMenu;
@@ -106,7 +15,7 @@ internal sealed class MainWindowMenuService
 
     private bool _isFadingOut;
 
-    public MainWindowMenuService(
+    public MenuService(
         Window window,
         PieControl pieMenu,
         Storyboard fadeInStoryboard,

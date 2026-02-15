@@ -15,9 +15,9 @@ namespace RadialActions;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private readonly MainWindowTrayService _trayService;
-    private readonly MainWindowHotkeyService _hotkeyService = new();
-    private readonly MainWindowMenuService _menuService;
+    private readonly TrayService _trayService;
+    private readonly HotkeyService _hotkeyService = new();
+    private readonly MenuService _menuService;
 
     public MainWindow()
     {
@@ -25,8 +25,8 @@ public partial class MainWindow : Window
         DataContext = this;
 
         Settings.Default.PropertyChanged += OnSettingsPropertyChanged;
-        _trayService = new MainWindowTrayService(Resources, this, Settings.Default.ActivationHotkey);
-        _menuService = new MainWindowMenuService(
+        _trayService = new TrayService(Resources, this, Settings.Default.ActivationHotkey);
+        _menuService = new MenuService(
             this,
             PieMenu,
             (System.Windows.Media.Animation.Storyboard)Resources["FadeInStoryboard"],
