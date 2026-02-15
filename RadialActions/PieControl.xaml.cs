@@ -508,7 +508,7 @@ public partial class PieControl : UserControl
         PieCanvas.Children.Add(surfacePath);
     }
 
-    private object? GetThemedResource(string resourceKey)
+    private object GetThemedResource(string resourceKey)
     {
         if (SystemParameters.HighContrast)
         {
@@ -648,7 +648,7 @@ public partial class PieControl : UserControl
         double toOpacity,
         Duration duration,
         IEasingFunction easingFunction,
-        Action? onCompleted = null)
+        Action onCompleted = null)
     {
         var opacityAnimation = new DoubleAnimation
         {
