@@ -1,0 +1,187 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <!-- Surface -->
+    <SolidColorBrush x:Key="RadialMenuSurfaceBrush"
+                     Color="#FFF8F8FA" />
+    <SolidColorBrush x:Key="RadialMenuSurfaceBrush.Light"
+                     Color="#FFF8F8FA" />
+    <SolidColorBrush x:Key="RadialMenuSurfaceBrush.Dark"
+                     Color="#FF1F2126" />
+
+    <SolidColorBrush x:Key="RadialMenuSurfaceBorderBrush"
+                     Color="#FFD6D8DE" />
+    <SolidColorBrush x:Key="RadialMenuSurfaceBorderBrush.Light"
+                     Color="#FFD6D8DE" />
+    <SolidColorBrush x:Key="RadialMenuSurfaceBorderBrush.Dark"
+                     Color="#FF3A3E45" />
+
+    <Color x:Key="RadialMenuShadowColor">#FF000000</Color>
+
+    <!-- Slices -->
+    <SolidColorBrush x:Key="RadialMenuSliceFillBrush"
+                     Color="#FFF3F4F6" />
+    <SolidColorBrush x:Key="RadialMenuSliceFillBrush.Light"
+                     Color="#FFF3F4F6" />
+    <SolidColorBrush x:Key="RadialMenuSliceFillBrush.Dark"
+                     Color="#FF262A30" />
+
+    <SolidColorBrush x:Key="RadialMenuSliceHoverBrush"
+                     Color="#FFE8EBF0" />
+    <SolidColorBrush x:Key="RadialMenuSliceHoverBrush.Light"
+                     Color="#FFE8EBF0" />
+    <SolidColorBrush x:Key="RadialMenuSliceHoverBrush.Dark"
+                     Color="#FF303641" />
+
+    <SolidColorBrush x:Key="RadialMenuSlicePressedBrush"
+                     Color="#FFDCE2EB" />
+    <SolidColorBrush x:Key="RadialMenuSlicePressedBrush.Light"
+                     Color="#FFDCE2EB" />
+    <SolidColorBrush x:Key="RadialMenuSlicePressedBrush.Dark"
+                     Color="#FF3A4250" />
+
+    <SolidColorBrush x:Key="RadialMenuSliceBorderBrush"
+                     Color="#FFD0D4DC" />
+    <SolidColorBrush x:Key="RadialMenuSliceBorderBrush.Light"
+                     Color="#FFD0D4DC" />
+    <SolidColorBrush x:Key="RadialMenuSliceBorderBrush.Dark"
+                     Color="#FF464C58" />
+
+    <SolidColorBrush x:Key="RadialMenuSliceAccentBrush"
+                     Color="#FF0A69C7" />
+    <SolidColorBrush x:Key="RadialMenuSliceAccentBrush.Light"
+                     Color="#FF0A69C7" />
+    <SolidColorBrush x:Key="RadialMenuSliceAccentBrush.Dark"
+                     Color="#FF7CB2FF" />
+
+    <!-- Hub -->
+    <SolidColorBrush x:Key="RadialMenuHubFillBrush"
+                     Color="#FFF6F7F9" />
+    <SolidColorBrush x:Key="RadialMenuHubFillBrush.Light"
+                     Color="#FFF6F7F9" />
+    <SolidColorBrush x:Key="RadialMenuHubFillBrush.Dark"
+                     Color="#FF252A31" />
+
+    <SolidColorBrush x:Key="RadialMenuHubHoverBrush"
+                     Color="#FFE7ECF4" />
+    <SolidColorBrush x:Key="RadialMenuHubHoverBrush.Light"
+                     Color="#FFE7ECF4" />
+    <SolidColorBrush x:Key="RadialMenuHubHoverBrush.Dark"
+                     Color="#FF353D4A" />
+
+    <SolidColorBrush x:Key="RadialMenuHubBorderBrush"
+                     Color="#FFC6CCD8" />
+    <SolidColorBrush x:Key="RadialMenuHubBorderBrush.Light"
+                     Color="#FFC6CCD8" />
+    <SolidColorBrush x:Key="RadialMenuHubBorderBrush.Dark"
+                     Color="#FF4A5363" />
+
+    <!-- Typography -->
+    <SolidColorBrush x:Key="RadialMenuTextBrush"
+                     Color="#FF1D2736" />
+    <SolidColorBrush x:Key="RadialMenuTextBrush.Light"
+                     Color="#FF1D2736" />
+    <SolidColorBrush x:Key="RadialMenuTextBrush.Dark"
+                     Color="#FFE6ECF8" />
+
+    <SolidColorBrush x:Key="RadialMenuSubtleTextBrush"
+                     Color="#FF5A6475" />
+    <SolidColorBrush x:Key="RadialMenuSubtleTextBrush.Light"
+                     Color="#FF5A6475" />
+    <SolidColorBrush x:Key="RadialMenuSubtleTextBrush.Dark"
+                     Color="#FFB1BCCE" />
+
+    <!-- Geometry and spacing -->
+    <sys:Double x:Key="RadialMenuSliceStrokeThickness">1.5</sys:Double>
+    <sys:Double x:Key="RadialMenuHubStrokeThickness">1.5</sys:Double>
+    <sys:Double x:Key="RadialMenuSliceContentMaxWidthRatio">0.38</sys:Double>
+    <sys:Double x:Key="RadialMenuIconToLabelSpacing">3</sys:Double>
+    <Thickness x:Key="RadialMenuSliceContentPadding">2,2,2,2</Thickness>
+    <CornerRadius x:Key="RadialMenuCornerRadiusSmall">8</CornerRadius>
+    <CornerRadius x:Key="RadialMenuCornerRadiusMedium">14</CornerRadius>
+
+    <!-- Motion -->
+    <Duration x:Key="RadialMenuFadeInDuration">0:0:0.22</Duration>
+    <Duration x:Key="RadialMenuFadeOutDuration">0:0:0.12</Duration>
+    <Duration x:Key="RadialMenuHoverDuration">0:0:0.09</Duration>
+    <Duration x:Key="RadialMenuPressDuration">0:0:0.08</Duration>
+    <CubicEase x:Key="RadialMenuEaseOut"
+               EasingMode="EaseOut" />
+    <CubicEase x:Key="RadialMenuEaseIn"
+               EasingMode="EaseIn" />
+    <QuadraticEase x:Key="RadialMenuEaseStandard"
+                   EasingMode="EaseOut" />
+
+    <!-- Effects -->
+    <DropShadowEffect x:Key="RadialMenuAmbientShadowEffect"
+                      BlurRadius="24"
+                      Color="{StaticResource RadialMenuShadowColor}"
+                      Direction="270"
+                      Opacity="0.30"
+                      ShadowDepth="3" />
+
+    <!-- Reusable styles -->
+    <Style x:Key="RadialMenuSlicePathStyle"
+           TargetType="{x:Type Path}">
+        <Setter Property="Fill"
+                Value="{DynamicResource RadialMenuSliceFillBrush}" />
+        <Setter Property="Stroke"
+                Value="{DynamicResource RadialMenuSliceBorderBrush}" />
+        <Setter Property="StrokeThickness"
+                Value="{DynamicResource RadialMenuSliceStrokeThickness}" />
+        <Setter Property="StrokeStartLineCap"
+                Value="Round" />
+        <Setter Property="StrokeEndLineCap"
+                Value="Round" />
+        <Setter Property="StrokeLineJoin"
+                Value="Round" />
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
+    </Style>
+
+    <Style x:Key="RadialMenuHubContainerStyle"
+           TargetType="{x:Type Grid}">
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
+        <Setter Property="UseLayoutRounding"
+                Value="True" />
+    </Style>
+
+    <Style x:Key="RadialMenuIconTextStyle"
+           TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground"
+                Value="{DynamicResource RadialMenuTextBrush}" />
+        <Setter Property="FontSize"
+                Value="20" />
+        <Setter Property="FontWeight"
+                Value="Normal" />
+        <Setter Property="TextAlignment"
+                Value="Center" />
+        <Setter Property="TextWrapping"
+                Value="NoWrap" />
+        <Setter Property="HorizontalAlignment"
+                Value="Center" />
+        <Setter Property="VerticalAlignment"
+                Value="Center" />
+    </Style>
+
+    <Style x:Key="RadialMenuLabelTextStyle"
+           TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground"
+                Value="{DynamicResource RadialMenuTextBrush}" />
+        <Setter Property="FontSize"
+                Value="11" />
+        <Setter Property="FontWeight"
+                Value="SemiBold" />
+        <Setter Property="TextAlignment"
+                Value="Center" />
+        <Setter Property="TextWrapping"
+                Value="NoWrap" />
+        <Setter Property="TextTrimming"
+                Value="CharacterEllipsis" />
+        <Setter Property="HorizontalAlignment"
+                Value="Center" />
+        <Setter Property="VerticalAlignment"
+                Value="Center" />
+    </Style>
+</ResourceDictionary>

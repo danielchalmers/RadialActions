@@ -2,9 +2,45 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:RadialActions"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DesignHeight="300" d:DesignWidth="300"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             SnapsToDevicePixels="True"
+             UseLayoutRounding="True"
              mc:Ignorable="d">
-    <Canvas Name="PieCanvas" />
+    <UserControl.Resources>
+        <Style x:Key="PieSlicePathStyle"
+               BasedOn="{StaticResource RadialMenuSlicePathStyle}"
+               TargetType="{x:Type Path}" />
+
+        <Style x:Key="PieHubContainerStyle"
+               BasedOn="{StaticResource RadialMenuHubContainerStyle}"
+               TargetType="{x:Type Grid}" />
+
+        <Style x:Key="PieIconTextStyle"
+               BasedOn="{StaticResource RadialMenuIconTextStyle}"
+               TargetType="{x:Type TextBlock}" />
+
+        <Style x:Key="PieLabelTextStyle"
+               BasedOn="{StaticResource RadialMenuLabelTextStyle}"
+               TargetType="{x:Type TextBlock}" />
+
+        <Style x:Key="PieHubEllipseStyle"
+               TargetType="{x:Type Ellipse}">
+            <Setter Property="Fill"
+                    Value="{DynamicResource RadialMenuHubFillBrush}" />
+            <Setter Property="Stroke"
+                    Value="{DynamicResource RadialMenuHubBorderBrush}" />
+            <Setter Property="StrokeThickness"
+                    Value="{DynamicResource RadialMenuHubStrokeThickness}" />
+            <Setter Property="SnapsToDevicePixels"
+                    Value="True" />
+        </Style>
+    </UserControl.Resources>
+
+    <Canvas Name="PieCanvas"
+            ClipToBounds="False"
+            RenderOptions.EdgeMode="Aliased"
+            SnapsToDevicePixels="True"
+            UseLayoutRounding="True" />
 </UserControl>
