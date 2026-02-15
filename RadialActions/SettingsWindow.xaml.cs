@@ -48,9 +48,34 @@ public partial class SettingsWindow : Window
 
     private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {
+        if (e.Uri.Scheme.Equals("radialactions", StringComparison.OrdinalIgnoreCase) &&
+            e.Uri.Host.Equals("licenses", StringComparison.OrdinalIgnoreCase))
+        {
+            OpenLicensesFile();
+            e.Handled = true;
+            return;
+        }
+
         Log.Information("Opening link from Settings/Help: {Url}", e.Uri.AbsoluteUri);
         Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
         e.Handled = true;
+    }
+
+    private static void OpenLicensesFile()
+    {
+        try
+        {
+            Process.Start("notepad", Path.Combine(App.MainFileInfo.DirectoryName, "Licenses.txt"));
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Couldn't open Licenses.txt");
+            MessageBox.Show(
+                $"Couldn't open Licenses.txt.\n\n{ex.Message}",
+                "Licenses",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
     }
 
     private void ActivationHotkey_PreviewKeyDown(object sender, KeyEventArgs e)

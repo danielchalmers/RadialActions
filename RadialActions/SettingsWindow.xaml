@@ -499,6 +499,12 @@
                                         🚀 Release Notes
                                     </Hyperlink>
                                 </TextBlock>
+                                <TextBlock Margin="0,0,12,8">
+                                    <Hyperlink NavigateUri="radialactions://licenses"
+                                               RequestNavigate="Hyperlink_RequestNavigate">
+                                        📜 Third-Party Licenses
+                                    </Hyperlink>
+                                </TextBlock>
                             </StackPanel>
                         </GroupBox>
 

@@ -24,4 +24,10 @@
     <Resource Include="RadialActions.ico" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Licenses.txt"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
