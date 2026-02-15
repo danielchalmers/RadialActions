@@ -18,6 +18,8 @@ public partial class PieControl : UserControl
     private const double HoverAnimationSeconds = 0.12;
     private const double PressAnimationSeconds = 0.08;
     private const double ReleaseAnimationSeconds = 0.10;
+    private const int DefaultSliceZIndex = 5;
+    private const int HoveredSliceZIndex = 9;
 
     public PieControl()
     {
@@ -275,11 +277,13 @@ public partial class PieControl : UserControl
             // Add hover effects once visual references exist.
             slice.MouseEnter += (s, e) =>
             {
+                Panel.SetZIndex(slice, HoveredSliceZIndex);
                 ApplyInteractionState(fillBrush, borderBrush, iconBrush, labelBrush, palette, isHovered: true, isPressed: false);
             };
 
             slice.MouseLeave += (s, e) =>
             {
+                Panel.SetZIndex(slice, DefaultSliceZIndex);
                 ApplyInteractionState(fillBrush, borderBrush, iconBrush, labelBrush, palette, isHovered: false, isPressed: false);
 
                 if (isMouseDown)
@@ -292,7 +296,7 @@ public partial class PieControl : UserControl
 
             ApplyInteractionState(fillBrush, borderBrush, iconBrush, labelBrush, palette, isHovered: false, isPressed: false);
             PieCanvas.Children.Add(slice);
-            Panel.SetZIndex(slice, 5);
+            Panel.SetZIndex(slice, DefaultSliceZIndex);
         }
     }
 
@@ -383,7 +387,7 @@ public partial class PieControl : UserControl
                 TextHoverColor: highlightText);
         }
 
-        var isDark = IsDarkThemeEnabled();
+        var isDark = IsDarkTheme();
         var accent = NormalizeAccentColor(SystemParameters.WindowGlassColor, isDark);
 
         var menuBackdropInner = isDark ? Color.FromArgb(126, 28, 28, 32) : Color.FromArgb(166, 255, 255, 255);
@@ -460,25 +464,41 @@ public partial class PieControl : UserControl
         return GetRelativeLuminance(color) < 0.45;
     }
 
-    private static bool IsDarkThemeEnabled()
+    private static bool IsDarkTheme()
     {
-        const string personalizePath = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
-        const string appsUseLightThemeValue = "AppsUseLightTheme";
-
-        try
+        if (TryGetThemeColor(SystemColors.WindowBrushKey, out var systemWindowColor))
         {
-            using var key = Registry.CurrentUser.OpenSubKey(personalizePath, writable: false);
-            if (key?.GetValue(appsUseLightThemeValue) is int appsUseLightTheme)
-            {
-                return appsUseLightTheme == 0;
-            }
+            return IsDarkColor(systemWindowColor);
         }
-        catch (Exception ex)
+
+        if (TryGetThemeColor("WindowBackgroundBrush", out var windowBackgroundColor))
         {
-            Log.Debug(ex, "Failed to read Windows app theme setting; falling back to color heuristics");
+            return IsDarkColor(windowBackgroundColor);
+        }
+
+        if (TryGetThemeColor("ControlFillColorDefaultBrush", out var controlFillColor))
+        {
+            return IsDarkColor(controlFillColor);
         }
 
         return IsDarkColor(SystemColors.WindowColor);
+    }
+
+    private static bool TryGetThemeColor(object key, out Color color)
+    {
+        color = default;
+        var resource = Application.Current?.TryFindResource(key);
+        switch (resource)
+        {
+            case SolidColorBrush brush:
+                color = brush.Color;
+                return true;
+            case Color directColor:
+                color = directColor;
+                return true;
+            default:
+                return false;
+        }
     }
 
     private double SnapToDevicePixels(double value, bool useXScale)
