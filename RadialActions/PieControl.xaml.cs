@@ -96,12 +96,14 @@ public partial class PieControl : UserControl
 
         if (!isVisible)
         {
+            Log.Debug("PieControl hidden; deferring render refresh");
             _renderRefreshPending = true;
             return;
         }
 
         if (_renderRefreshPending)
         {
+            Log.Debug("PieControl visible again; applying deferred render refresh");
             RequestRenderRefresh();
         }
     }
@@ -321,6 +323,11 @@ public partial class PieControl : UserControl
 
         if (Slices == null || Slices.Count == 0 || ActualWidth <= 0 || ActualHeight <= 0)
         {
+            Log.Debug(
+                "Skipping pie render (Slices={SliceCount}, Width={Width}, Height={Height})",
+                Slices?.Count ?? 0,
+                ActualWidth,
+                ActualHeight);
             _selectedSliceIndex = NoSelectedSliceIndex;
             return;
         }
@@ -339,6 +346,11 @@ public partial class PieControl : UserControl
                 SnapToDevicePixel,
                 out var layout))
         {
+            Log.Warning(
+                "Failed to create pie layout (Slices={SliceCount}, Width={Width}, Height={Height})",
+                Slices.Count,
+                ActualWidth,
+                ActualHeight);
             return;
         }
 
@@ -604,6 +616,10 @@ public partial class PieControl : UserControl
             _selectedSliceIndex = NoSelectedSliceIndex;
         }
 
+        Log.Debug(
+            "Pie menu rendered with {SliceCount} slices at {CanvasSize}px",
+            _sliceVisuals.Count,
+            canvasSize);
         RefreshVisualState(animate: false);
     }
 
@@ -775,6 +791,7 @@ public partial class PieControl : UserControl
 
             if (!IsLoaded || !IsVisible)
             {
+                Log.Debug("Skipping render refresh because PieControl is not ready (IsLoaded={IsLoaded}, IsVisible={IsVisible})", IsLoaded, IsVisible);
                 return;
             }
 

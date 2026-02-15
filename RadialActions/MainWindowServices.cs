@@ -16,6 +16,7 @@ internal sealed class MainWindowHotkeyService : IDisposable
     public void Initialize(IntPtr handle, EventHandler hotkeyHandler)
     {
         ArgumentNullException.ThrowIfNull(hotkeyHandler);
+        Log.Debug("Initializing hotkey service for handle {Handle}", handle);
         DisposeHotkeys();
 
         _hotkeyHandler = hotkeyHandler;
@@ -27,14 +28,19 @@ internal sealed class MainWindowHotkeyService : IDisposable
     {
         if (_hotkeys is null)
         {
+            Log.Debug("Skipping hotkey apply because service is not initialized");
             return;
         }
 
         _hotkeys.UnregisterAll();
         if (!string.IsNullOrWhiteSpace(hotkey))
         {
+            Log.Debug("Applying configured hotkey: {Hotkey}", hotkey);
             _hotkeys.RegisterHotkey(hotkey);
+            return;
         }
+
+        Log.Information("No activation hotkey configured; hotkeys are cleared");
     }
 
     public void Dispose()
@@ -55,6 +61,8 @@ internal sealed class MainWindowHotkeyService : IDisposable
         {
             return;
         }
+
+        Log.Debug("Disposing hotkey registrations");
 
         if (_hotkeyHandler is not null)
         {
