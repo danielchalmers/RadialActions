@@ -11,7 +11,7 @@ public static class UpdateService
     private static readonly Regex VersionPattern = new(@"\d+(?:\.\d+){0,3}", RegexOptions.Compiled);
     private static readonly HttpClient HttpClient = CreateHttpClient();
 
-    public static async Task<UpdateCheckResult> CheckAsync(Version currentVersion)
+    public static async Task<Version> GetLatestVersion()
     {
         try
         {
@@ -19,7 +19,7 @@ public static class UpdateService
             if (!response.IsSuccessStatusCode)
             {
                 Log.Warning("Update check failed with status code {StatusCode}", response.StatusCode);
-                return UpdateCheckResult.None;
+                return null;
             }
 
             var payload = await response.Content.ReadAsStringAsync();
@@ -34,21 +34,19 @@ public static class UpdateService
                     Log.Warning("Update check did not find any parseable release versions");
                 }
 
-                return UpdateCheckResult.None;
+                return null;
             }
 
-            return new UpdateCheckResult(
-                latestVersion,
-                CalculateIsUpdateAvailable(currentVersion, latestVersion));
+            return latestVersion;
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Failed to check for updates");
-            return UpdateCheckResult.None;
+            return null;
         }
     }
 
-    public static bool CalculateIsUpdateAvailable(Version currentVersion, Version latestVersion)
+    public static bool IsUpdateAvailable(Version currentVersion, Version latestVersion)
     {
         if (currentVersion == null || latestVersion == null)
         {
@@ -132,9 +130,4 @@ public static class UpdateService
         [JsonProperty("draft")]
         public bool Draft { get; init; }
     }
-}
-
-public readonly record struct UpdateCheckResult(Version LatestVersion, bool IsUpdateAvailable)
-{
-    public static UpdateCheckResult None { get; } = new(null, false);
 }

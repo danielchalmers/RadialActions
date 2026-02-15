@@ -3,9 +3,9 @@
 public class UpdateServiceTests
 {
     [Fact]
-    public void CalculateIsUpdateAvailable_WhenLatestGreater_ReturnsTrue()
+    public void IsUpdateAvailable_WhenLatestGreater_ReturnsTrue()
     {
-        var isAvailable = UpdateService.CalculateIsUpdateAvailable(new Version(1, 2, 0), new Version(1, 3, 0));
+        var isAvailable = UpdateService.IsUpdateAvailable(new Version(1, 2, 0), new Version(1, 3, 0));
 
         Assert.True(isAvailable);
     }
@@ -13,17 +13,17 @@ public class UpdateServiceTests
     [Theory]
     [InlineData("1.3.0", "1.3.0")]
     [InlineData("1.3.1", "1.3.0")]
-    public void CalculateIsUpdateAvailable_WhenLatestNotGreater_ReturnsFalse(string current, string latest)
+    public void IsUpdateAvailable_WhenLatestNotGreater_ReturnsFalse(string current, string latest)
     {
-        var isAvailable = UpdateService.CalculateIsUpdateAvailable(Version.Parse(current), Version.Parse(latest));
+        var isAvailable = UpdateService.IsUpdateAvailable(Version.Parse(current), Version.Parse(latest));
 
         Assert.False(isAvailable);
     }
 
     [Fact]
-    public void CalculateIsUpdateAvailable_WhenCurrentVersionMissing_ReturnsFalse()
+    public void IsUpdateAvailable_WhenCurrentVersionMissing_ReturnsFalse()
     {
-        var isAvailable = UpdateService.CalculateIsUpdateAvailable(null, new Version(1, 0, 0));
+        var isAvailable = UpdateService.IsUpdateAvailable(null, new Version(1, 0, 0));
 
         Assert.False(isAvailable);
     }

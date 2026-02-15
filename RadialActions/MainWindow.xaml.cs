@@ -249,10 +249,8 @@ public partial class MainWindow : Window
         try
         {
             var app = App.CurrentApp;
-            var updateCheckResult = await UpdateService.CheckAsync(app.CurrentVersion);
-
-            app.LatestVersion = updateCheckResult.LatestVersion;
-            app.IsUpdateAvailable = updateCheckResult.IsUpdateAvailable;
+            app.LatestVersion = await UpdateService.GetLatestVersion();
+            app.IsUpdateAvailable = UpdateService.IsUpdateAvailable(app.CurrentVersion, app.LatestVersion);
 
             if (!app.IsUpdateAvailable || app.LatestVersion == null)
             {
