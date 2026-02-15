@@ -163,12 +163,6 @@ public partial class PieAction : ObservableObject
     /// </summary>
     public void Execute()
     {
-        if (!IsEnabled)
-        {
-            Log.Debug("Skipping disabled action: {ActionName}", Name);
-            return;
-        }
-
         Log.Information($"Executing action: {Name} ({Type})");
 
         try
