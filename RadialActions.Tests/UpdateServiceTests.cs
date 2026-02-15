@@ -1,4 +1,4 @@
-namespace RadialActions.Tests;
+﻿namespace RadialActions.Tests;
 
 public class UpdateServiceTests
 {
