@@ -250,7 +250,7 @@ public partial class MainWindow : Window
         {
             var version = Version.TryParse(System.Diagnostics.FileVersionInfo.GetVersionInfo(App.MainFileInfo.FullName)?.FileVersion, out var v) ? v : null; // todo: move this to a property on App.xaml.cs
             await UpdateService.Instance.CheckAsync(version);
-            if (UpdateService.Instance.IsUpdateAvailable == true)
+            if (UpdateService.Instance.IsUpdateAvailable != true || UpdateService.Instance.LatestVersion == null)
             {
                 return;
             }

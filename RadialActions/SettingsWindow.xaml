@@ -510,7 +510,7 @@
                                 <TextBlock Margin="0,0,12,8">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
                                             RequestNavigate="Hyperlink_RequestNavigate">
-                                        🚀 Check for Updates
+                                        🚀 Release Notes
                                     </Hyperlink>
                                 </TextBlock>
                             </StackPanel>
