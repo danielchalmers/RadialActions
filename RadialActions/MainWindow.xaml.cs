@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Input;
 using System.Windows.Media.Animation;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
@@ -144,6 +145,7 @@ public partial class MainWindow : Window
         }
 
         Activate();
+        PieMenu.ResetInputState();
         IsHitTestVisible = true;
         BeginFadeIn();
     }
@@ -226,12 +228,19 @@ public partial class MainWindow : Window
         HideMenu();
     }
 
-    private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == System.Windows.Input.Key.Escape)
+        if (e.Key == Key.Escape)
         {
             Log.Debug("Escape pressed");
             HideMenu();
+            e.Handled = true;
+            return;
+        }
+
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (PieMenu.HandleMenuKey(key, Keyboard.Modifiers))
+        {
             e.Handled = true;
         }
     }
