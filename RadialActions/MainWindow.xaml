@@ -17,18 +17,23 @@
         WindowStyle="None"
         mc:Ignorable="d">
     <Window.Resources>
+        <CubicEase x:Key="MenuFadeInEaseOut"
+                   EasingMode="EaseOut" />
+        <CubicEase x:Key="MenuFadeOutEaseIn"
+                   EasingMode="EaseIn" />
+
         <Storyboard x:Key="FadeInStoryboard">
             <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             Duration="{StaticResource RadialMenuFadeInDuration}"
-                             EasingFunction="{StaticResource RadialMenuEaseOut}"
+                             Duration="0:0:0.22"
+                             EasingFunction="{StaticResource MenuFadeInEaseOut}"
                              To="1" />
         </Storyboard>
 
         <Storyboard x:Key="FadeOutStoryboard"
                     Completed="FadeOutStoryboard_Completed">
             <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             Duration="{StaticResource RadialMenuFadeOutDuration}"
-                             EasingFunction="{StaticResource RadialMenuEaseIn}"
+                             Duration="0:0:0.12"
+                             EasingFunction="{StaticResource MenuFadeOutEaseIn}"
                              To="0" />
         </Storyboard>
 

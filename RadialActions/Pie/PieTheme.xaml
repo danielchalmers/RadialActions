@@ -2,118 +2,118 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <!-- Surface -->
-    <SolidColorBrush x:Key="RadialMenuSurfaceBrush"
+    <SolidColorBrush x:Key="PieSurfaceBrush"
                      Color="#FFF8F8FA" />
-    <SolidColorBrush x:Key="RadialMenuSurfaceBrush.Light"
+    <SolidColorBrush x:Key="PieSurfaceBrush.Light"
                      Color="#FFF8F8FA" />
-    <SolidColorBrush x:Key="RadialMenuSurfaceBrush.Dark"
+    <SolidColorBrush x:Key="PieSurfaceBrush.Dark"
                      Color="#FF1F2126" />
 
-    <SolidColorBrush x:Key="RadialMenuSurfaceBorderBrush"
+    <SolidColorBrush x:Key="PieSurfaceBorderBrush"
                      Color="#FFD6D8DE" />
-    <SolidColorBrush x:Key="RadialMenuSurfaceBorderBrush.Light"
+    <SolidColorBrush x:Key="PieSurfaceBorderBrush.Light"
                      Color="#FFD6D8DE" />
-    <SolidColorBrush x:Key="RadialMenuSurfaceBorderBrush.Dark"
+    <SolidColorBrush x:Key="PieSurfaceBorderBrush.Dark"
                      Color="#FF3A3E45" />
 
-    <Color x:Key="RadialMenuShadowColor">#FF000000</Color>
+    <Color x:Key="PieShadowColor">#FF000000</Color>
 
     <!-- Slices -->
-    <SolidColorBrush x:Key="RadialMenuSliceFillBrush"
+    <SolidColorBrush x:Key="PieSliceFillBrush"
                      Color="#FFF3F4F6" />
-    <SolidColorBrush x:Key="RadialMenuSliceFillBrush.Light"
+    <SolidColorBrush x:Key="PieSliceFillBrush.Light"
                      Color="#FFF3F4F6" />
-    <SolidColorBrush x:Key="RadialMenuSliceFillBrush.Dark"
+    <SolidColorBrush x:Key="PieSliceFillBrush.Dark"
                      Color="#FF262A30" />
 
-    <SolidColorBrush x:Key="RadialMenuSliceHoverBrush"
+    <SolidColorBrush x:Key="PieSliceHoverBrush"
                      Color="#FFE8EBF0" />
-    <SolidColorBrush x:Key="RadialMenuSliceHoverBrush.Light"
+    <SolidColorBrush x:Key="PieSliceHoverBrush.Light"
                      Color="#FFE8EBF0" />
-    <SolidColorBrush x:Key="RadialMenuSliceHoverBrush.Dark"
+    <SolidColorBrush x:Key="PieSliceHoverBrush.Dark"
                      Color="#FF303641" />
 
-    <SolidColorBrush x:Key="RadialMenuSlicePressedBrush"
+    <SolidColorBrush x:Key="PieSlicePressedBrush"
                      Color="#FFDCE2EB" />
-    <SolidColorBrush x:Key="RadialMenuSlicePressedBrush.Light"
+    <SolidColorBrush x:Key="PieSlicePressedBrush.Light"
                      Color="#FFDCE2EB" />
-    <SolidColorBrush x:Key="RadialMenuSlicePressedBrush.Dark"
+    <SolidColorBrush x:Key="PieSlicePressedBrush.Dark"
                      Color="#FF3A4250" />
 
-    <SolidColorBrush x:Key="RadialMenuSliceBorderBrush"
+    <SolidColorBrush x:Key="PieSliceBorderBrush"
                      Color="#FFD0D4DC" />
-    <SolidColorBrush x:Key="RadialMenuSliceBorderBrush.Light"
+    <SolidColorBrush x:Key="PieSliceBorderBrush.Light"
                      Color="#FFD0D4DC" />
-    <SolidColorBrush x:Key="RadialMenuSliceBorderBrush.Dark"
+    <SolidColorBrush x:Key="PieSliceBorderBrush.Dark"
                      Color="#FF464C58" />
 
     <!-- Hub -->
-    <SolidColorBrush x:Key="RadialMenuHubFillBrush"
+    <SolidColorBrush x:Key="PieHubFillBrush"
                      Color="#FFF6F7F9" />
-    <SolidColorBrush x:Key="RadialMenuHubFillBrush.Light"
+    <SolidColorBrush x:Key="PieHubFillBrush.Light"
                      Color="#FFF6F7F9" />
-    <SolidColorBrush x:Key="RadialMenuHubFillBrush.Dark"
+    <SolidColorBrush x:Key="PieHubFillBrush.Dark"
                      Color="#FF252A31" />
 
-    <SolidColorBrush x:Key="RadialMenuHubHoverBrush"
+    <SolidColorBrush x:Key="PieHubHoverBrush"
                      Color="#FFE7ECF4" />
-    <SolidColorBrush x:Key="RadialMenuHubHoverBrush.Light"
+    <SolidColorBrush x:Key="PieHubHoverBrush.Light"
                      Color="#FFE7ECF4" />
-    <SolidColorBrush x:Key="RadialMenuHubHoverBrush.Dark"
+    <SolidColorBrush x:Key="PieHubHoverBrush.Dark"
                      Color="#FF353D4A" />
 
-    <SolidColorBrush x:Key="RadialMenuHubBorderBrush"
+    <SolidColorBrush x:Key="PieHubBorderBrush"
                      Color="#FFC6CCD8" />
-    <SolidColorBrush x:Key="RadialMenuHubBorderBrush.Light"
+    <SolidColorBrush x:Key="PieHubBorderBrush.Light"
                      Color="#FFC6CCD8" />
-    <SolidColorBrush x:Key="RadialMenuHubBorderBrush.Dark"
+    <SolidColorBrush x:Key="PieHubBorderBrush.Dark"
                      Color="#FF4A5363" />
 
     <!-- Typography -->
-    <SolidColorBrush x:Key="RadialMenuTextBrush"
+    <SolidColorBrush x:Key="PieTextBrush"
                      Color="#FF1D2736" />
-    <SolidColorBrush x:Key="RadialMenuTextBrush.Light"
+    <SolidColorBrush x:Key="PieTextBrush.Light"
                      Color="#FF1D2736" />
-    <SolidColorBrush x:Key="RadialMenuTextBrush.Dark"
+    <SolidColorBrush x:Key="PieTextBrush.Dark"
                      Color="#FFE6ECF8" />
 
     <!-- Geometry and spacing -->
-    <sys:Double x:Key="RadialMenuSliceStrokeThickness">1.5</sys:Double>
-    <sys:Double x:Key="RadialMenuHubStrokeThickness">1.5</sys:Double>
-    <sys:Double x:Key="RadialMenuSliceContentMaxWidthRatio">0.38</sys:Double>
-    <sys:Double x:Key="RadialMenuIconToLabelSpacing">3</sys:Double>
-    <Thickness x:Key="RadialMenuSliceContentPadding">2,2,2,2</Thickness>
+    <sys:Double x:Key="PieSliceStrokeThickness">1.5</sys:Double>
+    <sys:Double x:Key="PieHubStrokeThickness">1.5</sys:Double>
+    <sys:Double x:Key="PieSliceContentMaxWidthRatio">0.38</sys:Double>
+    <sys:Double x:Key="PieIconToLabelSpacing">3</sys:Double>
+    <Thickness x:Key="PieSliceContentPadding">2,2,2,2</Thickness>
 
     <!-- Motion -->
-    <Duration x:Key="RadialMenuFadeInDuration">0:0:0.22</Duration>
-    <Duration x:Key="RadialMenuFadeOutDuration">0:0:0.12</Duration>
-    <Duration x:Key="RadialMenuHoverDuration">0:0:0.09</Duration>
-    <Duration x:Key="RadialMenuPressDuration">0:0:0.08</Duration>
-    <CubicEase x:Key="RadialMenuEaseOut"
+    <Duration x:Key="PieFadeInDuration">0:0:0.22</Duration>
+    <Duration x:Key="PieFadeOutDuration">0:0:0.12</Duration>
+    <Duration x:Key="PieHoverDuration">0:0:0.09</Duration>
+    <Duration x:Key="PiePressDuration">0:0:0.08</Duration>
+    <CubicEase x:Key="PieEaseOut"
                EasingMode="EaseOut" />
-    <CubicEase x:Key="RadialMenuEaseIn"
+    <CubicEase x:Key="PieEaseIn"
                EasingMode="EaseIn" />
-    <QuadraticEase x:Key="RadialMenuEaseStandard"
+    <QuadraticEase x:Key="PieEaseStandard"
                    EasingMode="EaseOut" />
 
     <!-- Effects -->
-    <DropShadowEffect x:Key="RadialMenuAmbientShadowEffect"
+    <DropShadowEffect x:Key="PieAmbientShadowEffect"
                       BlurRadius="20"
-                      Color="{StaticResource RadialMenuShadowColor}"
+                      Color="{StaticResource PieShadowColor}"
                       Direction="270"
                       Opacity="0.24"
                       RenderingBias="Quality"
                       ShadowDepth="0" />
 
     <!-- Reusable styles -->
-    <Style x:Key="RadialMenuSlicePathStyle"
+    <Style x:Key="PieSlicePathStyle"
            TargetType="{x:Type Path}">
         <Setter Property="Fill"
-                Value="{DynamicResource RadialMenuSliceFillBrush}" />
+                Value="{DynamicResource PieSliceFillBrush}" />
         <Setter Property="Stroke"
-                Value="{DynamicResource RadialMenuSliceBorderBrush}" />
+                Value="{DynamicResource PieSliceBorderBrush}" />
         <Setter Property="StrokeThickness"
-                Value="{DynamicResource RadialMenuSliceStrokeThickness}" />
+                Value="{DynamicResource PieSliceStrokeThickness}" />
         <Setter Property="StrokeStartLineCap"
                 Value="Round" />
         <Setter Property="StrokeEndLineCap"
@@ -124,7 +124,7 @@
                 Value="True" />
     </Style>
 
-    <Style x:Key="RadialMenuHubContainerStyle"
+    <Style x:Key="PieHubContainerStyle"
            TargetType="{x:Type Grid}">
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
@@ -132,22 +132,22 @@
                 Value="True" />
     </Style>
 
-    <Style x:Key="RadialMenuHubEllipseStyle"
+    <Style x:Key="PieHubEllipseStyle"
            TargetType="{x:Type Ellipse}">
         <Setter Property="Fill"
-                Value="{DynamicResource RadialMenuHubFillBrush}" />
+                Value="{DynamicResource PieHubFillBrush}" />
         <Setter Property="Stroke"
-                Value="{DynamicResource RadialMenuHubBorderBrush}" />
+                Value="{DynamicResource PieHubBorderBrush}" />
         <Setter Property="StrokeThickness"
-                Value="{DynamicResource RadialMenuHubStrokeThickness}" />
+                Value="{DynamicResource PieHubStrokeThickness}" />
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
     </Style>
 
-    <Style x:Key="RadialMenuIconTextStyle"
+    <Style x:Key="PieIconTextStyle"
            TargetType="{x:Type TextBlock}">
         <Setter Property="Foreground"
-                Value="{DynamicResource RadialMenuTextBrush}" />
+                Value="{DynamicResource PieTextBrush}" />
         <Setter Property="FontSize"
                 Value="20" />
         <Setter Property="FontWeight"
@@ -162,10 +162,10 @@
                 Value="Center" />
     </Style>
 
-    <Style x:Key="RadialMenuLabelTextStyle"
+    <Style x:Key="PieLabelTextStyle"
            TargetType="{x:Type TextBlock}">
         <Setter Property="Foreground"
-                Value="{DynamicResource RadialMenuTextBrush}" />
+                Value="{DynamicResource PieTextBrush}" />
         <Setter Property="FontSize"
                 Value="11" />
         <Setter Property="FontWeight"

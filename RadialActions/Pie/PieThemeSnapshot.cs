@@ -108,36 +108,36 @@ internal sealed class PieThemeSnapshot
             return fallbackValue;
         }
 
-        var sliceStrokeThickness = Math.Max(1, ToDouble(ResolveResource("RadialMenuSliceStrokeThickness"), 1.5));
-        var hubStrokeThickness = Math.Max(1, ToDouble(ResolveResource("RadialMenuHubStrokeThickness"), 1.5));
-        var iconToLabelSpacing = Math.Max(0, ToDouble(ResolveResource("RadialMenuIconToLabelSpacing"), 3));
-        var contentMaxWidthRatio = Math.Clamp(ToDouble(ResolveResource("RadialMenuSliceContentMaxWidthRatio"), 0.38), 0.2, 0.8);
-        var contentPadding = ResolveResource("RadialMenuSliceContentPadding") as Thickness? ?? new Thickness(2);
+        var sliceStrokeThickness = Math.Max(1, ToDouble(ResolveResource("PieSliceStrokeThickness"), 1.5));
+        var hubStrokeThickness = Math.Max(1, ToDouble(ResolveResource("PieHubStrokeThickness"), 1.5));
+        var iconToLabelSpacing = Math.Max(0, ToDouble(ResolveResource("PieIconToLabelSpacing"), 3));
+        var contentMaxWidthRatio = Math.Clamp(ToDouble(ResolveResource("PieSliceContentMaxWidthRatio"), 0.38), 0.2, 0.8);
+        var contentPadding = ResolveResource("PieSliceContentPadding") as Thickness? ?? new Thickness(2);
 
-        var hoverDuration = ToDuration(ResolveResource("RadialMenuHoverDuration"), new Duration(TimeSpan.FromMilliseconds(100)));
-        var pressDuration = ToDuration(ResolveResource("RadialMenuPressDuration"), new Duration(TimeSpan.FromMilliseconds(75)));
-        var standardEasing = ResolveResource("RadialMenuEaseStandard") as IEasingFunction
+        var hoverDuration = ToDuration(ResolveResource("PieHoverDuration"), new Duration(TimeSpan.FromMilliseconds(100)));
+        var pressDuration = ToDuration(ResolveResource("PiePressDuration"), new Duration(TimeSpan.FromMilliseconds(75)));
+        var standardEasing = ResolveResource("PieEaseStandard") as IEasingFunction
             ?? new QuadraticEase { EasingMode = EasingMode.EaseOut };
 
-        var slicePathStyle = ResolveResource("RadialMenuSlicePathStyle") as Style;
-        var hubEllipseStyle = ResolveResource("RadialMenuHubEllipseStyle") as Style;
-        var hubContainerStyle = ResolveResource("RadialMenuHubContainerStyle") as Style;
-        var iconTextStyle = ResolveResource("RadialMenuIconTextStyle") as Style;
-        var labelTextStyle = ResolveResource("RadialMenuLabelTextStyle") as Style;
-        var ambientShadowEffect = ResolveResource("RadialMenuAmbientShadowEffect") as Effect;
+        var slicePathStyle = ResolveResource("PieSlicePathStyle") as Style;
+        var hubEllipseStyle = ResolveResource("PieHubEllipseStyle") as Style;
+        var hubContainerStyle = ResolveResource("PieHubContainerStyle") as Style;
+        var iconTextStyle = ResolveResource("PieIconTextStyle") as Style;
+        var labelTextStyle = ResolveResource("PieLabelTextStyle") as Style;
+        var ambientShadowEffect = ResolveResource("PieAmbientShadowEffect") as Effect;
 
         var accentColor = GetSystemAccentColor();
-        var surfaceColor = ToSolidColorBrush(ResolveResource("RadialMenuSurfaceBrush"), SystemColors.ControlColor).Color;
-        var surfaceBorderColor = ToSolidColorBrush(ResolveResource("RadialMenuSurfaceBorderBrush"), SystemColors.ControlDarkColor).Color;
-        var sliceColor = ToSolidColorBrush(ResolveResource("RadialMenuSliceFillBrush"), SystemColors.ControlColor).Color;
-        var hoverColor = ToSolidColorBrush(ResolveResource("RadialMenuSliceHoverBrush"), SystemColors.ControlLightColor).Color;
-        var pressedColor = ToSolidColorBrush(ResolveResource("RadialMenuSlicePressedBrush"), SystemColors.ControlDarkColor).Color;
-        var borderColor = ToSolidColorBrush(ResolveResource("RadialMenuSliceBorderBrush"), SystemColors.ControlDarkColor).Color;
-        var hubColor = ToSolidColorBrush(ResolveResource("RadialMenuHubFillBrush"), SystemColors.ControlColor).Color;
-        var hubHoverColor = ToSolidColorBrush(ResolveResource("RadialMenuHubHoverBrush"), SystemColors.ControlLightColor).Color;
-        var hubBorderColor = ToSolidColorBrush(ResolveResource("RadialMenuHubBorderBrush"), SystemColors.ControlDarkColor).Color;
+        var surfaceColor = ToSolidColorBrush(ResolveResource("PieSurfaceBrush"), SystemColors.ControlColor).Color;
+        var surfaceBorderColor = ToSolidColorBrush(ResolveResource("PieSurfaceBorderBrush"), SystemColors.ControlDarkColor).Color;
+        var sliceColor = ToSolidColorBrush(ResolveResource("PieSliceFillBrush"), SystemColors.ControlColor).Color;
+        var hoverColor = ToSolidColorBrush(ResolveResource("PieSliceHoverBrush"), SystemColors.ControlLightColor).Color;
+        var pressedColor = ToSolidColorBrush(ResolveResource("PieSlicePressedBrush"), SystemColors.ControlDarkColor).Color;
+        var borderColor = ToSolidColorBrush(ResolveResource("PieSliceBorderBrush"), SystemColors.ControlDarkColor).Color;
+        var hubColor = ToSolidColorBrush(ResolveResource("PieHubFillBrush"), SystemColors.ControlColor).Color;
+        var hubHoverColor = ToSolidColorBrush(ResolveResource("PieHubHoverBrush"), SystemColors.ControlLightColor).Color;
+        var hubBorderColor = ToSolidColorBrush(ResolveResource("PieHubBorderBrush"), SystemColors.ControlDarkColor).Color;
         var iconTextColor = accentColor;
-        var labelTextColor = ToSolidColorBrush(ResolveResource("RadialMenuTextBrush"), SystemColors.WindowTextColor).Color;
+        var labelTextColor = ToSolidColorBrush(ResolveResource("PieTextBrush"), SystemColors.WindowTextColor).Color;
 
         if (isHighContrast)
         {

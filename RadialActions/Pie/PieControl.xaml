@@ -9,6 +9,14 @@
              SnapsToDevicePixels="True"
              UseLayoutRounding="True"
              mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="PieTheme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Canvas Name="PieCanvas"
             ClipToBounds="False"
             SnapsToDevicePixels="True"
