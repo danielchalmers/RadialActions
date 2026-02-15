@@ -107,6 +107,11 @@ public partial class PieControl : UserControl
 
     private void CreatePieMenu()
     {
+        const int sliceZIndex = 10;
+        const int hoveredSliceZIndex = 14;
+        const int contentZIndex = 15;
+        const int centerZIndex = 20;
+
         PieCanvas.Children.Clear();
 
         if (Slices == null || Slices.Count == 0 || ActualWidth <= 0 || ActualHeight <= 0)
@@ -285,7 +290,7 @@ public partial class PieControl : UserControl
 
             Canvas.SetLeft(centerCloseTarget, SnapToDevicePixel(center.X - innerRadius, isXAxis: true));
             Canvas.SetTop(centerCloseTarget, SnapToDevicePixel(center.Y - innerRadius, isXAxis: false));
-            Panel.SetZIndex(centerCloseTarget, 20);
+            Panel.SetZIndex(centerCloseTarget, centerZIndex);
             PieCanvas.Children.Add(centerCloseTarget);
         }
 
@@ -338,12 +343,14 @@ public partial class PieControl : UserControl
 
             slice.MouseEnter += (_, _) =>
             {
+                Panel.SetZIndex(slice, hoveredSliceZIndex);
                 AnimateSliceColor(fillBrush, hoverColor, hoverDuration, standardEasing);
                 AnimateSliceColor(strokeBrush, borderHoverColor, hoverDuration, standardEasing);
             };
 
             slice.MouseLeave += (_, _) =>
             {
+                Panel.SetZIndex(slice, sliceZIndex);
                 AnimateSliceColor(fillBrush, sliceColor, hoverDuration, standardEasing);
                 AnimateSliceColor(strokeBrush, borderColor, hoverDuration, standardEasing);
 
@@ -362,7 +369,7 @@ public partial class PieControl : UserControl
             contextMenu.Items.Add(editMenuItem);
             slice.ContextMenu = contextMenu;
 
-            Panel.SetZIndex(slice, 10);
+            Panel.SetZIndex(slice, sliceZIndex);
             PieCanvas.Children.Add(slice);
 
             var textRadius = innerRadius > 0 ? (outerRadius + innerRadius) / 2 : outerRadius * 0.6;
@@ -426,7 +433,7 @@ public partial class PieControl : UserControl
             Canvas.SetLeft(contentPanel, SnapToDevicePixel(textPosition.X - (contentSize.Width / 2), isXAxis: true));
             Canvas.SetTop(contentPanel, SnapToDevicePixel(textPosition.Y - (contentSize.Height / 2), isXAxis: false));
 
-            Panel.SetZIndex(contentPanel, 15);
+            Panel.SetZIndex(contentPanel, contentZIndex);
             PieCanvas.Children.Add(contentPanel);
         }
     }
