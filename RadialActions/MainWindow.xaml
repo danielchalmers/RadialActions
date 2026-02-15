@@ -13,11 +13,7 @@
         Loaded="Window_Loaded" Opacity="0"
         ResizeMode="NoResize" ShowInTaskbar="False"
         SizeToContent="WidthAndHeight"
-        SnapsToDevicePixels="True"
-        TextOptions.TextFormattingMode="Display"
-        TextOptions.TextRenderingMode="ClearType"
         Topmost="True" Unloaded="Window_Unloaded"
-        UseLayoutRounding="True"
         WindowStyle="None"
         mc:Ignorable="d">
     <Window.Resources>
