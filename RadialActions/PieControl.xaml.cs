@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 
@@ -23,6 +22,11 @@ public partial class PieControl : UserControl
     public PieControl()
     {
         InitializeComponent();
+        UseLayoutRounding = true;
+        SnapsToDevicePixels = true;
+        PieCanvas.UseLayoutRounding = true;
+        PieCanvas.SnapsToDevicePixels = true;
+        TextOptions.SetTextFormattingMode(this, TextFormattingMode.Display);
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
         SizeChanged += (s, e) => CreatePieMenu();
@@ -139,13 +143,6 @@ public partial class PieControl : UserControl
                 Fill = new SolidColorBrush(palette.CenterFill),
                 Stroke = new SolidColorBrush(palette.CenterStroke),
                 StrokeThickness = 1.5,
-                Effect = new DropShadowEffect
-                {
-                    BlurRadius = 14,
-                    ShadowDepth = 0,
-                    Color = palette.MenuShadow,
-                    Opacity = 0.25
-                },
                 IsHitTestVisible = false
             };
             Canvas.SetLeft(centerHole, center.X - innerRadius);
@@ -168,7 +165,6 @@ public partial class PieControl : UserControl
             var borderBrush = new SolidColorBrush(palette.SliceBorder);
             var iconBrush = new SolidColorBrush(palette.IconColor);
             var labelBrush = new SolidColorBrush(palette.TextColor);
-            var contentScaleTransform = new ScaleTransform(1, 1);
             slice.Fill = fillBrush;
             slice.Stroke = borderBrush;
             slice.StrokeThickness = 1.5;
@@ -185,7 +181,6 @@ public partial class PieControl : UserControl
                 isMouseDown = true;
                 slice.CaptureMouse();
                 AnimateScale(sliceScaleTransform, 0.965, PressAnimationSeconds);
-                AnimateScale(contentScaleTransform, 0.985, PressAnimationSeconds);
                 ApplyInteractionState(fillBrush, borderBrush, iconBrush, labelBrush, palette, isHovered: true, isPressed: true);
                 e.Handled = true;
             };
@@ -200,7 +195,6 @@ public partial class PieControl : UserControl
                     var keepHoverState = slice.IsMouseOver;
                     ApplyInteractionState(fillBrush, borderBrush, iconBrush, labelBrush, palette, isHovered: keepHoverState, isPressed: false);
                     AnimateScale(sliceScaleTransform, 1.0, ReleaseAnimationSeconds);
-                    AnimateScale(contentScaleTransform, 1.0, ReleaseAnimationSeconds);
                     SliceClicked?.Invoke(this, new SliceClickEventArgs(sliceAction));
                     e.Handled = true;
                 }
@@ -229,8 +223,7 @@ public partial class PieControl : UserControl
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     IsHitTestVisible = false,
-                    RenderTransformOrigin = new Point(0.5, 0.5),
-                    RenderTransform = contentScaleTransform
+                    RenderTransformOrigin = new Point(0.5, 0.5)
                 };
 
                 if (showIcon)
@@ -270,8 +263,10 @@ public partial class PieControl : UserControl
                 contentPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                 var contentSize = contentPanel.DesiredSize;
 
-                Canvas.SetLeft(contentPanel, textPosition.X - (contentSize.Width / 2));
-                Canvas.SetTop(contentPanel, textPosition.Y - (contentSize.Height / 2));
+                var rawLeft = textPosition.X - (contentSize.Width / 2);
+                var rawTop = textPosition.Y - (contentSize.Height / 2);
+                Canvas.SetLeft(contentPanel, SnapToDevicePixels(rawLeft, true));
+                Canvas.SetTop(contentPanel, SnapToDevicePixels(rawTop, false));
 
                 PieCanvas.Children.Add(contentPanel);
                 Panel.SetZIndex(contentPanel, 10);
@@ -281,13 +276,11 @@ public partial class PieControl : UserControl
             slice.MouseEnter += (s, e) =>
             {
                 ApplyInteractionState(fillBrush, borderBrush, iconBrush, labelBrush, palette, isHovered: true, isPressed: false);
-                AnimateScale(contentScaleTransform, 1.025, HoverAnimationSeconds);
             };
 
             slice.MouseLeave += (s, e) =>
             {
                 ApplyInteractionState(fillBrush, borderBrush, iconBrush, labelBrush, palette, isHovered: false, isPressed: false);
-                AnimateScale(contentScaleTransform, 1.0, HoverAnimationSeconds);
 
                 if (isMouseDown)
                 {
@@ -324,14 +317,7 @@ public partial class PieControl : UserControl
             Fill = backdropBrush,
             Stroke = new SolidColorBrush(palette.MenuBackdropBorder),
             StrokeThickness = 1,
-            IsHitTestVisible = false,
-            Effect = new DropShadowEffect
-            {
-                BlurRadius = 36,
-                ShadowDepth = 0,
-                Color = palette.MenuShadow,
-                Opacity = 0.4
-            }
+            IsHitTestVisible = false
         };
 
         Canvas.SetLeft(backdrop, center.X - radius);
@@ -384,7 +370,6 @@ public partial class PieControl : UserControl
                 MenuBackdropInner: window,
                 MenuBackdropOuter: window,
                 MenuBackdropBorder: windowText,
-                MenuShadow: windowText,
                 SliceFill: window,
                 SliceFillHover: highlight,
                 SliceFillPressed: BlendColor(highlight, windowText, 0.15),
@@ -398,13 +383,12 @@ public partial class PieControl : UserControl
                 TextHoverColor: highlightText);
         }
 
-        var isDark = IsDarkColor(SystemColors.WindowColor);
+        var isDark = IsDarkThemeEnabled();
         var accent = NormalizeAccentColor(SystemParameters.WindowGlassColor, isDark);
 
         var menuBackdropInner = isDark ? Color.FromArgb(126, 28, 28, 32) : Color.FromArgb(166, 255, 255, 255);
         var menuBackdropOuter = isDark ? Color.FromArgb(84, 12, 12, 14) : Color.FromArgb(100, 245, 247, 250);
         var menuBackdropBorder = isDark ? Color.FromArgb(112, 255, 255, 255) : Color.FromArgb(62, 16, 24, 38);
-        var menuShadow = isDark ? Color.FromArgb(180, 0, 0, 0) : Color.FromArgb(120, 22, 26, 36);
 
         var sliceFill = isDark ? Color.FromArgb(214, 42, 42, 47) : Color.FromArgb(228, 250, 250, 252);
         var sliceFillHover = isDark
@@ -443,7 +427,6 @@ public partial class PieControl : UserControl
             MenuBackdropInner: menuBackdropInner,
             MenuBackdropOuter: menuBackdropOuter,
             MenuBackdropBorder: menuBackdropBorder,
-            MenuShadow: menuShadow,
             SliceFill: sliceFill,
             SliceFillHover: sliceFillHover,
             SliceFillPressed: sliceFillPressed,
@@ -475,6 +458,34 @@ public partial class PieControl : UserControl
     private static bool IsDarkColor(Color color)
     {
         return GetRelativeLuminance(color) < 0.45;
+    }
+
+    private static bool IsDarkThemeEnabled()
+    {
+        const string personalizePath = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+        const string appsUseLightThemeValue = "AppsUseLightTheme";
+
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(personalizePath, writable: false);
+            if (key?.GetValue(appsUseLightThemeValue) is int appsUseLightTheme)
+            {
+                return appsUseLightTheme == 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Debug(ex, "Failed to read Windows app theme setting; falling back to color heuristics");
+        }
+
+        return IsDarkColor(SystemColors.WindowColor);
+    }
+
+    private double SnapToDevicePixels(double value, bool useXScale)
+    {
+        var dpi = VisualTreeHelper.GetDpi(this);
+        var scale = useXScale ? dpi.DpiScaleX : dpi.DpiScaleY;
+        return Math.Round(value * scale) / scale;
     }
 
     private static Color NormalizeAccentColor(Color accentColor, bool isDark)
@@ -648,7 +659,6 @@ public partial class PieControl : UserControl
         Color MenuBackdropInner,
         Color MenuBackdropOuter,
         Color MenuBackdropBorder,
-        Color MenuShadow,
         Color SliceFill,
         Color SliceFillHover,
         Color SliceFillPressed,
