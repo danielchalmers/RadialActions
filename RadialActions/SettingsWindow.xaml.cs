@@ -93,7 +93,6 @@ public partial class SettingsWindow : Window
 
     private void OnClosed(object sender, EventArgs e)
     {
-        _viewModel.Dispose();
         SaveSettings();
     }
 }
@@ -101,7 +100,7 @@ public partial class SettingsWindow : Window
 /// <summary>
 /// ViewModel for the settings window.
 /// </summary>
-public partial class SettingsWindowViewModel : ObservableObject, IDisposable
+public partial class SettingsWindowViewModel : ObservableObject
 {
     public const string CustomKeyActionId = "__custom__";
     private const string LegacyDefaultIcon = "⭐";
@@ -143,25 +142,16 @@ public partial class SettingsWindowViewModel : ObservableObject, IDisposable
     /// Whether an action is currently selected.
     /// </summary>
     public bool HasSelectedAction => SelectedAction != null;
-    public bool IsUpdateBannerVisible => UpdateService.Instance.IsUpdateAvailable;
-    public string UpdateBannerVersionLabel => UpdateService.Instance.LatestVersion;
-    public string UpdateReleaseUrl => UpdateService.Instance.ReleaseUrl;
 
     public SettingsWindowViewModel(Settings settings)
     {
         Settings = settings;
-        UpdateService.Instance.CheckCompleted += OnUpdateCheckCompleted;
         TrackExistingDefaults();
         if (Settings.Actions.Count > 0)
         {
             SelectedActionIndex = 0;
             SelectedAction = Settings.Actions[0];
         }
-    }
-
-    public void Dispose()
-    {
-        UpdateService.Instance.CheckCompleted -= OnUpdateCheckCompleted;
     }
 
     public void SelectAction(PieAction action)
@@ -407,25 +397,6 @@ public partial class SettingsWindowViewModel : ObservableObject, IDisposable
                 MessageBoxImage.Error);
         }
     }
-
-    private void OnUpdateCheckCompleted(UpdateCheckResult _)
-    {
-        if (!Application.Current.Dispatcher.CheckAccess())
-        {
-            Application.Current.Dispatcher.InvokeAsync(RaiseUpdateBannerProperties);
-            return;
-        }
-
-        RaiseUpdateBannerProperties();
-    }
-
-    private void RaiseUpdateBannerProperties()
-    {
-        OnPropertyChanged(nameof(IsUpdateBannerVisible));
-        OnPropertyChanged(nameof(UpdateBannerVersionLabel));
-        OnPropertyChanged(nameof(UpdateReleaseUrl));
-    }
-
 
     partial void OnSelectedActionChanged(PieAction oldValue, PieAction newValue)
     {

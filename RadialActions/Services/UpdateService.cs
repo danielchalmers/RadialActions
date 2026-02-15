@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Net.Http;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json.Linq;
 
 namespace RadialActions;
 
-internal sealed class UpdateService
+public sealed partial class UpdateService : ObservableObject
 {
     public const string ReleasesPageUrl = "https://github.com/danielchalmers/RadialActions/releases";
     private const string ReleasesApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases?per_page=32";
@@ -19,12 +20,29 @@ internal sealed class UpdateService
 
     public static UpdateService Instance { get; } = new();
 
-    public event Action<UpdateCheckResult> CheckCompleted;
+    public bool IsEnabled
+    {
+        get => _isEnabled;
+        private set => SetProperty(ref _isEnabled, value);
+    }
 
-    public bool IsEnabled => _isEnabled;
-    public bool IsUpdateAvailable => _isUpdateAvailable;
-    public string LatestVersion => _latestVersion;
-    public string ReleaseUrl => _releaseUrl;
+    public bool IsUpdateAvailable
+    {
+        get => _isUpdateAvailable;
+        private set => SetProperty(ref _isUpdateAvailable, value);
+    }
+
+    public string LatestVersion
+    {
+        get => _latestVersion;
+        private set => SetProperty(ref _latestVersion, value);
+    }
+
+    public string ReleaseUrl
+    {
+        get => _releaseUrl;
+        private set => SetProperty(ref _releaseUrl, value);
+    }
 
     public async Task<UpdateCheckResult> CheckOnceAsync(bool isEnabled, CancellationToken cancellationToken = default)
     {
@@ -38,19 +56,17 @@ internal sealed class UpdateService
             ? await CheckForUpdatesAsync(cancellationToken)
             : UpdateCheckResult.Disabled;
         SetCurrentResult(result);
-
-        CheckCompleted?.Invoke(result);
         return result;
     }
 
-    private UpdateCheckResult GetCurrentResult() => new(_isEnabled, _isUpdateAvailable, _latestVersion, _releaseUrl);
+    private UpdateCheckResult GetCurrentResult() => new(IsEnabled, IsUpdateAvailable, LatestVersion, ReleaseUrl);
 
     private void SetCurrentResult(UpdateCheckResult result)
     {
-        _isEnabled = result.IsEnabled;
-        _isUpdateAvailable = result.IsUpdateAvailable;
-        _latestVersion = result.LatestVersion ?? string.Empty;
-        _releaseUrl = string.IsNullOrWhiteSpace(result.ReleaseUrl) ? ReleasesPageUrl : result.ReleaseUrl;
+        IsEnabled = result.IsEnabled;
+        IsUpdateAvailable = result.IsUpdateAvailable;
+        LatestVersion = result.LatestVersion ?? string.Empty;
+        ReleaseUrl = string.IsNullOrWhiteSpace(result.ReleaseUrl) ? ReleasesPageUrl : result.ReleaseUrl;
     }
 
     private static async Task<UpdateCheckResult> CheckForUpdatesAsync(CancellationToken cancellationToken)
