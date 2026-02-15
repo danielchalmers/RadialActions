@@ -321,10 +321,15 @@ public partial class PieControl : UserControl
         _centerVisual = null;
         _renderRefreshPending = false;
 
-        if (Slices == null || Slices.Count == 0 || ActualWidth <= 0 || ActualHeight <= 0)
+        var enabledSlices = Slices?
+            .Where(slice => slice?.IsEnabled == true)
+            .ToList();
+
+        if (enabledSlices == null || enabledSlices.Count == 0 || ActualWidth <= 0 || ActualHeight <= 0)
         {
             Log.Debug(
-                "Skipping pie render (Slices={SliceCount}, Width={Width}, Height={Height})",
+                "Skipping pie render (EnabledSlices={EnabledSliceCount}, TotalSlices={TotalSliceCount}, Width={Width}, Height={Height})",
+                enabledSlices?.Count ?? 0,
                 Slices?.Count ?? 0,
                 ActualWidth,
                 ActualHeight);
@@ -340,15 +345,16 @@ public partial class PieControl : UserControl
         if (!PieLayoutCalculator.TryCreateLayout(
                 ActualWidth,
                 ActualHeight,
-                Slices.Count,
+                enabledSlices.Count,
                 DefaultCenterHoleRatio,
                 theme.SliceStrokeThickness,
                 SnapToDevicePixel,
                 out var layout))
         {
             Log.Warning(
-                "Failed to create pie layout (Slices={SliceCount}, Width={Width}, Height={Height})",
-                Slices.Count,
+                "Failed to create pie layout (EnabledSlices={EnabledSliceCount}, TotalSlices={TotalSliceCount}, Width={Width}, Height={Height})",
+                enabledSlices.Count,
+                Slices?.Count ?? 0,
                 ActualWidth,
                 ActualHeight);
             return;
@@ -471,9 +477,9 @@ public partial class PieControl : UserControl
             PieCanvas.Children.Add(centerElements.Target);
         }
 
-        for (var i = 0; i < Slices.Count; i++)
+        for (var i = 0; i < enabledSlices.Count; i++)
         {
-            var sliceAction = Slices[i];
+            var sliceAction = enabledSlices[i];
             var startAngle = (i * angleStep) - 90;
             var endAngle = startAngle + angleStep;
 

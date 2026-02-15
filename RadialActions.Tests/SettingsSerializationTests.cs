@@ -17,6 +17,7 @@ public class SettingsSerializationTests
               "Name": null,
               "Icon": "",
               "Type": 999,
+              "IsEnabled": false,
               "Parameter": null,
               "Arguments": null,
               "WorkingDirectory": null
@@ -33,6 +34,7 @@ public class SettingsSerializationTests
         Assert.Equal(PieAction.DefaultName, settings.Actions[0].Name);
         Assert.Equal(PieAction.DefaultIcon, settings.Actions[0].Icon);
         Assert.Equal(ActionType.None, settings.Actions[0].Type);
+        Assert.False(settings.Actions[0].IsEnabled);
         Assert.Equal(string.Empty, settings.Actions[0].Parameter);
         Assert.Equal(string.Empty, settings.Actions[0].Arguments);
         Assert.Equal(string.Empty, settings.Actions[0].WorkingDirectory);
@@ -67,6 +69,7 @@ public class SettingsSerializationTests
             PieAction.CreateKeyAction("Mute"),
             PieAction.CreateShellAction("Explorer", "explorer.exe")
         };
+        settings.Actions[1].IsEnabled = false;
 
         var json = settings.SerializeToJson();
         var loaded = Settings.DeserializeFromJson(json);
@@ -76,7 +79,31 @@ public class SettingsSerializationTests
         Assert.Equal(2, loaded.Actions.Count);
         Assert.Equal(ActionType.Key, loaded.Actions[0].Type);
         Assert.Equal("Mute", loaded.Actions[0].Parameter);
+        Assert.True(loaded.Actions[0].IsEnabled);
         Assert.Equal(ActionType.Shell, loaded.Actions[1].Type);
         Assert.Equal("explorer.exe", loaded.Actions[1].Parameter);
+        Assert.False(loaded.Actions[1].IsEnabled);
+    }
+
+    [Fact]
+    public void DeserializeFromJson_MissingIsEnabled_DefaultsToTrue()
+    {
+        const string json = """
+        {
+          "Actions": [
+            {
+              "Name": "Test",
+              "Icon": "*",
+              "Type": 1,
+              "Parameter": "Mute"
+            }
+          ]
+        }
+        """;
+
+        var settings = Settings.DeserializeFromJson(json);
+
+        Assert.Single(settings.Actions);
+        Assert.True(settings.Actions[0].IsEnabled);
     }
 }

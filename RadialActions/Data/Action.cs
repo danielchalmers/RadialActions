@@ -92,6 +92,12 @@ public partial class PieAction : ObservableObject
     private ActionType _type = ActionType.None;
 
     /// <summary>
+    /// Whether the action is enabled and should appear in the menu.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isEnabled = true;
+
+    /// <summary>
     /// The parameter for the action (path, URL, command, key name, etc.).
     /// </summary>
     [ObservableProperty]
