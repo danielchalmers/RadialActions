@@ -21,7 +21,7 @@ internal sealed class TrayService : IDisposable
         Log.Debug("Created tray icon");
     }
 
-    public void ShowUpdateAvailableNotification(string latestVersion)
+    public void ShowUpdateAvailableNotification(Version latestVersion)
     {
         _trayIcon.ShowNotification(
             "Update available",

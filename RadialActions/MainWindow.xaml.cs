@@ -18,7 +18,6 @@ public partial class MainWindow : Window
     private readonly TrayService _trayService;
     private readonly HotkeyService _hotkeyService = new();
     private readonly MenuService _menuService;
-    private readonly UpdateService _updateService = UpdateService.Instance;
 
     public MainWindow()
     {
@@ -32,8 +31,6 @@ public partial class MainWindow : Window
             PieMenu,
             (System.Windows.Media.Animation.Storyboard)Resources["FadeInStoryboard"],
             (System.Windows.Media.Animation.Storyboard)Resources["FadeOutStoryboard"]);
-
-        _ = RunStartupUpdateCheckAsync();
     }
 
     /// <summary>
@@ -105,7 +102,7 @@ public partial class MainWindow : Window
         _menuService.HideMenu(animate);
     }
 
-    private void Window_Loaded(object sender, RoutedEventArgs e)
+    private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
         _menuService.HideMenu(animate: false);
 
@@ -116,6 +113,8 @@ public partial class MainWindow : Window
 #if DEBUG
         _menuService.ShowMenu(false);
 #endif
+
+        await CheckForUpdatesAsync();
     }
 
     private void Window_Unloaded(object sender, RoutedEventArgs e)
@@ -240,19 +239,24 @@ public partial class MainWindow : Window
         _menuService.OnFadeOutCompleted();
     }
 
-    private async Task RunStartupUpdateCheckAsync()
+    private async Task CheckForUpdatesAsync()
     {
+        if (!Settings.Default.CheckForUpdatesOnStartup)
+        {
+            return;
+        }
+
         try
         {
-            var result = await _updateService.CheckOnceAsync(Settings.Default.CheckForUpdatesOnStartup);
-            if (!result.IsUpdateAvailable)
+            await UpdateService.Instance.CheckOnceAsync();
+            if (UpdateService.Instance.IsUpdateAvailable == true)
             {
                 return;
             }
 
             await Dispatcher.InvokeAsync(() =>
             {
-                _trayService.ShowUpdateAvailableNotification(result.LatestVersion);
+                _trayService.ShowUpdateAvailableNotification(UpdateService.Instance.LatestVersion);
             });
         }
         catch (Exception ex)
