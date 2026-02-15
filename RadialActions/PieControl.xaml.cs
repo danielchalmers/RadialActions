@@ -113,13 +113,30 @@ public partial class PieControl : UserControl
         var canvasRadius = canvasSize / 2;
         var center = new Point(canvasRadius, canvasRadius);
         var accentColor = SystemParameters.WindowGlassColor;
-        var sliceColor = GetNeutralSliceBackgroundColor();
-        var iconAndTextColor = GetAccessibleAccentColor(accentColor, sliceColor);
+        var isHighContrast = SystemParameters.HighContrast;
+        var sliceColor = isHighContrast
+            ? SystemColors.WindowColor
+            : GetNeutralSliceBackgroundColor();
+        var iconAndTextColor = isHighContrast
+            ? SystemColors.WindowTextColor
+            : GetAccessibleAccentColor(accentColor, sliceColor);
         var isDarkSlice = GetRelativeLuminance(sliceColor) < 0.5;
         var hoverTarget = isDarkSlice ? Colors.White : Colors.Black;
         var borderTarget = isDarkSlice ? Colors.White : Colors.Black;
-        var hoverColor = BlendColor(sliceColor, hoverTarget, 0.12);
-        var borderColor = BlendColor(sliceColor, borderTarget, 0.25);
+        var hoverColor = isHighContrast
+            ? SystemColors.HighlightColor
+            : BlendColor(sliceColor, hoverTarget, 0.12);
+        var borderColor = isHighContrast
+            ? SystemColors.WindowTextColor
+            : BlendColor(sliceColor, borderTarget, 0.25);
+        var centerHoleColor = isHighContrast
+            ? SystemColors.ControlColor
+            : BlendColor(sliceColor, borderTarget, 0.2);
+
+        if (isHighContrast && hoverColor == sliceColor)
+        {
+            hoverColor = BlendColor(sliceColor, borderColor, 0.3);
+        }
         var showCenterHole = true;
         var showIcons = true;
         var showLabels = true;
@@ -137,7 +154,7 @@ public partial class PieControl : UserControl
             {
                 Width = innerRadius * 2,
                 Height = innerRadius * 2,
-                Fill = new SolidColorBrush(BlendColor(sliceColor, borderTarget, 0.2)),
+                Fill = new SolidColorBrush(centerHoleColor),
                 Stroke = new SolidColorBrush(borderColor),
                 StrokeThickness = 2,
                 IsHitTestVisible = false
