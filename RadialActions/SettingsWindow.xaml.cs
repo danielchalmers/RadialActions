@@ -26,7 +26,7 @@ public partial class SettingsWindow : Window
         InitializeComponent();
         _viewModel = new SettingsWindowViewModel(Settings.Default);
         DataContext = _viewModel;
-        Closed += (s, e) => SaveSettings();
+        Closed += OnClosed;
     }
 
     public void SelectAction(PieAction action)
@@ -91,6 +91,10 @@ public partial class SettingsWindow : Window
             or Key.LWin or Key.RWin;
     }
 
+    private void OnClosed(object sender, EventArgs e)
+    {
+        SaveSettings();
+    }
 }
 
 /// <summary>
@@ -393,7 +397,6 @@ public partial class SettingsWindowViewModel : ObservableObject
                 MessageBoxImage.Error);
         }
     }
-
 
     partial void OnSelectedActionChanged(PieAction oldValue, PieAction newValue)
     {

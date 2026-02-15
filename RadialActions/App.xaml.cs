@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
 
 namespace RadialActions;
@@ -9,12 +10,25 @@ namespace RadialActions;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
+[INotifyPropertyChanged]
 public partial class App : Application
 {
     /// <summary>
     /// The main executable file of the application.
     /// </summary>
     public static FileInfo MainFileInfo { get; } = new(Environment.ProcessPath);
+    public static App CurrentApp => (App)Current;
+
+    [ObservableProperty]
+    private Version _latestVersion;
+
+    [ObservableProperty]
+    private bool _isUpdateAvailable;
+
+    public Version CurrentVersion { get; } =
+        Version.TryParse(FileVersionInfo.GetVersionInfo(MainFileInfo.FullName)?.FileVersion, out var parsedVersion)
+            ? parsedVersion
+            : null;
 
     protected override void OnStartup(StartupEventArgs e)
     {

@@ -102,7 +102,7 @@ public partial class MainWindow : Window
         _menuService.HideMenu(animate);
     }
 
-    private void Window_Loaded(object sender, RoutedEventArgs e)
+    private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
         _menuService.HideMenu(animate: false);
 
@@ -113,6 +113,8 @@ public partial class MainWindow : Window
 #if DEBUG
         _menuService.ShowMenu(false);
 #endif
+
+        await CheckForUpdatesAsync();
     }
 
     private void Window_Unloaded(object sender, RoutedEventArgs e)
@@ -235,5 +237,43 @@ public partial class MainWindow : Window
     private void FadeOutStoryboard_Completed(object sender, EventArgs e)
     {
         _menuService.OnFadeOutCompleted();
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        if (!Settings.Default.CheckForUpdatesOnStartup)
+        {
+            Log.Debug("Startup update check skipped because {SettingName} is disabled", nameof(Settings.CheckForUpdatesOnStartup));
+            return;
+        }
+
+        try
+        {
+            var app = App.CurrentApp;
+            Log.Information("Checking for updates on startup. Current version: {CurrentVersion}", app.CurrentVersion);
+            app.LatestVersion = await UpdateService.GetLatestVersion();
+            app.IsUpdateAvailable = UpdateService.IsUpdateAvailable(app.CurrentVersion, app.LatestVersion);
+            Log.Information(
+                "Startup update check completed. Current version: {CurrentVersion}, Latest version: {LatestVersion}, Update available: {IsUpdateAvailable}",
+                app.CurrentVersion,
+                app.LatestVersion,
+                app.IsUpdateAvailable);
+
+            if (!app.IsUpdateAvailable || app.LatestVersion == null)
+            {
+                Log.Debug("No startup update notification will be shown");
+                return;
+            }
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                Log.Information("Showing update available tray notification for version {LatestVersion}", app.LatestVersion);
+                _trayService.ShowUpdateAvailableNotification(app.LatestVersion);
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Startup update check failed");
+        }
     }
 }

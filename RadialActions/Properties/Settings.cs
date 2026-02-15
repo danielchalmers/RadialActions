@@ -41,6 +41,12 @@ public sealed partial class Settings
     private bool _keepMenuOpenAfterSliceClick;
 
     /// <summary>
+    /// Checks GitHub releases at startup to notify about new versions.
+    /// </summary>
+    [ObservableProperty]
+    private bool _checkForUpdatesOnStartup = true;
+
+    /// <summary>
     /// The collection of actions displayed in the pie menu.
     /// </summary>
     [ObservableProperty]
