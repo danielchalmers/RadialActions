@@ -113,10 +113,13 @@ public partial class PieControl : UserControl
         var canvasRadius = canvasSize / 2;
         var center = new Point(canvasRadius, canvasRadius);
         var accentColor = SystemParameters.WindowGlassColor;
-        var sliceColor = accentColor;
-        var hoverColor = BlendColor(sliceColor, Colors.White, 0.15);
-        var borderColor = BlendColor(sliceColor, Colors.Black, 0.35);
-        var textColor = GetReadableTextColor(sliceColor);
+        var sliceColor = GetNeutralSliceBackgroundColor();
+        var iconAndTextColor = GetAccessibleAccentColor(accentColor, sliceColor);
+        var isDarkSlice = GetRelativeLuminance(sliceColor) < 0.5;
+        var hoverTarget = isDarkSlice ? Colors.White : Colors.Black;
+        var borderTarget = isDarkSlice ? Colors.White : Colors.Black;
+        var hoverColor = BlendColor(sliceColor, hoverTarget, 0.12);
+        var borderColor = BlendColor(sliceColor, borderTarget, 0.25);
         var showCenterHole = true;
         var showIcons = true;
         var showLabels = true;
@@ -134,7 +137,7 @@ public partial class PieControl : UserControl
             {
                 Width = innerRadius * 2,
                 Height = innerRadius * 2,
-                Fill = new SolidColorBrush(Color.FromArgb(200, 20, 20, 20)),
+                Fill = new SolidColorBrush(BlendColor(sliceColor, borderTarget, 0.2)),
                 Stroke = new SolidColorBrush(borderColor),
                 StrokeThickness = 2,
                 IsHitTestVisible = false
@@ -232,7 +235,7 @@ public partial class PieControl : UserControl
                     var iconText = new TextBlock
                     {
                         Text = sliceAction.Icon,
-                        Foreground = new SolidColorBrush(textColor),
+                        Foreground = new SolidColorBrush(iconAndTextColor),
                         FontSize = showLabel ? 20 : 28,
                         TextAlignment = TextAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
@@ -248,7 +251,7 @@ public partial class PieControl : UserControl
                     var text = new TextBlock
                     {
                         Text = sliceAction.Name,
-                        Foreground = new SolidColorBrush(textColor),
+                        Foreground = new SolidColorBrush(iconAndTextColor),
                         FontSize = 11,
                         FontWeight = FontWeights.SemiBold,
                         TextAlignment = TextAlignment.Center,
@@ -281,12 +284,70 @@ public partial class PieControl : UserControl
         return Color.FromRgb(r, g, b);
     }
 
-    private static Color GetReadableTextColor(Color background)
+    private static Color GetNeutralSliceBackgroundColor()
     {
-        var luminance = ((0.2126 * background.R) + (0.7152 * background.G) + (0.0722 * background.B)) / 255.0;
-        return luminance > 0.6
-            ? Color.FromRgb(28, 28, 28)
-            : Color.FromRgb(245, 245, 245);
+        var dark = Color.FromRgb(30, 30, 30);
+        var light = Color.FromRgb(242, 242, 242);
+        return IsAppDarkModeEnabled() ? dark : light;
+    }
+
+    private static bool IsAppDarkModeEnabled()
+    {
+        const string personalizePath = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+        const string appsUseLightTheme = "AppsUseLightTheme";
+
+        try
+        {
+            using var personalizeKey = Registry.CurrentUser.OpenSubKey(personalizePath);
+            if (personalizeKey?.GetValue(appsUseLightTheme) is int lightThemeFlag)
+            {
+                return lightThemeFlag == 0;
+            }
+        }
+        catch
+        {
+            // Ignore registry access failures and fallback to system colors.
+        }
+
+        return GetRelativeLuminance(SystemColors.WindowColor) < 0.5;
+    }
+
+    private static Color GetAccessibleAccentColor(Color accentColor, Color backgroundColor)
+    {
+        var contrast = GetContrastRatio(accentColor, backgroundColor);
+        if (contrast >= 3.0)
+        {
+            return accentColor;
+        }
+
+        var isDarkBackground = GetRelativeLuminance(backgroundColor) < 0.5;
+        var target = isDarkBackground ? Colors.White : Colors.Black;
+        return BlendColor(accentColor, target, 0.35);
+    }
+
+    private static double GetContrastRatio(Color foreground, Color background)
+    {
+        var foregroundLuminance = GetRelativeLuminance(foreground);
+        var backgroundLuminance = GetRelativeLuminance(background);
+        var brighter = Math.Max(foregroundLuminance, backgroundLuminance);
+        var darker = Math.Min(foregroundLuminance, backgroundLuminance);
+        return (brighter + 0.05) / (darker + 0.05);
+    }
+
+    private static double GetRelativeLuminance(Color color)
+    {
+        static double ChannelToLinear(byte channel)
+        {
+            var srgb = channel / 255.0;
+            return srgb <= 0.03928
+                ? srgb / 12.92
+                : Math.Pow((srgb + 0.055) / 1.055, 2.4);
+        }
+
+        var r = ChannelToLinear(color.R);
+        var g = ChannelToLinear(color.G);
+        var b = ChannelToLinear(color.B);
+        return (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
     }
 
     private void OnSystemParametersChanged(object sender, PropertyChangedEventArgs e)
