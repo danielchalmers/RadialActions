@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -144,6 +145,32 @@ public partial class MainWindow : Window
     {
         Log.Debug("Tray icon left double clicked");
         OpenSettingsWindow(1);
+    }
+
+    private void OnTraySettingsMenuItemClick(object sender, RoutedEventArgs e)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.InvokeAsync(() => OnTraySettingsMenuItemClick(sender, e), DispatcherPriority.Normal);
+            return;
+        }
+
+        var tabIndex = sender is MenuItem { Tag: string tag } && int.TryParse(tag, out var parsedIndex)
+            ? parsedIndex
+            : 0;
+
+        OpenSettingsWindow(tabIndex);
+    }
+
+    private void OnTrayExitMenuItemClick(object sender, RoutedEventArgs e)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.InvokeAsync(() => OnTrayExitMenuItemClick(sender, e), DispatcherPriority.Send);
+            return;
+        }
+
+        Exit();
     }
 
     private void OnSliceClicked(object sender, SliceClickEventArgs e)
