@@ -11,8 +11,6 @@
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-
         <Style x:Key="LabelTextBlock"
                TargetType="TextBlock"
                BasedOn="{StaticResource {x:Type TextBlock}}">
@@ -60,7 +58,7 @@
                 CornerRadius="10"
                 BorderBrush="#FF7AB58C"
                 BorderThickness="1"
-                Visibility="{Binding IsUpdateBannerVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                Visibility="{Binding IsUpdateBannerVisible, Converter={local:BoolToVisibilityConverter}}">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                     <GradientStop Color="#FFF5FFF8" Offset="0" />
