@@ -200,6 +200,11 @@ public partial class MainWindow : Window
     private void OnCenterContextMenuRequested(object sender, EventArgs e)
     {
         Log.Debug("Center close target right clicked");
+        OpenMainContextMenu();
+    }
+
+    private void OpenMainContextMenu()
+    {
         var contextMenu = (ContextMenu)Resources["MainContextMenu"];
         contextMenu.DataContext = this;
         contextMenu.PlacementTarget = PieMenu;
@@ -235,6 +240,14 @@ public partial class MainWindow : Window
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
         if (PieMenu.HandleMenuKey(key, Keyboard.Modifiers))
         {
+            e.Handled = true;
+            return;
+        }
+
+        if ((key == Key.F10 && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) || key == Key.Apps)
+        {
+            Log.Debug("Context menu key pressed with no selected slice; opening main context menu");
+            OpenMainContextMenu();
             e.Handled = true;
         }
     }

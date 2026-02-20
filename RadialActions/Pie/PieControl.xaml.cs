@@ -128,11 +128,9 @@ public partial class PieControl : UserControl
                 ActivateSelectedSlice();
                 return true;
             case Key.Apps:
-                OpenSelectedSliceContextMenu();
-                return true;
+                return OpenSelectedSliceContextMenu();
             case Key.F10 when modifiers.HasFlag(ModifierKeys.Shift):
-                OpenSelectedSliceContextMenu();
-                return true;
+                return OpenSelectedSliceContextMenu();
             default:
                 return false;
         }
@@ -198,17 +196,18 @@ public partial class PieControl : UserControl
         }
     }
 
-    private void OpenSelectedSliceContextMenu()
+    private bool OpenSelectedSliceContextMenu()
     {
         var selectedSlice = GetSelectedSliceVisual();
         if (selectedSlice == null)
         {
-            return;
+            return false;
         }
 
         selectedSlice.ContextMenu.PlacementTarget = selectedSlice.Path;
         selectedSlice.ContextMenu.Placement = PlacementMode.Center;
         selectedSlice.ContextMenu.IsOpen = true;
+        return true;
     }
 
     private SliceVisual GetSelectedSliceVisual()
