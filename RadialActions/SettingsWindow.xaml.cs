@@ -37,6 +37,11 @@ public partial class SettingsWindow : Window
         _viewModel.SelectAction(action);
     }
 
+    public void SelectSection(int sectionIndex)
+    {
+        _viewModel.SelectSection(sectionIndex);
+    }
+
     private void SaveSettings()
     {
         if (Settings.CanBeSaved)
@@ -129,6 +134,10 @@ public partial class SettingsWindowViewModel : ObservableObject
 {
     public const string CustomKeyActionId = "__custom__";
     private const string LegacyDefaultIcon = "⭐";
+    private const int GeneralSectionIndex = 0;
+    private const int ActionsSectionIndex = 1;
+    private const int AdvancedSectionIndex = 2;
+    private const int HelpSectionIndex = 3;
 
     private static readonly KeyActionDefinition CustomKeyActionOption =
         new(CustomKeyActionId, "Custom Shortcut...", "⌨️", 0);
@@ -145,12 +154,26 @@ public partial class SettingsWindowViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedActionIndex = -1;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGeneralSectionSelected))]
+    [NotifyPropertyChangedFor(nameof(IsActionsSectionSelected))]
+    [NotifyPropertyChangedFor(nameof(IsAdvancedSectionSelected))]
+    [NotifyPropertyChangedFor(nameof(IsHelpSectionSelected))]
+    private int _selectedSectionIndex;
+
     public Settings Settings { get; }
     public string FileVersion { get; } = FileVersionInfo.GetVersionInfo(App.MainFileInfo.FullName)?.FileVersion ?? "Unknown";
     public string Architecture { get; } = RuntimeInformation.ProcessArchitecture.ToString();
     public string RuntimeDescription { get; } = RuntimeInformation.FrameworkDescription;
     public string OsDescription { get; } = RuntimeInformation.OSDescription;
     public string ExecutablePath { get; } = App.MainFileInfo.FullName;
+    public IReadOnlyList<SettingsSectionItem> Sections { get; } =
+    [
+        new(GeneralSectionIndex, "General", "\uE713", "Hotkey, look, and startup behavior"),
+        new(ActionsSectionIndex, "Actions", "\uE7FC", "Manage radial menu actions"),
+        new(AdvancedSectionIndex, "Advanced", "\uE9CE", "Tools and app diagnostics"),
+        new(HelpSectionIndex, "Help", "\uE897", "Quick start and support links"),
+    ];
 
     /// <summary>
     /// Available action types for the dropdown.
@@ -167,15 +190,31 @@ public partial class SettingsWindowViewModel : ObservableObject
     /// Whether an action is currently selected.
     /// </summary>
     public bool HasSelectedAction => SelectedAction != null;
+    public bool IsGeneralSectionSelected => SelectedSectionIndex == GeneralSectionIndex;
+    public bool IsActionsSectionSelected => SelectedSectionIndex == ActionsSectionIndex;
+    public bool IsAdvancedSectionSelected => SelectedSectionIndex == AdvancedSectionIndex;
+    public bool IsHelpSectionSelected => SelectedSectionIndex == HelpSectionIndex;
 
     public SettingsWindowViewModel(Settings settings)
     {
         Settings = settings;
+        var sectionCount = Sections.Count;
+        var clampedIndex = Math.Clamp(Settings.SettingsTabIndex, 0, sectionCount - 1);
+        SelectedSectionIndex = clampedIndex;
+        Settings.SettingsTabIndex = clampedIndex;
         TrackExistingDefaults();
         if (Settings.Actions.Count > 0)
         {
             SelectedActionIndex = 0;
             SelectedAction = Settings.Actions[0];
+        }
+    }
+
+    partial void OnSelectedSectionIndexChanged(int value)
+    {
+        if (Settings.SettingsTabIndex != value)
+        {
+            Settings.SettingsTabIndex = value;
         }
     }
 
@@ -190,6 +229,11 @@ public partial class SettingsWindowViewModel : ObservableObject
 
         SelectedActionIndex = index;
         SelectedAction = action;
+    }
+
+    public void SelectSection(int sectionIndex)
+    {
+        SelectedSectionIndex = Math.Clamp(sectionIndex, 0, Sections.Count - 1);
     }
 
     public ActionType SelectedActionType
@@ -607,3 +651,5 @@ public partial class SettingsWindowViewModel : ObservableObject
 
     private readonly record struct ShellDefaults(string Name, string Icon, string WorkingDirectory);
 }
+
+public sealed record SettingsSectionItem(int Index, string Title, string Icon, string Description);

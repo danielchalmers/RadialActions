@@ -1,4 +1,4 @@
-﻿<Window x:Class="RadialActions.SettingsWindow"
+<Window x:Class="RadialActions.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,7 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:p="clr-namespace:RadialActions.Properties"
         Title="Settings"
-        Width="1200" Height="800"
+        Width="1040" Height="760"
+        MinWidth="900" MinHeight="620"
         d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
@@ -28,6 +29,77 @@
             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
         </Style>
 
+        <Style x:Key="CardTitleTextBlock"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Margin" Value="0,0,0,2" />
+        </Style>
+
+        <Style x:Key="CardDescriptionTextBlock"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+
+        <Style x:Key="SettingsCard"
+               TargetType="Border">
+            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" />
+        </Style>
+
+        <Style x:Key="SidebarListBoxItemStyle"
+               TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="ItemBorder"
+                                CornerRadius="8"
+                                BorderThickness="1"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected"
+                                     Value="True">
+                                <Setter TargetName="ItemBorder"
+                                        Property="Background"
+                                        Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                                <Setter TargetName="ItemBorder"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver"
+                                               Value="True" />
+                                    <Condition Property="IsSelected"
+                                               Value="False" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="ItemBorder"
+                                        Property="Background"
+                                        Value="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" />
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style TargetType="Hyperlink"
                BasedOn="{StaticResource {x:Type Hyperlink}}">
             <Setter Property="TextDecorations" Value="None" />
@@ -46,6 +118,7 @@
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
     </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -85,35 +158,111 @@
             </Grid>
         </Border>
 
-        <TabControl Grid.Row="1"
-                    Padding="12,12,12,0"
-                    SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
-            <TabItem Header="_General">
-                <ScrollViewer VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                    <Grid Margin="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="16" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
+        <Grid Grid.Row="1"
+              Margin="12,12,12,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0">
-                            <GroupBox Header="Activation"
-                                      Margin="0,0,0,12">
-                                <StackPanel Margin="8">
+            <Border Grid.Column="0"
+                    Style="{StaticResource SettingsCard}"
+                    Margin="0">
+                <DockPanel LastChildFill="True">
+                    <StackPanel DockPanel.Dock="Top"
+                                Margin="0,0,0,10">
+                        <TextBlock Text="Settings"
+                                   FontWeight="SemiBold"
+                                   FontSize="18" />
+                        <TextBlock Text="Choose a section"
+                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+                    </StackPanel>
+
+                    <ListBox ItemsSource="{Binding Sections}"
+                             SelectedValuePath="Index"
+                             SelectedValue="{Binding SelectedSectionIndex, Mode=TwoWay}"
+                             ItemContainerStyle="{StaticResource SidebarListBoxItemStyle}"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding Icon}"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="14"
+                                               VerticalAlignment="Top" />
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="{Binding Title}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Description}"
+                                                   FontSize="11"
+                                                   Opacity="0.8"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <Grid Grid.Column="2">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Visibility="{Binding IsGeneralSectionSelected, Converter={local:BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <StackPanel MaxWidth="680"
+                                    HorizontalAlignment="Center">
+                            <Border Style="{StaticResource SettingsCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Activation"
+                                               Style="{StaticResource CardTitleTextBlock}" />
+                                    <TextBlock Text="Set the global keyboard shortcut that opens the radial menu."
+                                               Style="{StaticResource CardDescriptionTextBlock}" />
+
                                     <TextBlock Text="Hotkey:"
                                                Style="{StaticResource LabelTextBlock}" />
-                                    <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    <TextBox Width="280"
+                                             HorizontalAlignment="Left"
+                                             Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              PreviewKeyDown="ActivationHotkey_PreviewKeyDown" />
                                     <TextBlock Text="Examples: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z"
                                                Style="{StaticResource DescriptionTextBlock}" />
                                 </StackPanel>
-                            </GroupBox>
+                            </Border>
 
-                            <GroupBox Header="Behavior"
-                                      Margin="0,0,0,12">
-                                <StackPanel Margin="8">
+                            <Border Style="{StaticResource SettingsCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Appearance"
+                                               Style="{StaticResource CardTitleTextBlock}" />
+                                    <TextBlock Text="Tune the visual footprint of the radial menu."
+                                               Style="{StaticResource CardDescriptionTextBlock}" />
+
+                                    <TextBlock Text="Menu Size (pixels):"
+                                               Style="{StaticResource LabelTextBlock}" />
+                                    <TextBox Width="130"
+                                             HorizontalAlignment="Left"
+                                             Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="Recommended: 300-500"
+                                               Style="{StaticResource DescriptionTextBlock}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource SettingsCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Behavior"
+                                               Style="{StaticResource CardTitleTextBlock}" />
+                                    <TextBlock Text="Control how and where the menu behaves when triggered."
+                                               Style="{StaticResource CardDescriptionTextBlock}" />
+
                                     <CheckBox Content="Keep menu open after clicking a slice"
                                               IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
                                     <TextBlock Text="The menu stays open until you click another app or press Escape."
@@ -124,24 +273,15 @@
                                     <TextBlock Text="Useful for keyboard navigation when the pointer may be far from your focus."
                                                Style="{StaticResource DescriptionTextBlock}" />
                                 </StackPanel>
-                            </GroupBox>
-                        </StackPanel>
+                            </Border>
 
-                        <StackPanel Grid.Column="2">
-                            <GroupBox Header="Appearance"
-                                      Margin="0,0,0,12">
-                                <StackPanel Margin="8">
-                                    <TextBlock Text="Menu Size (pixels):"
-                                               Style="{StaticResource LabelTextBlock}" />
-                                    <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock Text="Recommended: 300-500"
-                                               Style="{StaticResource DescriptionTextBlock}" />
-                                </StackPanel>
-                            </GroupBox>
+                            <Border Style="{StaticResource SettingsCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Startup"
+                                               Style="{StaticResource CardTitleTextBlock}" />
+                                    <TextBlock Text="Background startup and update check options."
+                                               Style="{StaticResource CardDescriptionTextBlock}" />
 
-                            <GroupBox Header="Startup"
-                                      Margin="0,0,0,12">
-                                <StackPanel Margin="8">
                                     <CheckBox Content="Run on Windows startup"
                                               IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
                                     <TextBlock Text="Starts the app minimized to tray when you log in."
@@ -152,386 +292,466 @@
                                     <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
                                                Style="{StaticResource DescriptionTextBlock}" />
                                 </StackPanel>
-                            </GroupBox>
+                            </Border>
                         </StackPanel>
                     </Grid>
                 </ScrollViewer>
-            </TabItem>
 
-            <TabItem Header="_Actions">
-                <Grid Margin="0,12,0,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="1.5*" />
-                    </Grid.ColumnDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Visibility="{Binding IsActionsSectionSelected, Converter={local:BooleanToVisibilityConverter}}">
+                    <Grid MaxWidth="1080"
+                          HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="1.5*" />
+                        </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" MinHeight="150" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <!--  Actions List  -->
-                        <ListBox Grid.Row="0"
-                                 MinHeight="150"
-                                 ItemsSource="{Binding Settings.Actions}"
-                                 SelectedIndex="{Binding SelectedActionIndex}"
-                                 SelectedItem="{Binding SelectedAction}">
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="Padding" Value="4,2" />
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Margin="0"
-                                                Orientation="Horizontal">
-                                        <StackPanel.Style>
-                                            <Style TargetType="StackPanel">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsEnabled}"
-                                                                 Value="False">
-                                                        <Setter Property="Opacity" Value="0.45" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </StackPanel.Style>
-                                        <TextBlock Text="{Binding Icon}"
-                                                   Width="22"
-                                                   FontSize="14" />
-                                        <TextBlock Text="{Binding Name}"
-                                                   Margin="4,0,6,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding Type}"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="10"
-                                                   Foreground="Gray" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-
-                        <!--  List Controls  -->
-                        <Grid Grid.Row="1"
-                              Margin="0,12,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="4" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="4" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="4" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0"
-                                    Content="Add"
-                                    Command="{Binding AddActionCommand}"
-                                    HorizontalAlignment="Stretch" />
-                            <Button Grid.Column="2"
-                                    Content="Remove"
-                                    Command="{Binding RemoveActionCommand}"
-                                    HorizontalAlignment="Stretch" />
-                            <Button Grid.Column="4"
-                                    Content="Move Up"
-                                    Command="{Binding MoveUpCommand}"
-                                    HorizontalAlignment="Stretch" />
-                            <Button Grid.Column="6"
-                                    Content="Move Down"
-                                    Command="{Binding MoveDownCommand}"
-                                    HorizontalAlignment="Stretch" />
-                        </Grid>
-                    </Grid>
-
-                    <!--  Action Editor  -->
-                    <GroupBox Grid.Column="2"
-                              Header="Edit Action"
-                              IsEnabled="{Binding HasSelectedAction}">
-                        <Grid Grid.IsSharedSizeScope="True"
-                              Margin="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Row="0" Grid.Column="0"
-                                       Text="Enabled:"
-                                       Margin="0,0,8,8" VerticalAlignment="Center"
-                                       FontWeight="SemiBold" />
-                            <CheckBox Grid.Row="0" Grid.Column="1"
-                                      Content="Show this action"
-                                      IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}"
-                                      Margin="0,0,0,8" />
-
-                            <TextBlock Grid.Row="1" Grid.Column="0"
-                                       Text="Name:"
-                                       Margin="0,0,8,4" VerticalAlignment="Center"
-                                       FontWeight="SemiBold" />
-                            <TextBox Grid.Row="1" Grid.Column="1"
-                                     Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,0,0,4" />
-
-                            <TextBlock Grid.Row="2" Grid.Column="0"
-                                       Text="Icon:"
-                                       Margin="0,0,8,4" VerticalAlignment="Center"
-                                       FontWeight="SemiBold" />
-                            <TextBox Grid.Row="2" Grid.Column="1"
-                                     Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,0,0,4" />
-
-                            <TextBlock Grid.Row="3" Grid.Column="0"
-                                       Text="Type:"
-                                       Margin="0,0,8,4" VerticalAlignment="Center"
-                                       FontWeight="SemiBold" />
-                            <ComboBox Grid.Row="3" Grid.Column="1"
-                                      Margin="0,0,0,4"
-                                      ItemsSource="{Binding ActionTypes}"
-                                      SelectedItem="{Binding SelectedActionType, Mode=TwoWay}" />
-
-                            <Grid Grid.Row="4" Grid.ColumnSpan="2"
-                                  Margin="0,8,0,0"
-                                  Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                Style="{StaticResource SettingsCard}"
+                                Margin="0">
+                            <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" MinHeight="180" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="Key Action:"
-                                           Margin="0,0,8,4" VerticalAlignment="Center"
-                                           FontWeight="SemiBold" />
-                                <ComboBox Grid.Row="0" Grid.Column="1"
-                                          SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
-                                          SelectedValuePath="Id"
-                                          Margin="0,0,0,4"
-                                          IsTextSearchEnabled="True"
-                                          ItemsSource="{Binding KeyActionOptions}">
-                                    <ComboBox.ItemTemplate>
+                                <StackPanel Grid.Row="0"
+                                            Margin="0,0,0,10">
+                                    <TextBlock Text="Actions"
+                                               Style="{StaticResource CardTitleTextBlock}" />
+                                    <TextBlock Text="Reorder and toggle actions shown in the radial menu."
+                                               Style="{StaticResource CardDescriptionTextBlock}"
+                                               Margin="0,0,0,0" />
+                                </StackPanel>
+
+                                <ListBox Grid.Row="1"
+                                         MinHeight="180"
+                                         ItemsSource="{Binding Settings.Actions}"
+                                         SelectedIndex="{Binding SelectedActionIndex}"
+                                         SelectedItem="{Binding SelectedAction}">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="4,2" />
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
+                                            <StackPanel Margin="0"
+                                                        Orientation="Horizontal">
+                                                <StackPanel.Style>
+                                                    <Style TargetType="StackPanel">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsEnabled}"
+                                                                         Value="False">
+                                                                <Setter Property="Opacity" Value="0.45" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </StackPanel.Style>
                                                 <TextBlock Text="{Binding Icon}"
-                                                           Width="20"
+                                                           Width="22"
                                                            FontSize="14" />
                                                 <TextBlock Text="{Binding Name}"
-                                                           Margin="4,0,0,0" VerticalAlignment="Center" />
+                                                           Margin="4,0,6,0"
+                                                           VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding Type}"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="10"
+                                                           Foreground="Gray" />
                                             </StackPanel>
                                         </DataTemplate>
-                                    </ComboBox.ItemTemplate>
-                                </ComboBox>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
 
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Text="Shortcut:"
-                                           Margin="0,0,8,0" VerticalAlignment="Center"
-                                           FontWeight="SemiBold"
-                                           Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
-                                <TextBox Grid.Row="1" Grid.Column="1"
-                                         Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
+                                <Grid Grid.Row="2"
+                                      Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="4" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="4" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="4" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0"
+                                            Content="Add"
+                                            Command="{Binding AddActionCommand}"
+                                            HorizontalAlignment="Stretch" />
+                                    <Button Grid.Column="2"
+                                            Content="Remove"
+                                            Command="{Binding RemoveActionCommand}"
+                                            HorizontalAlignment="Stretch" />
+                                    <Button Grid.Column="4"
+                                            Content="Move Up"
+                                            Command="{Binding MoveUpCommand}"
+                                            HorizontalAlignment="Stretch" />
+                                    <Button Grid.Column="6"
+                                            Content="Move Down"
+                                            Command="{Binding MoveDownCommand}"
+                                            HorizontalAlignment="Stretch" />
+                                </Grid>
                             </Grid>
+                        </Border>
 
-                            <Grid Grid.Row="5" Grid.ColumnSpan="2"
-                                  Margin="0,8,0,0"
-                                  Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Shell}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                        <Border Grid.Column="2"
+                                Style="{StaticResource SettingsCard}"
+                                Margin="0"
+                                IsEnabled="{Binding HasSelectedAction}">
+                            <Grid Grid.IsSharedSizeScope="True">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="Target:"
-                                           Margin="0,0,8,4" VerticalAlignment="Center"
-                                           FontWeight="SemiBold" />
-                                <Grid Grid.Row="0" Grid.Column="1"
-                                      Margin="0,0,0,4">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="6" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0"
-                                             Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <Button Grid.Column="2"
-                                            Content="Browse..."
-                                            Command="{Binding BrowseShellTargetCommand}"
-                                            Padding="10,2" />
-                                </Grid>
+                                <StackPanel Grid.Row="0"
+                                            Margin="0,0,0,10">
+                                    <TextBlock Text="Edit Action"
+                                               Style="{StaticResource CardTitleTextBlock}" />
+                                    <TextBlock Text="Adjust name, icon, and execution behavior for the selected action."
+                                               Style="{StaticResource CardDescriptionTextBlock}"
+                                               Margin="0,0,0,0" />
+                                </StackPanel>
 
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Text="Arguments:"
-                                           Margin="0,0,8,4" VerticalAlignment="Center"
-                                           FontWeight="SemiBold" />
-                                <TextBox Grid.Row="1" Grid.Column="1"
-                                         Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         Margin="0,0,0,4" />
-
-                                <TextBlock Grid.Row="2" Grid.Column="0"
-                                           Text="Working Directory:"
-                                           Margin="0,0,8,0" VerticalAlignment="Center"
-                                           FontWeight="SemiBold" />
-                                <Grid Grid.Row="2" Grid.Column="1">
+                                <Grid Grid.Row="1"
+                                      Grid.IsSharedSizeScope="True">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
                                         <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="6" />
-                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0"
-                                             Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <Button Grid.Column="2"
-                                            Content="Browse..."
-                                            Command="{Binding BrowseWorkingDirectoryCommand}"
-                                            Padding="10,2" />
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0"
+                                               Grid.Column="0"
+                                               Text="Enabled:"
+                                               Margin="0,0,8,8"
+                                               VerticalAlignment="Center"
+                                               FontWeight="SemiBold" />
+                                    <CheckBox Grid.Row="0"
+                                              Grid.Column="1"
+                                              Content="Show this action"
+                                              IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}"
+                                              Margin="0,0,0,8" />
+
+                                    <TextBlock Grid.Row="1"
+                                               Grid.Column="0"
+                                               Text="Name:"
+                                               Margin="0,0,8,4"
+                                               VerticalAlignment="Center"
+                                               FontWeight="SemiBold" />
+                                    <TextBox Grid.Row="1"
+                                             Grid.Column="1"
+                                             Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Margin="0,0,0,4" />
+
+                                    <TextBlock Grid.Row="2"
+                                               Grid.Column="0"
+                                               Text="Icon:"
+                                               Margin="0,0,8,4"
+                                               VerticalAlignment="Center"
+                                               FontWeight="SemiBold" />
+                                    <TextBox Grid.Row="2"
+                                             Grid.Column="1"
+                                             Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Margin="0,0,0,4" />
+
+                                    <TextBlock Grid.Row="3"
+                                               Grid.Column="0"
+                                               Text="Type:"
+                                               Margin="0,0,8,4"
+                                               VerticalAlignment="Center"
+                                               FontWeight="SemiBold" />
+                                    <ComboBox Grid.Row="3"
+                                              Grid.Column="1"
+                                              Margin="0,0,0,4"
+                                              ItemsSource="{Binding ActionTypes}"
+                                              SelectedItem="{Binding SelectedActionType, Mode=TwoWay}" />
+
+                                    <Grid Grid.Row="4"
+                                          Grid.ColumnSpan="2"
+                                          Margin="0,8,0,0"
+                                          Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0"
+                                                   Grid.Column="0"
+                                                   Text="Key Action:"
+                                                   Margin="0,0,8,4"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold" />
+                                        <ComboBox Grid.Row="0"
+                                                  Grid.Column="1"
+                                                  SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
+                                                  SelectedValuePath="Id"
+                                                  Margin="0,0,0,4"
+                                                  IsTextSearchEnabled="True"
+                                                  ItemsSource="{Binding KeyActionOptions}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Icon}"
+                                                                   Width="20"
+                                                                   FontSize="14" />
+                                                        <TextBlock Text="{Binding Name}"
+                                                                   Margin="4,0,0,0"
+                                                                   VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+
+                                        <TextBlock Grid.Row="1"
+                                                   Grid.Column="0"
+                                                   Text="Shortcut:"
+                                                   Margin="0,0,8,0"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold"
+                                                   Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
+                                        <TextBox Grid.Row="1"
+                                                 Grid.Column="1"
+                                                 Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
+                                    </Grid>
+
+                                    <Grid Grid.Row="5"
+                                          Grid.ColumnSpan="2"
+                                          Margin="0,8,0,0"
+                                          Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Shell}}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0"
+                                                   Grid.Column="0"
+                                                   Text="Target:"
+                                                   Margin="0,0,8,4"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold" />
+                                        <Grid Grid.Row="0"
+                                              Grid.Column="1"
+                                              Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="6" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0"
+                                                     Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <Button Grid.Column="2"
+                                                    Content="Browse..."
+                                                    Command="{Binding BrowseShellTargetCommand}"
+                                                    Padding="10,2" />
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="1"
+                                                   Grid.Column="0"
+                                                   Text="Arguments:"
+                                                   Margin="0,0,8,4"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold" />
+                                        <TextBox Grid.Row="1"
+                                                 Grid.Column="1"
+                                                 Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Margin="0,0,0,4" />
+
+                                        <TextBlock Grid.Row="2"
+                                                   Grid.Column="0"
+                                                   Text="Working Directory:"
+                                                   Margin="0,0,8,0"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold" />
+                                        <Grid Grid.Row="2"
+                                              Grid.Column="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="6" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0"
+                                                     Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <Button Grid.Column="2"
+                                                    Content="Browse..."
+                                                    Command="{Binding BrowseWorkingDirectoryCommand}"
+                                                    Padding="10,2" />
+                                        </Grid>
+                                    </Grid>
                                 </Grid>
                             </Grid>
-                        </Grid>
-                    </GroupBox>
-                </Grid>
-            </TabItem>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
 
-            <TabItem Header="Ad_vanced">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0">
-                        <GroupBox Header="Tools">
-                            <StackPanel Margin="8">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Visibility="{Binding IsAdvancedSectionSelected, Converter={local:BooleanToVisibilityConverter}}">
+                    <StackPanel MaxWidth="760"
+                                HorizontalAlignment="Center">
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <TextBlock Text="Tools"
+                                           Style="{StaticResource CardTitleTextBlock}" />
+                                <TextBlock Text="Open app folders and inspect local settings files."
+                                           Style="{StaticResource CardDescriptionTextBlock}" />
+
                                 <Button Content="Open Exe Folder"
                                         Command="{Binding OpenExeFolderCommand}"
                                         Margin="0,0,0,8" />
                                 <Button Content="Open Settings File"
                                         Command="{Binding OpenSettingsFileCommand}"
-                                        Margin="0,0,0,8"
                                         IsEnabled="{x:Static p:Settings.CanBeSaved}" />
                             </StackPanel>
-                        </GroupBox>
+                        </Border>
 
-                        <GroupBox Header="App Info"
-                                  Margin="0,12,0,0">
-                            <Grid Margin="8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="12" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           FontWeight="SemiBold"
-                                           Text="File Version" />
-                                <TextBlock Grid.Row="0" Grid.Column="2"
-                                           Text="{Binding FileVersion}" />
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           FontWeight="SemiBold"
-                                           Text="Architecture" />
-                                <TextBlock Grid.Row="1" Grid.Column="2"
-                                           Text="{Binding Architecture}" />
-                                <TextBlock Grid.Row="2" Grid.Column="0"
-                                           FontWeight="SemiBold"
-                                           Text="Runtime" />
-                                <TextBlock Grid.Row="2" Grid.Column="2"
-                                           Text="{Binding RuntimeDescription}" />
-                                <TextBlock Grid.Row="3" Grid.Column="0"
-                                           FontWeight="SemiBold"
-                                           Text="OS" />
-                                <TextBlock Grid.Row="3" Grid.Column="2"
-                                           Text="{Binding OsDescription}" />
-                                <TextBlock Grid.Row="4" Grid.Column="0"
-                                           FontWeight="SemiBold"
-                                           Text="Executable" />
-                                <TextBlock Grid.Row="4" Grid.Column="2"
-                                           Text="{Binding ExecutablePath}"
-                                           TextWrapping="Wrap" />
-                            </Grid>
-                        </GroupBox>
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <TextBlock Text="App Info"
+                                           Style="{StaticResource CardTitleTextBlock}" />
+                                <TextBlock Text="Runtime and executable details for diagnostics."
+                                           Style="{StaticResource CardDescriptionTextBlock}" />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0"
+                                               Grid.Column="0"
+                                               FontWeight="SemiBold"
+                                               Text="File Version" />
+                                    <TextBlock Grid.Row="0"
+                                               Grid.Column="2"
+                                               Text="{Binding FileVersion}" />
+                                    <TextBlock Grid.Row="1"
+                                               Grid.Column="0"
+                                               FontWeight="SemiBold"
+                                               Text="Architecture" />
+                                    <TextBlock Grid.Row="1"
+                                               Grid.Column="2"
+                                               Text="{Binding Architecture}" />
+                                    <TextBlock Grid.Row="2"
+                                               Grid.Column="0"
+                                               FontWeight="SemiBold"
+                                               Text="Runtime" />
+                                    <TextBlock Grid.Row="2"
+                                               Grid.Column="2"
+                                               Text="{Binding RuntimeDescription}" />
+                                    <TextBlock Grid.Row="3"
+                                               Grid.Column="0"
+                                               FontWeight="SemiBold"
+                                               Text="OS" />
+                                    <TextBlock Grid.Row="3"
+                                               Grid.Column="2"
+                                               Text="{Binding OsDescription}" />
+                                    <TextBlock Grid.Row="4"
+                                               Grid.Column="0"
+                                               FontWeight="SemiBold"
+                                               Text="Executable" />
+                                    <TextBlock Grid.Row="4"
+                                               Grid.Column="2"
+                                               Text="{Binding ExecutablePath}"
+                                               TextWrapping="Wrap" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </ScrollViewer>
-            </TabItem>
 
-            <TabItem Header="_Help">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <Grid Margin="0"
-                          MinHeight="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportHeight}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Visibility="{Binding IsHelpSectionSelected, Converter={local:BooleanToVisibilityConverter}}">
+                    <StackPanel MaxWidth="920"
+                                HorizontalAlignment="Center">
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <TextBlock Text="Radial Actions"
+                                           FontSize="24"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Margin="0,4,0,0"
+                                           Text="Summon a radial launcher for your everyday shortcuts."
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Grid.Row="0">
-                            <TextBlock Text="Radial Actions"
-                                       FontSize="24"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Margin="0,4,0,0"
-                                       Text="Summon a radial launcher for your everyday shortcuts."
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <TextBlock Text="Quick Start"
+                                           Style="{StaticResource CardTitleTextBlock}" />
+                                <TextBlock Text="Get productive in three quick steps."
+                                           Style="{StaticResource CardDescriptionTextBlock}" />
 
-                        <GroupBox Header="Quick Start"
-                                  Grid.Row="2">
-                            <StackPanel Margin="8">
                                 <TextBlock Margin="0,0,0,4"
                                            TextWrapping="Wrap">
-                                    <Run FontWeight="Bold">
-                                        1.
-                                    </Run>
+                                    <Run FontWeight="Bold">1.</Run>
                                     Press
                                     <Run Text="{Binding Settings.ActivationHotkey, Mode=OneWay}"
                                          FontWeight="Bold" />
-                                    to open the radial menu</TextBlock>
+                                    to open the radial menu
+                                </TextBlock>
                                 <TextBlock Margin="0,0,0,4"
                                            TextWrapping="Wrap">
-                                    <Run FontWeight="Bold">
-                                        2.
-                                    </Run>
-                                    Click a slice to perform the action</TextBlock>
+                                    <Run FontWeight="Bold">2.</Run>
+                                    Click a slice to perform the action
+                                </TextBlock>
                                 <TextBlock TextWrapping="Wrap">
-                                    <Run FontWeight="Bold">
-                                        3.
-                                    </Run>
-                                    Click outside or press Escape to close</TextBlock>
+                                    <Run FontWeight="Bold">3.</Run>
+                                    Click outside or press Escape to close
+                                </TextBlock>
                             </StackPanel>
-                        </GroupBox>
+                        </Border>
 
-                        <GroupBox Header="Support"
-                                  Grid.Row="4">
-                            <StackPanel Margin="8">
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <TextBlock Text="Support"
+                                           Style="{StaticResource CardTitleTextBlock}" />
+                                <TextBlock Text="Links for source code, issues, and release notes."
+                                           Style="{StaticResource CardDescriptionTextBlock}" />
+
                                 <TextBlock Margin="0,0,12,8">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions"
-                                                RequestNavigate="Hyperlink_RequestNavigate">
+                                               RequestNavigate="Hyperlink_RequestNavigate">
                                         📦 View on GitHub
                                     </Hyperlink>
                                 </TextBlock>
                                 <TextBlock Margin="0,0,12,8">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues"
-                                                RequestNavigate="Hyperlink_RequestNavigate">
+                                               RequestNavigate="Hyperlink_RequestNavigate">
                                         🐛 Report a Bug
                                     </Hyperlink>
                                 </TextBlock>
                                 <TextBlock Margin="0,0,12,8">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
-                                            RequestNavigate="Hyperlink_RequestNavigate">
+                                               RequestNavigate="Hyperlink_RequestNavigate">
                                         🚀 Release Notes
                                     </Hyperlink>
                                 </TextBlock>
@@ -542,13 +762,18 @@
                                     </Hyperlink>
                                 </TextBlock>
                             </StackPanel>
-                        </GroupBox>
+                        </Border>
 
-                        <GroupBox Header="More from the Author"
-                                  Grid.Row="6">
-                            <StackPanel Margin="8">
-                                <UniformGrid Columns="3"
-                                             Margin="0,4,0,0">
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <TextBlock Text="More from the Author"
+                                           Style="{StaticResource CardTitleTextBlock}" />
+                                <TextBlock Text="Other projects you might find useful."
+                                           Style="{StaticResource CardDescriptionTextBlock}" />
+
+                                <WrapPanel Margin="0,4,0,0"
+                                           ItemWidth="270"
+                                           Orientation="Horizontal">
                                     <StackPanel Margin="0,0,12,12">
                                         <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
                                             <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp"
@@ -615,7 +840,8 @@
                                                    Style="{StaticResource ProjectDescriptionTextBlock}"
                                                    Text="Stay focused with URL blocking and schedules." />
                                     </StackPanel>
-                                </UniformGrid>
+                                </WrapPanel>
+
                                 <TextBlock Margin="0,0,0,8">
                                     <Hyperlink NavigateUri="https://github.com/danielchalmers"
                                                RequestNavigate="Hyperlink_RequestNavigate">
@@ -623,10 +849,10 @@
                                     </Hyperlink>
                                 </TextBlock>
                             </StackPanel>
-                        </GroupBox>
-                    </Grid>
+                        </Border>
+                    </StackPanel>
                 </ScrollViewer>
-            </TabItem>
-        </TabControl>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>
