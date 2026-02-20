@@ -233,7 +233,7 @@
             </TabItem>
 
             <TabItem Header="_Actions">
-                <Grid Margin="0">
+                <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="16" />
@@ -488,8 +488,21 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
+                        <GroupBox Grid.Row="0"
+                                  Grid.Column="0"
+                                  Header="Settings"
+                                  Margin="0"
+                                  Style="{StaticResource SettingsCardGroupBox}">
+                            <StackPanel>
+                                <CheckBox Content="Check for updates"
+                                          IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
+                                <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
+                                           Style="{StaticResource DescriptionTextBlock}" />
+                            </StackPanel>
+                        </GroupBox>
+
                         <Grid Grid.Row="0"
-                              Grid.Column="0">
+                              Grid.Column="2">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="12" />
@@ -557,19 +570,6 @@
                                 </StackPanel>
                             </GroupBox>
                         </Grid>
-
-                        <GroupBox Grid.Row="0"
-                                  Grid.Column="2"
-                                  Header="Settings"
-                                  Margin="0"
-                                  Style="{StaticResource SettingsCardGroupBox}">
-                            <StackPanel>
-                                <CheckBox Content="Check for updates"
-                                          IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
-                                <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
-                                           Style="{StaticResource DescriptionTextBlock}" />
-                            </StackPanel>
-                        </GroupBox>
                     </Grid>
                 </ScrollViewer>
             </TabItem>
@@ -604,10 +604,14 @@
                                       Margin="0"
                                       Style="{StaticResource SettingsCardGroupBox}">
                                 <StackPanel>
-                                    <TextBlock Text="Build your own shortcut wheel for the apps and actions you use most."
+                                    <TextBlock Text="Radial Actions"
+                                               FontSize="24"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Margin="0,4,0,0"
+                                               Text="Build your own shortcut wheel for the apps and actions you use most.&#x0a;"
                                                TextWrapping="Wrap" />
                                     <TextBlock Margin="0,0,0,8"
-                                               Text="Use the Actions tab to add slices for apps, files, folders, scripts, and key commands."
+                                               Text="Use the Actions tab to add slices for apps, files, folders, scripts, and key commands.&#x0a;"
                                                TextWrapping="Wrap" />
                                     <TextBlock Style="{StaticResource QuickStartStepTextBlock}">
                                         <Run FontWeight="Bold">
