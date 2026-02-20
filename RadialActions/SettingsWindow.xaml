@@ -149,7 +149,8 @@
         </Border>
 
         <TabControl Grid.Row="1"
-                    Padding="12,12,12,0"
+                    Margin="12,0,12,0"
+                    Padding="0,12,0,0"
                     SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
             <TabItem Header="_General">
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
@@ -165,6 +166,7 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="12" />
                             <RowDefinition Height="*" />
+                            <RowDefinition Height="12" />
                         </Grid.RowDefinitions>
 
                         <GroupBox Grid.Row="0"
@@ -177,7 +179,7 @@
                                            Style="{StaticResource LabelTextBlock}" />
                                 <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          PreviewKeyDown="ActivationHotkey_PreviewKeyDown" />
-                                <TextBlock Text="Examples: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z"
+                                <TextBlock Text="Press the key combination directly (for example: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z)."
                                            Style="{StaticResource DescriptionTextBlock}" />
                             </StackPanel>
                         </GroupBox>
@@ -231,15 +233,15 @@
             </TabItem>
 
             <TabItem Header="_Actions">
-                <Grid Margin="0,0,0,12">
+                <Grid Margin="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="1.2*" />
                     </Grid.ColumnDefinitions>
 
                     <GroupBox Grid.Column="0"
-                              Header="Actions List"
+                              Margin="0"
                               VerticalContentAlignment="Stretch"
                               Style="{StaticResource SettingsCardGroupBox}">
                         <Grid>
@@ -305,11 +307,11 @@
                                         Command="{Binding RemoveActionCommand}"
                                         HorizontalAlignment="Stretch" />
                                 <Button Grid.Column="4"
-                                        Content="Move Up"
+                                        Content="Up"
                                         Command="{Binding MoveUpCommand}"
                                         HorizontalAlignment="Stretch" />
                                 <Button Grid.Column="6"
-                                        Content="Move Down"
+                                        Content="Down"
                                         Command="{Binding MoveDownCommand}"
                                         HorizontalAlignment="Stretch" />
                             </Grid>
@@ -318,7 +320,7 @@
 
                     <!--  Action Editor  -->
                     <GroupBox Grid.Column="2"
-                              Header="Edit Action"
+                              Margin="0"
                               VerticalContentAlignment="Stretch"
                               Style="{StaticResource SettingsCardGroupBox}"
                               IsEnabled="{Binding HasSelectedAction}">
@@ -495,6 +497,52 @@
                             </Grid.RowDefinitions>
 
                             <GroupBox Grid.Row="0"
+                                      Header="App Info"
+                                      Margin="0"
+                                      Style="{StaticResource SettingsCardGroupBox}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0"
+                                               FontWeight="SemiBold"
+                                               Text="File Version" />
+                                    <TextBlock Grid.Row="0" Grid.Column="2"
+                                               Text="{Binding FileVersion}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0"
+                                               FontWeight="SemiBold"
+                                               Text="Architecture" />
+                                    <TextBlock Grid.Row="1" Grid.Column="2"
+                                               Text="{Binding Architecture}" />
+                                    <TextBlock Grid.Row="2" Grid.Column="0"
+                                               FontWeight="SemiBold"
+                                               Text="Runtime" />
+                                    <TextBlock Grid.Row="2" Grid.Column="2"
+                                               Text="{Binding RuntimeDescription}" />
+                                    <TextBlock Grid.Row="3" Grid.Column="0"
+                                               FontWeight="SemiBold"
+                                               Text="OS" />
+                                    <TextBlock Grid.Row="3" Grid.Column="2"
+                                               Text="{Binding OsDescription}" />
+                                    <TextBlock Grid.Row="4" Grid.Column="0"
+                                               FontWeight="SemiBold"
+                                               Text="Executable" />
+                                    <TextBlock Grid.Row="4" Grid.Column="2"
+                                               Text="{Binding ExecutablePath}"
+                                               TextWrapping="Wrap" />
+                                </Grid>
+                            </GroupBox>
+
+                            <GroupBox Grid.Row="2"
                                       Header="Tools"
                                       Margin="0"
                                       Style="{StaticResource SettingsCardGroupBox}">
@@ -508,65 +556,19 @@
                                             IsEnabled="{x:Static p:Settings.CanBeSaved}" />
                                 </StackPanel>
                             </GroupBox>
-
-                            <GroupBox Grid.Row="2"
-                                      Header="Misc Advanced Settings"
-                                      Margin="0"
-                                      Style="{StaticResource SettingsCardGroupBox}">
-                                <StackPanel>
-                                    <CheckBox Content="Check for updates"
-                                              IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
-                                    <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
-                                               Style="{StaticResource DescriptionTextBlock}" />
-                                </StackPanel>
-                            </GroupBox>
                         </Grid>
 
                         <GroupBox Grid.Row="0"
                                   Grid.Column="2"
-                                  Header="App Info"
+                                  Header="Settings"
                                   Margin="0"
                                   Style="{StaticResource SettingsCardGroupBox}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="12" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           FontWeight="SemiBold"
-                                           Text="File Version" />
-                                <TextBlock Grid.Row="0" Grid.Column="2"
-                                           Text="{Binding FileVersion}" />
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           FontWeight="SemiBold"
-                                           Text="Architecture" />
-                                <TextBlock Grid.Row="1" Grid.Column="2"
-                                           Text="{Binding Architecture}" />
-                                <TextBlock Grid.Row="2" Grid.Column="0"
-                                           FontWeight="SemiBold"
-                                           Text="Runtime" />
-                                <TextBlock Grid.Row="2" Grid.Column="2"
-                                           Text="{Binding RuntimeDescription}" />
-                                <TextBlock Grid.Row="3" Grid.Column="0"
-                                           FontWeight="SemiBold"
-                                           Text="OS" />
-                                <TextBlock Grid.Row="3" Grid.Column="2"
-                                           Text="{Binding OsDescription}" />
-                                <TextBlock Grid.Row="4" Grid.Column="0"
-                                           FontWeight="SemiBold"
-                                           Text="Executable" />
-                                <TextBlock Grid.Row="4" Grid.Column="2"
-                                           Text="{Binding ExecutablePath}"
-                                           TextWrapping="Wrap" />
-                            </Grid>
+                            <StackPanel>
+                                <CheckBox Content="Check for updates"
+                                          IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
+                                <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
+                                           Style="{StaticResource DescriptionTextBlock}" />
+                            </StackPanel>
                         </GroupBox>
                     </Grid>
                 </ScrollViewer>
@@ -619,14 +621,12 @@
                                         <Run FontWeight="Bold">
                                             2.
                                         </Run>
-                                        Mouse: move toward a slice and click to run it</TextBlock>
+                                        Use the mouse or the arrow keys to select a slice and click the mouse or hit Enter to run it</TextBlock>
                                     <TextBlock Style="{StaticResource QuickStartStepTextBlock}">
                                         <Run FontWeight="Bold">
                                             3.
                                         </Run>
-                                        Keyboard: press Escape to close instantly</TextBlock>
-                                    <TextBlock TextWrapping="Wrap"
-                                               Text="Tune hotkey, size, and behavior in General until it feels natural." />
+                                        Access more options by right-clicking or hitting Shift+F10</TextBlock>
                                 </StackPanel>
                             </GroupBox>
 
