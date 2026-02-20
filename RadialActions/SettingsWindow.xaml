@@ -89,61 +89,72 @@
                     Padding="12,12,12,0"
                     SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
             <TabItem Header="_General">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0">
-                        <GroupBox Header="Activation"
-                                  Margin="0,0,0,12">
-                            <StackPanel Margin="8">
-                                <TextBlock Text="Hotkey:"
-                                           Style="{StaticResource LabelTextBlock}" />
-                                <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         PreviewKeyDown="ActivationHotkey_PreviewKeyDown" />
-                                <TextBlock Text="Examples: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z"
-                                           Style="{StaticResource DescriptionTextBlock}" />
-                            </StackPanel>
-                        </GroupBox>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                        <GroupBox Header="Appearance"
-                                  Margin="0,0,0,12">
-                            <StackPanel Margin="8">
-                                <TextBlock Text="Menu Size (pixels):"
-                                           Style="{StaticResource LabelTextBlock}" />
-                                <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Text="Recommended: 300-500"
-                                           Style="{StaticResource DescriptionTextBlock}" />
-                            </StackPanel>
-                        </GroupBox>
+                        <StackPanel Grid.Column="0">
+                            <GroupBox Header="Activation"
+                                      Margin="0,0,0,12">
+                                <StackPanel Margin="8">
+                                    <TextBlock Text="Hotkey:"
+                                               Style="{StaticResource LabelTextBlock}" />
+                                    <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             PreviewKeyDown="ActivationHotkey_PreviewKeyDown" />
+                                    <TextBlock Text="Examples: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z"
+                                               Style="{StaticResource DescriptionTextBlock}" />
+                                </StackPanel>
+                            </GroupBox>
 
-                        <GroupBox Header="Behavior"
-                                  Margin="0,0,0,12">
-                            <StackPanel Margin="8">
-                                <CheckBox Content="Keep menu open after clicking a slice"
-                                          IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
-                                <TextBlock Text="The menu stays open until you click another app or press Escape."
-                                           Style="{StaticResource DescriptionTextBlock}" />
-                                <CheckBox Margin="0,8,0,0"
-                                          Content="Always open menu in screen center"
-                                          IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}" />
-                                <TextBlock Text="Useful for keyboard navigation when the pointer may be far from your focus."
-                                           Style="{StaticResource DescriptionTextBlock}" />
-                            </StackPanel>
-                        </GroupBox>
+                            <GroupBox Header="Behavior"
+                                      Margin="0,0,0,12">
+                                <StackPanel Margin="8">
+                                    <CheckBox Content="Keep menu open after clicking a slice"
+                                              IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
+                                    <TextBlock Text="The menu stays open until you click another app or press Escape."
+                                               Style="{StaticResource DescriptionTextBlock}" />
+                                    <CheckBox Margin="0,8,0,0"
+                                              Content="Always open menu in screen center"
+                                              IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}" />
+                                    <TextBlock Text="Useful for keyboard navigation when the pointer may be far from your focus."
+                                               Style="{StaticResource DescriptionTextBlock}" />
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
 
-                        <GroupBox Header="Startup"
-                                  Margin="0,0,0,12">
-                            <StackPanel Margin="8">
-                                <CheckBox Content="Run on Windows startup"
-                                          IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
-                                <TextBlock Text="Starts the app minimized to tray when you log in."
-                                           Style="{StaticResource DescriptionTextBlock}" />
-                                <CheckBox Margin="0,8,0,0"
-                                          Content="Check for updates"
-                                          IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
-                                <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
-                                           Style="{StaticResource DescriptionTextBlock}" />
-                            </StackPanel>
-                        </GroupBox>
-                    </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <GroupBox Header="Appearance"
+                                      Margin="0,0,0,12">
+                                <StackPanel Margin="8">
+                                    <TextBlock Text="Menu Size (pixels):"
+                                               Style="{StaticResource LabelTextBlock}" />
+                                    <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="Recommended: 300-500"
+                                               Style="{StaticResource DescriptionTextBlock}" />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Startup"
+                                      Margin="0,0,0,12">
+                                <StackPanel Margin="8">
+                                    <CheckBox Content="Run on Windows startup"
+                                              IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
+                                    <TextBlock Text="Starts the app minimized to tray when you log in."
+                                               Style="{StaticResource DescriptionTextBlock}" />
+                                    <CheckBox Margin="0,8,0,0"
+                                              Content="Check for updates"
+                                              IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
+                                    <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
+                                               Style="{StaticResource DescriptionTextBlock}" />
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </TabItem>
 
