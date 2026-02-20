@@ -102,6 +102,11 @@ public partial class MainWindow : Window
         _menuService.HideMenu(animate);
     }
 
+    private void ShowMenuUsingConfiguredPosition()
+    {
+        _menuService.ShowMenu(!Settings.Default.OpenMenuInScreenCenter);
+    }
+
     private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
         _menuService.HideMenu(animate: false);
@@ -134,14 +139,14 @@ public partial class MainWindow : Window
         }
         else
         {
-            _menuService.ShowMenu(true);
+            ShowMenuUsingConfiguredPosition();
         }
     }
 
     private void OnTrayLeftMouseDown(object sender, RoutedEventArgs e)
     {
         Log.Debug("Tray icon left clicked");
-        _menuService.ShowMenu(true);
+        ShowMenuUsingConfiguredPosition();
     }
 
     private void OnTrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)

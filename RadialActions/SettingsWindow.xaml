@@ -121,6 +121,11 @@
                                           IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
                                 <TextBlock Text="The menu stays open until you click another app or press Escape."
                                            Style="{StaticResource DescriptionTextBlock}" />
+                                <CheckBox Margin="0,8,0,0"
+                                          Content="Always open menu in screen center"
+                                          IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}" />
+                                <TextBlock Text="Useful for keyboard navigation when the pointer may be far from your focus."
+                                           Style="{StaticResource DescriptionTextBlock}" />
                             </StackPanel>
                         </GroupBox>
 

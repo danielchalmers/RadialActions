@@ -30,6 +30,7 @@ public class SettingsSerializationTests
 
         Assert.Equal(Settings.DefaultActivationHotkey, settings.ActivationHotkey);
         Assert.Equal(Settings.DefaultSize, settings.Size);
+        Assert.False(settings.OpenMenuInScreenCenter);
         Assert.Single(settings.Actions);
         Assert.Equal(PieAction.DefaultName, settings.Actions[0].Name);
         Assert.Equal(PieAction.DefaultIcon, settings.Actions[0].Icon);
@@ -64,6 +65,7 @@ public class SettingsSerializationTests
         var settings = Settings.DeserializeFromJson("{}");
         settings.ActivationHotkey = "Ctrl+Shift+R";
         settings.Size = 512;
+        settings.OpenMenuInScreenCenter = true;
         settings.Actions = new System.Collections.ObjectModel.ObservableCollection<PieAction>
         {
             PieAction.CreateKeyAction("Mute"),
@@ -76,6 +78,7 @@ public class SettingsSerializationTests
 
         Assert.Equal("Ctrl+Shift+R", loaded.ActivationHotkey);
         Assert.Equal(512, loaded.Size);
+        Assert.True(loaded.OpenMenuInScreenCenter);
         Assert.Equal(2, loaded.Actions.Count);
         Assert.Equal(ActionType.Key, loaded.Actions[0].Type);
         Assert.Equal("Mute", loaded.Actions[0].Parameter);

@@ -41,6 +41,12 @@ public sealed partial class Settings
     private bool _keepMenuOpenAfterSliceClick;
 
     /// <summary>
+    /// Opens the menu at the center of the current screen instead of the cursor.
+    /// </summary>
+    [ObservableProperty]
+    private bool _openMenuInScreenCenter;
+
+    /// <summary>
     /// Checks GitHub releases at startup to notify about new versions.
     /// </summary>
     [ObservableProperty]
