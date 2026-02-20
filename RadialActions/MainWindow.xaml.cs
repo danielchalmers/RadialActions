@@ -81,8 +81,6 @@ public partial class MainWindow : Window
         Log.Debug($"Opening settings window to tab {tabIndex}");
         Settings.Default.SettingsTabIndex = tabIndex;
         App.ShowSingletonWindow<SettingsWindow>();
-        var settingsWindow = Application.Current.Windows.OfType<SettingsWindow>().FirstOrDefault();
-        settingsWindow?.SelectSection(tabIndex);
     }
 
     /// <summary>
