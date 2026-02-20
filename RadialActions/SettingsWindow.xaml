@@ -61,11 +61,10 @@
         <Style x:Key="DescriptionTextBlock"
                TargetType="TextBlock"
                BasedOn="{StaticResource {x:Type TextBlock}}">
-            <Setter Property="FontStyle" Value="Italic" />
-            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontStyle" Value="Normal" />
+            <Setter Property="FontSize" Value="12" />
             <Setter Property="Margin" Value="0,4,0,12" />
             <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
         </Style>
 
         <Style x:Key="ActionEditorLabelTextBlock"
@@ -138,7 +137,7 @@
                     </TextBlock>
                     <TextBlock Margin="0,2,0,0"
                                TextWrapping="Wrap">
-                        A newer version of Radial Actions is available.
+                        A new version of Radial Actions is available!
                         <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases/latest"
                                    RequestNavigate="Hyperlink_RequestNavigate">
                             Learn more
@@ -233,14 +232,19 @@
             </TabItem>
 
             <TabItem Header="_Actions">
-                <Grid Margin="0,0,0,12">
+                <Grid Margin="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="12" />
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="16" />
                         <ColumnDefinition Width="1.2*" />
                     </Grid.ColumnDefinitions>
 
-                    <GroupBox Grid.Column="0"
+                    <GroupBox Grid.Row="0"
+                              Grid.Column="0"
                               Margin="0"
                               VerticalContentAlignment="Stretch"
                               Style="{StaticResource SettingsCardGroupBox}">
@@ -319,7 +323,8 @@
                     </GroupBox>
 
                     <!--  Action Editor  -->
-                    <GroupBox Grid.Column="2"
+                    <GroupBox Grid.Row="0"
+                              Grid.Column="2"
                               Margin="0"
                               VerticalContentAlignment="Stretch"
                               Style="{StaticResource SettingsCardGroupBox}"
@@ -630,7 +635,7 @@
                                         <Run FontWeight="Bold">
                                             3.
                                         </Run>
-                                        Access more options by right-clicking or hitting Shift+F10</TextBlock>
+                                        Access more options with right click or Shift+F10</TextBlock>
                                 </StackPanel>
                             </GroupBox>
 
@@ -698,7 +703,7 @@
                                         <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
                                             <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay"
                                                        RequestNavigate="Hyperlink_RequestNavigate">
-                                                SentryReplay
+                                                Sentry Replay
                                             </Hyperlink>
                                         </TextBlock>
                                         <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
