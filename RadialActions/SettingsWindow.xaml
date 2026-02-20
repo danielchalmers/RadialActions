@@ -154,69 +154,78 @@
             <TabItem Header="_General">
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
-                    <Grid Margin="0,0,0,12">
+                    <Grid Margin="0"
+                          MinHeight="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportHeight}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="16" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Column="0">
-                            <GroupBox Header="Activation"
-                                      Style="{StaticResource SettingsCardGroupBox}">
-                                <StackPanel>
-                                    <TextBlock Text="Hotkey:"
-                                               Style="{StaticResource LabelTextBlock}" />
-                                    <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                             PreviewKeyDown="ActivationHotkey_PreviewKeyDown" />
-                                    <TextBlock Text="Examples: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z"
-                                               Style="{StaticResource DescriptionTextBlock}" />
-                                </StackPanel>
-                            </GroupBox>
+                        <GroupBox Grid.Row="0"
+                                  Grid.Column="0"
+                                  Header="Activation"
+                                  Margin="0"
+                                  Style="{StaticResource SettingsCardGroupBox}">
+                            <StackPanel>
+                                <TextBlock Text="Hotkey:"
+                                           Style="{StaticResource LabelTextBlock}" />
+                                <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         PreviewKeyDown="ActivationHotkey_PreviewKeyDown" />
+                                <TextBlock Text="Examples: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z"
+                                           Style="{StaticResource DescriptionTextBlock}" />
+                            </StackPanel>
+                        </GroupBox>
 
-                            <GroupBox Header="Behavior"
-                                      Style="{StaticResource SettingsCardGroupBox}">
-                                <StackPanel>
-                                    <CheckBox Content="Keep menu open after clicking a slice"
-                                              IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
-                                    <TextBlock Text="The menu stays open until you click another app or press Escape."
-                                               Style="{StaticResource DescriptionTextBlock}" />
-                                    <CheckBox Margin="0,8,0,0"
-                                              Content="Always open menu in screen center"
-                                              IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}" />
-                                    <TextBlock Text="Useful for keyboard navigation when the pointer may be far from your focus."
-                                               Style="{StaticResource DescriptionTextBlock}" />
-                                </StackPanel>
-                            </GroupBox>
-                        </StackPanel>
+                        <GroupBox Grid.Row="0"
+                                  Grid.Column="2"
+                                  Header="Appearance"
+                                  Margin="0"
+                                  Style="{StaticResource SettingsCardGroupBox}">
+                            <StackPanel>
+                                <TextBlock Text="Menu Size (pixels):"
+                                           Style="{StaticResource LabelTextBlock}" />
+                                <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Recommended: 300-500"
+                                           Style="{StaticResource DescriptionTextBlock}" />
+                            </StackPanel>
+                        </GroupBox>
 
-                        <StackPanel Grid.Column="2">
-                            <GroupBox Header="Appearance"
-                                      Style="{StaticResource SettingsCardGroupBox}">
-                                <StackPanel>
-                                    <TextBlock Text="Menu Size (pixels):"
-                                               Style="{StaticResource LabelTextBlock}" />
-                                    <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock Text="Recommended: 300-500"
-                                               Style="{StaticResource DescriptionTextBlock}" />
-                                </StackPanel>
-                            </GroupBox>
+                        <GroupBox Grid.Row="2"
+                                  Grid.Column="0"
+                                  Header="Behavior"
+                                  Margin="0"
+                                  Style="{StaticResource SettingsCardGroupBox}">
+                            <StackPanel>
+                                <CheckBox Content="Keep menu open after clicking a slice"
+                                          IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
+                                <TextBlock Text="The menu stays open until you click another app or press Escape."
+                                           Style="{StaticResource DescriptionTextBlock}" />
+                                <CheckBox Margin="0,8,0,0"
+                                          Content="Always open menu in screen center"
+                                          IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}" />
+                                <TextBlock Text="Useful for keyboard navigation when the pointer may be far from your focus."
+                                           Style="{StaticResource DescriptionTextBlock}" />
+                            </StackPanel>
+                        </GroupBox>
 
-                            <GroupBox Header="Startup"
-                                      Style="{StaticResource SettingsCardGroupBox}">
-                                <StackPanel>
-                                    <CheckBox Content="Run on Windows startup"
-                                              IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
-                                    <TextBlock Text="Starts the app minimized to tray when you log in."
-                                               Style="{StaticResource DescriptionTextBlock}" />
-                                    <CheckBox Margin="0,8,0,0"
-                                              Content="Check for updates"
-                                              IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
-                                    <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
-                                               Style="{StaticResource DescriptionTextBlock}" />
-                                </StackPanel>
-                            </GroupBox>
-                        </StackPanel>
+                        <GroupBox Grid.Row="2"
+                                  Grid.Column="2"
+                                  Header="Startup"
+                                  Margin="0"
+                                  Style="{StaticResource SettingsCardGroupBox}">
+                            <StackPanel>
+                                <CheckBox Content="Run on Windows startup"
+                                          IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
+                                <TextBlock Text="Starts the app minimized to tray when you log in."
+                                           Style="{StaticResource DescriptionTextBlock}" />
+                            </StackPanel>
+                        </GroupBox>
                     </Grid>
                 </ScrollViewer>
             </TabItem>
@@ -224,9 +233,9 @@
             <TabItem Header="_Actions">
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="1.5*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
                     <GroupBox Grid.Column="0"
@@ -465,29 +474,58 @@
 
             <TabItem Header="Ad_vanced">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <Grid Margin="0,0,0,12">
+                    <Grid Margin="0"
+                          MinHeight="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportHeight}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="12" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="16" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <GroupBox Grid.Column="0"
-                                  Header="Tools"
-                                  Style="{StaticResource SettingsCardGroupBox}">
-                            <StackPanel>
-                                <Button Content="Open Exe Folder"
-                                        Command="{Binding OpenExeFolderCommand}"
-                                        Margin="0,0,0,8" />
-                                <Button Content="Open Settings File"
-                                        Command="{Binding OpenSettingsFileCommand}"
-                                        Margin="0,0,0,8"
-                                        IsEnabled="{x:Static p:Settings.CanBeSaved}" />
-                            </StackPanel>
-                        </GroupBox>
+                        <Grid Grid.Row="0"
+                              Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
 
-                        <GroupBox Grid.Column="2"
+                            <GroupBox Grid.Row="0"
+                                      Header="Tools"
+                                      Margin="0"
+                                      Style="{StaticResource SettingsCardGroupBox}">
+                                <StackPanel>
+                                    <Button Content="Open Exe Folder"
+                                            Command="{Binding OpenExeFolderCommand}"
+                                            Margin="0,0,0,8" />
+                                    <Button Content="Open Settings File"
+                                            Command="{Binding OpenSettingsFileCommand}"
+                                            Margin="0,0,0,8"
+                                            IsEnabled="{x:Static p:Settings.CanBeSaved}" />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Grid.Row="2"
+                                      Header="Misc Advanced Settings"
+                                      Margin="0"
+                                      Style="{StaticResource SettingsCardGroupBox}">
+                                <StackPanel>
+                                    <CheckBox Content="Check for updates"
+                                              IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
+                                    <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
+                                               Style="{StaticResource DescriptionTextBlock}" />
+                                </StackPanel>
+                            </GroupBox>
+                        </Grid>
+
+                        <GroupBox Grid.Row="0"
+                                  Grid.Column="2"
                                   Header="App Info"
+                                  Margin="0"
                                   Style="{StaticResource SettingsCardGroupBox}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -539,10 +577,14 @@
                               HorizontalScrollBarVisibility="Disabled">
                     <Grid Margin="0"
                           MinHeight="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportHeight}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="12" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="16" />
-                            <ColumnDefinition Width="1.4*" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
                         <Grid Grid.Column="0">
@@ -555,29 +597,16 @@
                             </Grid.RowDefinitions>
 
                             <GroupBox Grid.Row="0"
-                                      Header="About"
+                                      Grid.RowSpan="3"
+                                      Header="Getting Started"
                                       Margin="0"
                                       Style="{StaticResource SettingsCardGroupBox}">
                                 <StackPanel>
-                                    <TextBlock Text="Radial Actions"
-                                               FontSize="24"
-                                               FontWeight="SemiBold" />
-                                    <TextBlock Margin="0,4,0,0"
-                                               Text="Summon a radial launcher for your everyday shortcuts."
+                                    <TextBlock Text="Build your own shortcut wheel for the apps and actions you use most."
                                                TextWrapping="Wrap" />
-                                    <TextBlock Margin="0,0,0,4"
-                                               Text="Configure slices in the Actions tab to run apps, files, scripts, and key actions."
+                                    <TextBlock Margin="0,0,0,8"
+                                               Text="Use the Actions tab to add slices for apps, files, folders, scripts, and key commands."
                                                TextWrapping="Wrap" />
-                                    <TextBlock Text="Use General settings to tune your activation hotkey, menu size, behavior, and startup."
-                                               TextWrapping="Wrap" />
-                                </StackPanel>
-                            </GroupBox>
-
-                            <GroupBox Grid.Row="2"
-                                      Header="Quick Start"
-                                      Margin="0"
-                                      Style="{StaticResource SettingsCardGroupBox}">
-                                <StackPanel>
                                     <TextBlock Style="{StaticResource QuickStartStepTextBlock}">
                                         <Run FontWeight="Bold">
                                             1.
@@ -590,16 +619,14 @@
                                         <Run FontWeight="Bold">
                                             2.
                                         </Run>
-                                        Click a slice to perform the action</TextBlock>
+                                        Mouse: move toward a slice and click to run it</TextBlock>
                                     <TextBlock Style="{StaticResource QuickStartStepTextBlock}">
                                         <Run FontWeight="Bold">
                                             3.
                                         </Run>
-                                        Click outside or press Escape to close</TextBlock>
-                                    <TextBlock Style="{StaticResource QuickStartStepTextBlock}"
-                                               Text="Mouse tip: move toward a slice and click to trigger it quickly." />
+                                        Keyboard: press Escape to close instantly</TextBlock>
                                     <TextBlock TextWrapping="Wrap"
-                                               Text="Keyboard tip: open with the hotkey and press Escape to close without reaching for the mouse." />
+                                               Text="Tune hotkey, size, and behavior in General until it feels natural." />
                                 </StackPanel>
                             </GroupBox>
 
