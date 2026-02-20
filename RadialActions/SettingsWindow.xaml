@@ -16,29 +16,33 @@
                BasedOn="{StaticResource {x:Type GroupBox}}">
             <Setter Property="Margin" Value="0,0,0,12" />
             <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GroupBox">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10"
-                                Padding="14">
+                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="10"
+                                        Padding="14">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <ContentPresenter Grid.Row="0"
-                                                  Margin="0,0,0,10"
+                                                  Margin="0,0,0,8"
                                                   ContentSource="Header"
                                                   RecognizesAccessKey="True"
                                                   TextElement.FontSize="13"
                                                   TextElement.FontWeight="SemiBold" />
                                 <ContentPresenter Grid.Row="1"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                                   ContentSource="Content" />
                             </Grid>
                         </Border>
@@ -59,9 +63,19 @@
                BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="FontStyle" Value="Italic" />
             <Setter Property="FontSize" Value="11" />
-            <Setter Property="Margin" Value="0,2,0,12" />
+            <Setter Property="Margin" Value="0,4,0,12" />
             <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+        </Style>
+
+        <Style x:Key="ActionEditorLabelTextBlock"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="Margin" Value="0,0,8,4" />
         </Style>
 
         <Style TargetType="Hyperlink"
@@ -79,7 +93,20 @@
         <Style x:Key="ProjectDescriptionTextBlock"
                TargetType="TextBlock"
                BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Margin" Value="0,4,0,8" />
             <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="QuickStartStepTextBlock"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Margin" Value="0,0,0,4" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="ProjectTileStackPanel"
+               TargetType="StackPanel">
+            <Setter Property="Margin" Value="0,0,12,12" />
         </Style>
     </Window.Resources>
     <Grid>
@@ -195,7 +222,7 @@
             </TabItem>
 
             <TabItem Header="_Actions">
-                <Grid Margin="0,12,0,12">
+                <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="16" />
@@ -204,6 +231,7 @@
 
                     <GroupBox Grid.Column="0"
                               Header="Actions List"
+                              VerticalContentAlignment="Stretch"
                               Style="{StaticResource SettingsCardGroupBox}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -223,8 +251,7 @@
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Margin="0"
-                                                    Orientation="Horizontal">
+                                        <StackPanel Orientation="Horizontal">
                                             <StackPanel.Style>
                                                 <Style TargetType="StackPanel">
                                                     <Style.Triggers>
@@ -283,6 +310,7 @@
                     <!--  Action Editor  -->
                     <GroupBox Grid.Column="2"
                               Header="Edit Action"
+                              VerticalContentAlignment="Stretch"
                               Style="{StaticResource SettingsCardGroupBox}"
                               IsEnabled="{Binding HasSelectedAction}">
                         <Grid Grid.IsSharedSizeScope="True">
@@ -301,8 +329,8 @@
 
                             <TextBlock Grid.Row="0" Grid.Column="0"
                                        Text="Enabled:"
-                                       Margin="0,0,8,8" VerticalAlignment="Center"
-                                       FontWeight="SemiBold" />
+                                       Margin="0,0,8,8"
+                                       Style="{StaticResource ActionEditorLabelTextBlock}" />
                             <CheckBox Grid.Row="0" Grid.Column="1"
                                       Content="Show this action"
                                       IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}"
@@ -310,24 +338,21 @@
 
                             <TextBlock Grid.Row="1" Grid.Column="0"
                                        Text="Name:"
-                                       Margin="0,0,8,4" VerticalAlignment="Center"
-                                       FontWeight="SemiBold" />
+                                       Style="{StaticResource ActionEditorLabelTextBlock}" />
                             <TextBox Grid.Row="1" Grid.Column="1"
                                      Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,0,4" />
 
                             <TextBlock Grid.Row="2" Grid.Column="0"
                                        Text="Icon:"
-                                       Margin="0,0,8,4" VerticalAlignment="Center"
-                                       FontWeight="SemiBold" />
+                                       Style="{StaticResource ActionEditorLabelTextBlock}" />
                             <TextBox Grid.Row="2" Grid.Column="1"
                                      Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,0,4" />
 
                             <TextBlock Grid.Row="3" Grid.Column="0"
                                        Text="Type:"
-                                       Margin="0,0,8,4" VerticalAlignment="Center"
-                                       FontWeight="SemiBold" />
+                                       Style="{StaticResource ActionEditorLabelTextBlock}" />
                             <ComboBox Grid.Row="3" Grid.Column="1"
                                       Margin="0,0,0,4"
                                       ItemsSource="{Binding ActionTypes}"
@@ -347,8 +372,7 @@
 
                                 <TextBlock Grid.Row="0" Grid.Column="0"
                                            Text="Key Action:"
-                                           Margin="0,0,8,4" VerticalAlignment="Center"
-                                           FontWeight="SemiBold" />
+                                           Style="{StaticResource ActionEditorLabelTextBlock}" />
                                 <ComboBox Grid.Row="0" Grid.Column="1"
                                           SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
                                           SelectedValuePath="Id"
@@ -370,8 +394,8 @@
 
                                 <TextBlock Grid.Row="1" Grid.Column="0"
                                            Text="Shortcut:"
-                                           Margin="0,0,8,0" VerticalAlignment="Center"
-                                           FontWeight="SemiBold"
+                                           Margin="0,0,8,0"
+                                           Style="{StaticResource ActionEditorLabelTextBlock}"
                                            Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
                                 <TextBox Grid.Row="1" Grid.Column="1"
                                          Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -393,8 +417,7 @@
 
                                 <TextBlock Grid.Row="0" Grid.Column="0"
                                            Text="Target:"
-                                           Margin="0,0,8,4" VerticalAlignment="Center"
-                                           FontWeight="SemiBold" />
+                                           Style="{StaticResource ActionEditorLabelTextBlock}" />
                                 <Grid Grid.Row="0" Grid.Column="1"
                                       Margin="0,0,0,4">
                                     <Grid.ColumnDefinitions>
@@ -407,21 +430,20 @@
                                     <Button Grid.Column="2"
                                             Content="Browse..."
                                             Command="{Binding BrowseShellTargetCommand}"
-                                            Padding="10,2" />
+                                            Padding="8,2" />
                                 </Grid>
 
                                 <TextBlock Grid.Row="1" Grid.Column="0"
                                            Text="Arguments:"
-                                           Margin="0,0,8,4" VerticalAlignment="Center"
-                                           FontWeight="SemiBold" />
+                                           Style="{StaticResource ActionEditorLabelTextBlock}" />
                                 <TextBox Grid.Row="1" Grid.Column="1"
                                          Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          Margin="0,0,0,4" />
 
                                 <TextBlock Grid.Row="2" Grid.Column="0"
                                            Text="Working Directory:"
-                                           Margin="0,0,8,0" VerticalAlignment="Center"
-                                           FontWeight="SemiBold" />
+                                           Margin="0,0,8,0"
+                                           Style="{StaticResource ActionEditorLabelTextBlock}" />
                                 <Grid Grid.Row="2" Grid.Column="1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -433,7 +455,7 @@
                                     <Button Grid.Column="2"
                                             Content="Browse..."
                                             Command="{Binding BrowseWorkingDirectoryCommand}"
-                                            Padding="10,2" />
+                                            Padding="8,2" />
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -515,169 +537,181 @@
             <TabItem Header="_Help">
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
-                    <Grid Margin="0,0,0,12">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="12" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                    <Grid Margin="0"
+                          MinHeight="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportHeight}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="1.4*" />
+                        </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Row="0">
-                            <TextBlock Text="Radial Actions"
-                                       FontSize="24"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Margin="0,4,0,0"
-                                       Text="Summon a radial launcher for your everyday shortcuts."
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
+                        <Grid Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
 
-                        <Grid Grid.Row="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="16" />
-                                <ColumnDefinition Width="1.4*" />
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0">
-                                <GroupBox Header="Quick Start"
-                                          Style="{StaticResource SettingsCardGroupBox}">
-                                    <StackPanel>
-                                        <TextBlock Margin="0,0,0,4"
-                                                   TextWrapping="Wrap">
-                                            <Run FontWeight="Bold">
-                                                1.
-                                            </Run>
-                                            Press
-                                            <Run Text="{Binding Settings.ActivationHotkey, Mode=OneWay}"
-                                                 FontWeight="Bold" />
-                                            to open the radial menu</TextBlock>
-                                        <TextBlock Margin="0,0,0,4"
-                                                   TextWrapping="Wrap">
-                                            <Run FontWeight="Bold">
-                                                2.
-                                            </Run>
-                                            Click a slice to perform the action</TextBlock>
-                                        <TextBlock TextWrapping="Wrap">
-                                            <Run FontWeight="Bold">
-                                                3.
-                                            </Run>
-                                            Click outside or press Escape to close</TextBlock>
-                                    </StackPanel>
-                                </GroupBox>
-
-                                <GroupBox Header="Support"
-                                          Style="{StaticResource SettingsCardGroupBox}">
-                                    <StackPanel>
-                                        <TextBlock Margin="0,0,12,8">
-                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions"
-                                                       RequestNavigate="Hyperlink_RequestNavigate">
-                                                📦 View on GitHub
-                                            </Hyperlink>
-                                        </TextBlock>
-                                        <TextBlock Margin="0,0,12,8">
-                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues"
-                                                       RequestNavigate="Hyperlink_RequestNavigate">
-                                                🐛 Report a Bug
-                                            </Hyperlink>
-                                        </TextBlock>
-                                        <TextBlock Margin="0,0,12,8">
-                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
-                                                       RequestNavigate="Hyperlink_RequestNavigate">
-                                                🚀 Release Notes
-                                            </Hyperlink>
-                                        </TextBlock>
-                                        <TextBlock Margin="0,0,12,8">
-                                            <Hyperlink NavigateUri="radialactions://licenses"
-                                                       RequestNavigate="Hyperlink_RequestNavigate">
-                                                📜 Third-Party Licenses
-                                            </Hyperlink>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </GroupBox>
-                            </StackPanel>
-
-                            <GroupBox Grid.Column="2"
-                                      Header="More from the Author"
+                            <GroupBox Grid.Row="0"
+                                      Header="About"
+                                      Margin="0"
                                       Style="{StaticResource SettingsCardGroupBox}">
                                 <StackPanel>
-                                    <UniformGrid Columns="2"
-                                                 Margin="0,4,0,0">
-                                        <StackPanel Margin="0,0,12,12">
-                                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
-                                                <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp"
-                                                           RequestNavigate="Hyperlink_RequestNavigate">
-                                                    Good Diary
-                                                </Hyperlink>
-                                            </TextBlock>
-                                            <TextBlock Margin="0,4,0,8"
-                                                       Style="{StaticResource ProjectDescriptionTextBlock}"
-                                                       Text="Track your daily activities and moods on Android." />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,0,12,12">
-                                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
-                                                <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock"
-                                                           RequestNavigate="Hyperlink_RequestNavigate">
-                                                    DesktopClock
-                                                </Hyperlink>
-                                            </TextBlock>
-                                            <TextBlock Margin="0,4,0,8"
-                                                       Style="{StaticResource ProjectDescriptionTextBlock}"
-                                                       Text="A digital clock for your desktop." />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,0,12,12">
-                                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
-                                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay"
-                                                           RequestNavigate="Hyperlink_RequestNavigate">
-                                                    SentryReplay
-                                                </Hyperlink>
-                                            </TextBlock>
-                                            <TextBlock Margin="0,4,0,8"
-                                                       Style="{StaticResource ProjectDescriptionTextBlock}"
-                                                       Text="Review Tesla dashcam clips on Windows." />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,0,12,12">
-                                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
-                                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SteamAccountSwitcher"
-                                                           RequestNavigate="Hyperlink_RequestNavigate">
-                                                    SteamAccountSwitcher
-                                                </Hyperlink>
-                                            </TextBlock>
-                                            <TextBlock Margin="0,4,0,8"
-                                                       Style="{StaticResource ProjectDescriptionTextBlock}"
-                                                       Text="Swap Steam accounts from the system tray." />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,0,12,12">
-                                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
-                                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Network-Monitor"
-                                                           RequestNavigate="Hyperlink_RequestNavigate">
-                                                    Network Monitor
-                                                </Hyperlink>
-                                            </TextBlock>
-                                            <TextBlock Margin="0,4,0,8"
-                                                       Style="{StaticResource ProjectDescriptionTextBlock}"
-                                                       Text="Live latency and bandwidth in a desktop widget." />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,0,12,12">
-                                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
-                                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Teichos"
-                                                           RequestNavigate="Hyperlink_RequestNavigate">
-                                                    Teichos
-                                                </Hyperlink>
-                                            </TextBlock>
-                                            <TextBlock Margin="0,4,0,8"
-                                                       Style="{StaticResource ProjectDescriptionTextBlock}"
-                                                       Text="Stay focused with URL blocking and schedules." />
-                                        </StackPanel>
-                                    </UniformGrid>
+                                    <TextBlock Text="Radial Actions"
+                                               FontSize="24"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Margin="0,4,0,0"
+                                               Text="Summon a radial launcher for your everyday shortcuts."
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Margin="0,0,0,4"
+                                               Text="Configure slices in the Actions tab to run apps, files, scripts, and key actions."
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="Use General settings to tune your activation hotkey, menu size, behavior, and startup."
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Grid.Row="2"
+                                      Header="Quick Start"
+                                      Margin="0"
+                                      Style="{StaticResource SettingsCardGroupBox}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource QuickStartStepTextBlock}">
+                                        <Run FontWeight="Bold">
+                                            1.
+                                        </Run>
+                                        Press
+                                        <Run Text="{Binding Settings.ActivationHotkey, Mode=OneWay}"
+                                             FontWeight="Bold" />
+                                        to open the radial menu</TextBlock>
+                                    <TextBlock Style="{StaticResource QuickStartStepTextBlock}">
+                                        <Run FontWeight="Bold">
+                                            2.
+                                        </Run>
+                                        Click a slice to perform the action</TextBlock>
+                                    <TextBlock Style="{StaticResource QuickStartStepTextBlock}">
+                                        <Run FontWeight="Bold">
+                                            3.
+                                        </Run>
+                                        Click outside or press Escape to close</TextBlock>
+                                    <TextBlock Style="{StaticResource QuickStartStepTextBlock}"
+                                               Text="Mouse tip: move toward a slice and click to trigger it quickly." />
+                                    <TextBlock TextWrapping="Wrap"
+                                               Text="Keyboard tip: open with the hotkey and press Escape to close without reaching for the mouse." />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Grid.Row="4"
+                                      Header="Support"
+                                      Margin="0"
+                                      Style="{StaticResource SettingsCardGroupBox}">
+                                <StackPanel>
                                     <TextBlock Margin="0,0,0,8">
-                                        <Hyperlink NavigateUri="https://github.com/danielchalmers"
+                                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions"
                                                    RequestNavigate="Hyperlink_RequestNavigate">
-                                            View all projects on GitHub
+                                            📦 View on GitHub
+                                        </Hyperlink>
+                                    </TextBlock>
+                                    <TextBlock Margin="0,0,0,8">
+                                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues"
+                                                   RequestNavigate="Hyperlink_RequestNavigate">
+                                            🐛 Report a Bug
+                                        </Hyperlink>
+                                    </TextBlock>
+                                    <TextBlock Margin="0,0,0,8">
+                                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
+                                                   RequestNavigate="Hyperlink_RequestNavigate">
+                                            🚀 Release Notes
+                                        </Hyperlink>
+                                    </TextBlock>
+                                    <TextBlock Margin="0,0,0,8">
+                                        <Hyperlink NavigateUri="radialactions://licenses"
+                                                   RequestNavigate="Hyperlink_RequestNavigate">
+                                            📜 Third-Party Licenses
                                         </Hyperlink>
                                     </TextBlock>
                                 </StackPanel>
                             </GroupBox>
                         </Grid>
+
+                        <GroupBox Grid.Column="2"
+                                  Header="More from the Author"
+                                  Margin="0"
+                                  Style="{StaticResource SettingsCardGroupBox}">
+                            <StackPanel>
+                                <UniformGrid Columns="2"
+                                             Margin="0,4,0,0">
+                                    <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                Good Diary
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="Track your daily activities and moods on Android." />
+                                    </StackPanel>
+                                    <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                DesktopClock
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="A digital clock for your desktop." />
+                                    </StackPanel>
+                                    <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                SentryReplay
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="Review Tesla dashcam clips on Windows." />
+                                    </StackPanel>
+                                    <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/SteamAccountSwitcher"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                SteamAccountSwitcher
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="Swap Steam accounts from the system tray." />
+                                    </StackPanel>
+                                    <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/Network-Monitor"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                Network Monitor
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="Live latency and bandwidth in a desktop widget." />
+                                    </StackPanel>
+                                    <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                                        <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                            <Hyperlink NavigateUri="https://github.com/danielchalmers/Teichos"
+                                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                                Teichos
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                                   Text="Stay focused with URL blocking and schedules." />
+                                    </StackPanel>
+                                </UniformGrid>
+                                <TextBlock Margin="0,0,0,8">
+                                    <Hyperlink NavigateUri="https://github.com/danielchalmers"
+                                               RequestNavigate="Hyperlink_RequestNavigate">
+                                        View all projects on GitHub
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </GroupBox>
                     </Grid>
                 </ScrollViewer>
             </TabItem>
