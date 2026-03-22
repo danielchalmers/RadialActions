@@ -51,7 +51,7 @@
                       Click="OnTraySettingsMenuItemClick"
                       Tag="1">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE7FC;"
+                    <TextBlock Text="&#xE71D;"
                                FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>
@@ -60,7 +60,7 @@
                       Click="OnTraySettingsMenuItemClick"
                       Tag="2">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE9CE;"
+                    <TextBlock Text="&#xE90F;"
                                FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>
@@ -74,10 +74,12 @@
                 </MenuItem.Icon>
             </MenuItem>
 
+            <Separator />
+
             <MenuItem Header="E_xit"
                       Click="OnTrayExitMenuItemClick">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE8BB;"
+                    <TextBlock Text="&#xE7E8;"
                                FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>
