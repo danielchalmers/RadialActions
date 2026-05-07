@@ -58,9 +58,9 @@ public class UpdateServiceTests
     {
         const string payload = """
         [
-          { "tag_name": "v9.9.9", "name": "v9.9.9", "draft": true },
-          { "tag_name": "v1.2.3-preview1", "name": "v1.2.3-preview1", "draft": false },
-          { "tag_name": "v2.4.1", "name": "v2.4.1", "draft": false }
+          { "tag_name": "v2.4.1", "name": "v2.4.1", "draft": false, "published_at": "2026-02-01T00:00:00Z" },
+          { "tag_name": "v9.9.9", "name": "v9.9.9", "draft": true, "published_at": "2026-03-01T00:00:00Z" },
+          { "tag_name": "v1.2.3-preview1", "name": "v1.2.3-preview1", "draft": false, "published_at": "2026-04-01T00:00:00Z" }
         ]
         """;
 

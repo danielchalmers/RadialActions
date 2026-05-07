@@ -56,7 +56,7 @@ public static class UpdateService
             return false;
         }
 
-        foreach (var release in releases)
+        foreach (var release in releases.OrderByDescending(r => r.PublishedAt ?? DateTimeOffset.MinValue))
         {
             if (release.Draft)
             {
@@ -116,5 +116,8 @@ public static class UpdateService
 
         [JsonProperty("draft")]
         public bool Draft { get; init; }
+
+        [JsonProperty("published_at")]
+        public DateTimeOffset? PublishedAt { get; init; }
     }
 }
