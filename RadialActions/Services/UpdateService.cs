@@ -51,19 +51,26 @@ public static class UpdateService
         latestVersion = null;
 
         var releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(payload);
-        var release = releases?.FirstOrDefault(r => !r.Draft);
-        if (release == null)
+        if (releases == null)
         {
             return false;
         }
 
-        latestVersion = TryParseVersion(release.TagName) ?? TryParseVersion(release.Name);
-        if (latestVersion == null)
+        foreach (var release in releases)
         {
-            return false;
+            if (release.Draft)
+            {
+                continue;
+            }
+
+            latestVersion = TryParseVersion(release.TagName);
+            if (latestVersion != null)
+            {
+                return true;
+            }
         }
 
-        return true;
+        return false;
     }
 
     private static HttpClient CreateHttpClient()
@@ -89,12 +96,6 @@ public static class UpdateService
         if (normalized.StartsWith("v", StringComparison.OrdinalIgnoreCase))
         {
             normalized = normalized[1..];
-        }
-
-        var separatorIndex = normalized.IndexOfAny(['-', '+']);
-        if (separatorIndex >= 0)
-        {
-            normalized = normalized[..separatorIndex];
         }
 
         return Version.TryParse(normalized, out var parsedVersion)

@@ -31,7 +31,6 @@ public class UpdateServiceTests
     [Theory]
     [InlineData("v1.2.3", "1.2.3")]
     [InlineData("V2.0", "2.0")]
-    [InlineData("v1.2.3-preview1", "1.2.3")]
     [InlineData("  v3.0.1  ", "3.0.1")]
     public void TryParseVersion_ValidFormats_ReturnsVersion(string raw, string expected)
     {
@@ -44,6 +43,7 @@ public class UpdateServiceTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
+    [InlineData("v1.2.3-preview1")]
     [InlineData("release-10.4.7-beta1")]
     [InlineData("no-version-here")]
     public void TryParseVersion_InvalidFormats_ReturnsNull(string raw)
@@ -54,7 +54,7 @@ public class UpdateServiceTests
     }
 
     [Fact]
-    public void TryGetLatestReleaseVersion_UsesFirstNonDraftRelease()
+    public void TryGetLatestReleaseVersion_UsesFirstNonDraftReleaseWithParseableTag()
     {
         const string payload = """
         [
@@ -67,22 +67,7 @@ public class UpdateServiceTests
         var ok = UpdateService.TryGetLatestReleaseVersion(payload, out var latestVersion);
 
         Assert.True(ok);
-        Assert.Equal(new Version(1, 2, 3), latestVersion);
-    }
-
-    [Fact]
-    public void TryGetLatestReleaseVersion_FallsBackToReleaseName()
-    {
-        const string payload = """
-        [
-          { "tag_name": "release", "name": "v1.2.0", "draft": false }
-        ]
-        """;
-
-        var ok = UpdateService.TryGetLatestReleaseVersion(payload, out var latestVersion);
-
-        Assert.True(ok);
-        Assert.Equal(new Version(1, 2, 0), latestVersion);
+        Assert.Equal(new Version(2, 4, 1), latestVersion);
     }
 
     [Fact]
