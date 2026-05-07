@@ -6,14 +6,14 @@ namespace RadialActions;
 
 public static class UpdateService
 {
-    private const string GitHubLatestReleaseApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases/latest";
+    private const string GitHubReleasesApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases";
     private static readonly HttpClient HttpClient = CreateHttpClient();
 
     public static async Task<Version> GetLatestVersion()
     {
         try
         {
-            using var response = await HttpClient.GetAsync(GitHubLatestReleaseApiUrl);
+            using var response = await HttpClient.GetAsync(GitHubReleasesApiUrl);
             if (!response.IsSuccessStatusCode)
             {
                 Log.Warning("Update check failed with status code {StatusCode}", response.StatusCode);
@@ -23,7 +23,7 @@ public static class UpdateService
             var payload = await response.Content.ReadAsStringAsync();
             if (!TryGetLatestReleaseVersion(payload, out var latestVersion))
             {
-                Log.Warning("Update check did not return a parseable latest release version");
+                Log.Warning("Update check did not return a parseable latest non-draft release version");
                 return null;
             }
 
@@ -50,8 +50,9 @@ public static class UpdateService
     {
         latestVersion = null;
 
-        var release = JsonConvert.DeserializeObject<GitHubRelease>(payload);
-        if (release == null || release.Draft)
+        var releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(payload);
+        var release = releases?.FirstOrDefault(r => !r.Draft);
+        if (release == null)
         {
             return false;
         }
@@ -88,6 +89,12 @@ public static class UpdateService
         if (normalized.StartsWith("v", StringComparison.OrdinalIgnoreCase))
         {
             normalized = normalized[1..];
+        }
+
+        var separatorIndex = normalized.IndexOfAny(['-', '+']);
+        if (separatorIndex >= 0)
+        {
+            normalized = normalized[..separatorIndex];
         }
 
         return Version.TryParse(normalized, out var parsedVersion)
