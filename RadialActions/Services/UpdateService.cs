@@ -1,11 +1,10 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
 namespace RadialActions;
 
-public static partial class UpdateService
+public static class UpdateService
 {
     private const string GitHubReleasesApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases";
     private static readonly HttpClient HttpClient = CreateHttpClient();
@@ -22,17 +21,9 @@ public static partial class UpdateService
             }
 
             var payload = await response.Content.ReadAsStringAsync();
-            if (!TryGetLatestReleaseVersion(payload, out var latestVersion, out var hadReleases))
+            if (!TryGetLatestReleaseVersion(payload, out var latestVersion))
             {
-                if (!hadReleases)
-                {
-                    Log.Warning("Update check returned no releases");
-                }
-                else
-                {
-                    Log.Warning("Update check did not find any parseable release versions");
-                }
-
+                Log.Warning("Update check did not return a parseable latest non-draft release version");
                 return null;
             }
 
@@ -55,33 +46,23 @@ public static partial class UpdateService
         return latestVersion > currentVersion;
     }
 
-    internal static bool TryGetLatestReleaseVersion(string payload, out Version latestVersion, out bool hadReleases)
+    internal static bool TryGetLatestReleaseVersion(string payload, out Version latestVersion)
     {
-        latestVersion = null;
-        hadReleases = false;
-
         var releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(payload);
-        if (releases == null || releases.Count == 0)
+        if (releases == null)
         {
+            latestVersion = null;
             return false;
         }
 
-        hadReleases = true;
-
-        var newestRelease = releases
-            .Where(r => !r.Draft)
-            .Select(r => TryParseVersion(r.TagName) ?? TryParseVersion(r.Name))
-            .Where(v => v != null)
-            .OrderByDescending(v => v)
+        latestVersion = releases
+            .Where(release => !release.Draft)
+            .Select(release => TryParseVersion(release.TagName))
+            .Where(version => version != null)
+            .OrderByDescending(version => version)
             .FirstOrDefault();
 
-        if (newestRelease == null)
-        {
-            return false;
-        }
-
-        latestVersion = newestRelease;
-        return true;
+        return latestVersion != null;
     }
 
     private static HttpClient CreateHttpClient()
@@ -109,8 +90,7 @@ public static partial class UpdateService
             normalized = normalized[1..];
         }
 
-        var match = VersionPattern().Match(normalized);
-        return match.Success && Version.TryParse(match.Value, out var parsedVersion)
+        return Version.TryParse(normalized, out var parsedVersion)
             ? parsedVersion
             : null;
     }
@@ -129,7 +109,4 @@ public static partial class UpdateService
         [JsonProperty("draft")]
         public bool Draft { get; init; }
     }
-
-    [GeneratedRegex(@"\d+(?:\.\d+){0,3}", RegexOptions.Compiled)]
-    private static partial Regex VersionPattern();
 }

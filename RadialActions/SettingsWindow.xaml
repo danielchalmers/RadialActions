@@ -501,7 +501,7 @@
                             <StackPanel>
                                 <CheckBox Content="Check for updates"
                                           IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
-                                <TextBlock Text="Includes prereleases. Disable this if you don't want startup update checks."
+                                <TextBlock Text="Checks the latest stable GitHub release on startup."
                                            Style="{StaticResource DescriptionTextBlock}" />
                             </StackPanel>
                         </GroupBox>
