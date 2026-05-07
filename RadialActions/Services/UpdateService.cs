@@ -48,29 +48,21 @@ public static class UpdateService
 
     internal static bool TryGetLatestReleaseVersion(string payload, out Version latestVersion)
     {
-        latestVersion = null;
-
         var releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(payload);
         if (releases == null)
         {
+            latestVersion = null;
             return false;
         }
 
-        foreach (var release in releases.OrderByDescending(r => r.PublishedAt ?? DateTimeOffset.MinValue))
-        {
-            if (release.Draft)
-            {
-                continue;
-            }
+        latestVersion = releases
+            .Where(release => !release.Draft)
+            .Select(release => TryParseVersion(release.TagName))
+            .Where(version => version != null)
+            .OrderByDescending(version => version)
+            .FirstOrDefault();
 
-            latestVersion = TryParseVersion(release.TagName);
-            if (latestVersion != null)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return latestVersion != null;
     }
 
     private static HttpClient CreateHttpClient()
@@ -116,8 +108,5 @@ public static class UpdateService
 
         [JsonProperty("draft")]
         public bool Draft { get; init; }
-
-        [JsonProperty("published_at")]
-        public DateTimeOffset? PublishedAt { get; init; }
     }
 }

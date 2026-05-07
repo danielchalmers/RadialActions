@@ -54,20 +54,21 @@ public class UpdateServiceTests
     }
 
     [Fact]
-    public void TryGetLatestReleaseVersion_UsesFirstNonDraftReleaseWithParseableTag()
+    public void TryGetLatestReleaseVersion_UsesHighestParseableStableTagVersion()
     {
         const string payload = """
         [
-          { "tag_name": "v2.4.1", "name": "v2.4.1", "draft": false, "published_at": "2026-02-01T00:00:00Z" },
-          { "tag_name": "v9.9.9", "name": "v9.9.9", "draft": true, "published_at": "2026-03-01T00:00:00Z" },
-          { "tag_name": "v1.2.3-preview1", "name": "v1.2.3-preview1", "draft": false, "published_at": "2026-04-01T00:00:00Z" }
+          { "tag_name": "v2.4.1", "name": "v2.4.1", "draft": false },
+          { "tag_name": "v9.9.9", "name": "v9.9.9", "draft": true },
+          { "tag_name": "v1.2.3-preview1", "name": "v1.2.3-preview1", "draft": false },
+          { "tag_name": "v3.0.0", "name": "v3.0.0", "draft": false }
         ]
         """;
 
         var ok = UpdateService.TryGetLatestReleaseVersion(payload, out var latestVersion);
 
         Assert.True(ok);
-        Assert.Equal(new Version(2, 4, 1), latestVersion);
+        Assert.Equal(new Version(3, 0, 0), latestVersion);
     }
 
     [Fact]
