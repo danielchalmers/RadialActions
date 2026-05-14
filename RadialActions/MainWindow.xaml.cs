@@ -133,7 +133,7 @@ public partial class MainWindow : Window
     {
         Log.Debug("Hotkey pressed");
 
-        if (IsVisible && IsActive)
+        if (IsActive)
         {
             _menuService.HideMenu();
         }
