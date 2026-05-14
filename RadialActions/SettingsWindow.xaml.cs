@@ -182,14 +182,14 @@ public partial class SettingsWindowViewModel : ObservableObject
         var fileVersionInfo = FileVersionInfo.GetVersionInfo(App.MainFileInfo.FullName);
         var builder = new StringBuilder();
 
-        AppendAppInfoLine(builder, "File Version", fileVersionInfo?.FileVersion);
-        AppendAppInfoLine(builder, "Product Version", fileVersionInfo?.ProductVersion);
+        AppendAppInfoLine(builder, "File Version", fileVersionInfo?.FileVersion ?? string.Empty);
+        AppendAppInfoLine(builder, "Product Version", fileVersionInfo?.ProductVersion ?? string.Empty);
         AppendAppInfoLine(builder, "Architecture", RuntimeInformation.ProcessArchitecture.ToString());
         AppendAppInfoLine(builder, "Runtime", RuntimeInformation.FrameworkDescription);
         AppendAppInfoLine(builder, "OS", RuntimeInformation.OSDescription);
         AppendAppInfoLine(builder, "Executable", App.MainFileInfo.FullName);
-        AppendAppInfoLine(builder, "Executable Folder", App.MainFileInfo.DirectoryName);
-        AppendAppInfoLine(builder, "Settings File", Properties.Settings.FilePath);
+        AppendAppInfoLine(builder, "Executable Folder", App.MainFileInfo.DirectoryName ?? string.Empty);
+        AppendAppInfoLine(builder, "Settings File", Properties.Settings.FilePath ?? string.Empty);
         AppendAppInfoLine(builder, "Settings File Exists", Properties.Settings.Exists ? "Yes" : "No");
         AppendAppInfoLine(builder, "Settings File Writable", Properties.Settings.CanBeSaved ? "Yes" : "No");
         AppendAppInfoLine(builder, "Working Directory", Environment.CurrentDirectory);
@@ -197,7 +197,7 @@ public partial class SettingsWindowViewModel : ObservableObject
         return builder.ToString();
     }
 
-    private static void AppendAppInfoLine(StringBuilder builder, string label, string? value)
+    private static void AppendAppInfoLine(StringBuilder builder, string label, string value)
     {
         if (builder.Length > 0)
         {
