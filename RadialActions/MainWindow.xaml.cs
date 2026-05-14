@@ -155,6 +155,12 @@ public partial class MainWindow : Window
         OpenSettingsWindow(1);
     }
 
+    private void OnTrayBalloonTipClicked(object sender, RoutedEventArgs e)
+    {
+        Log.Debug("Tray balloon clicked");
+        OpenSettingsWindow(0);
+    }
+
     private void OnTraySettingsMenuItemClick(object sender, RoutedEventArgs e)
     {
         if (!Dispatcher.CheckAccess())

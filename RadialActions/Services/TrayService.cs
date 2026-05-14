@@ -15,9 +15,9 @@ internal sealed class TrayService : IDisposable
         var trayContextMenu = (ContextMenu)resources["MainContextMenu"];
         trayContextMenu.DataContext = dataContext;
         _trayIcon.ContextMenu = trayContextMenu;
-        _trayIcon.ToolTipText = "Radial Actions";
         _trayIcon.ForceCreate(enablesEfficiencyMode: false);
-        _trayIcon.ShowNotification("Radial Actions", $"Press {initialHotkey} to open the menu");
+        _trayIcon.ToolTipText = "Radial Actions";
+        _trayIcon.ShowNotification("Radial Actions", $"Press {initialHotkey} to open the menu", sound: false);
         Log.Debug("Created tray icon");
     }
 
@@ -25,7 +25,7 @@ internal sealed class TrayService : IDisposable
     {
         _trayIcon.ShowNotification(
             "Update available",
-            $"{latestVersion} is available to download from Settings",
+            $"v{latestVersion} is available to download!",
             NotificationIcon.Info);
     }
 
