@@ -7,9 +7,10 @@ namespace RadialActions;
 public static class UpdateService
 {
     private const string GitHubReleasesApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases";
+    internal static readonly Uri LatestReleasePageUrl = new("https://github.com/danielchalmers/RadialActions/releases/latest");
     private static readonly HttpClient HttpClient = CreateHttpClient();
 
-    public static async Task<Version> GetLatestVersion()
+    internal static async Task<ReleaseInfo> GetLatestRelease()
     {
         try
         {
@@ -21,19 +22,25 @@ public static class UpdateService
             }
 
             var payload = await response.Content.ReadAsStringAsync();
-            if (!TryGetLatestReleaseVersion(payload, out var latestVersion))
+            if (!TryGetLatestRelease(payload, out var latestRelease))
             {
-                Log.Warning("Update check did not return a parseable latest non-draft release version");
+                Log.Warning("Update check did not return a parseable latest non-draft release");
                 return null;
             }
 
-            return latestVersion;
+            return latestRelease;
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Failed to check for updates");
             return null;
         }
+    }
+
+    public static async Task<Version> GetLatestVersion()
+    {
+        var latestRelease = await GetLatestRelease();
+        return latestRelease?.Version;
     }
 
     public static bool IsUpdateAvailable(Version currentVersion, Version latestVersion)
@@ -48,21 +55,33 @@ public static class UpdateService
 
     internal static bool TryGetLatestReleaseVersion(string payload, out Version latestVersion)
     {
-        var releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(payload);
-        if (releases == null)
+        if (!TryGetLatestRelease(payload, out var latestRelease))
         {
             latestVersion = null;
             return false;
         }
 
-        latestVersion = releases
+        latestVersion = latestRelease.Version;
+        return true;
+    }
+
+    internal static bool TryGetLatestRelease(string payload, out ReleaseInfo latestRelease)
+    {
+        var releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(payload);
+        if (releases == null)
+        {
+            latestRelease = null;
+            return false;
+        }
+
+        latestRelease = releases
             .Where(release => !release.Draft)
-            .Select(release => TryParseVersion(release.TagName))
-            .Where(version => version != null)
-            .OrderByDescending(version => version)
+            .Select(CreateReleaseInfo)
+            .Where(release => release != null)
+            .OrderByDescending(release => release.Version)
             .FirstOrDefault();
 
-        return latestVersion != null;
+        return latestRelease != null;
     }
 
     private static HttpClient CreateHttpClient()
@@ -94,6 +113,26 @@ public static class UpdateService
             ? parsedVersion
             : null;
     }
+
+    private static ReleaseInfo CreateReleaseInfo(GitHubRelease release)
+    {
+        var version = TryParseVersion(release.TagName);
+        if (version == null)
+        {
+            return null;
+        }
+
+        return new ReleaseInfo(version, TryParseReleaseUrl(release.HtmlUrl) ?? LatestReleasePageUrl);
+    }
+
+    private static Uri TryParseReleaseUrl(string value)
+    {
+        return Uri.TryCreate(value, UriKind.Absolute, out var parsedUri)
+            ? parsedUri
+            : null;
+    }
+
+    internal sealed record ReleaseInfo(Version Version, Uri Url);
 
     private sealed class GitHubRelease
     {
