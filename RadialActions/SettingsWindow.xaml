@@ -67,6 +67,21 @@
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
 
+        <Style x:Key="SelectableInfoTextBox"
+               TargetType="TextBox"
+               BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="IsReadOnlyCaretVisible" Value="True" />
+            <Setter Property="AcceptsReturn" Value="True" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="SpellCheck.IsEnabled" Value="False" />
+        </Style>
+
         <Style x:Key="ActionEditorLabelTextBlock"
                TargetType="TextBlock"
                BasedOn="{StaticResource {x:Type TextBlock}}">
@@ -518,46 +533,9 @@
                                       Header="App Info"
                                       Margin="0"
                                       Style="{StaticResource SettingsCardGroupBox}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="12" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Grid.Column="0"
-                                               FontWeight="SemiBold"
-                                               Text="File Version" />
-                                    <TextBlock Grid.Row="0" Grid.Column="2"
-                                               Text="{Binding FileVersion}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="0"
-                                               FontWeight="SemiBold"
-                                               Text="Architecture" />
-                                    <TextBlock Grid.Row="1" Grid.Column="2"
-                                               Text="{Binding Architecture}" />
-                                    <TextBlock Grid.Row="2" Grid.Column="0"
-                                               FontWeight="SemiBold"
-                                               Text="Runtime" />
-                                    <TextBlock Grid.Row="2" Grid.Column="2"
-                                               Text="{Binding RuntimeDescription}" />
-                                    <TextBlock Grid.Row="3" Grid.Column="0"
-                                               FontWeight="SemiBold"
-                                               Text="OS" />
-                                    <TextBlock Grid.Row="3" Grid.Column="2"
-                                               Text="{Binding OsDescription}" />
-                                    <TextBlock Grid.Row="4" Grid.Column="0"
-                                               FontWeight="SemiBold"
-                                               Text="Executable" />
-                                    <TextBlock Grid.Row="4" Grid.Column="2"
-                                               Text="{Binding ExecutablePath}"
-                                               TextWrapping="Wrap" />
-                                </Grid>
+                                <TextBox Text="{Binding AppInfoText}"
+                                         Style="{StaticResource SelectableInfoTextBox}"
+                                         MinHeight="160" />
                             </GroupBox>
 
                             <GroupBox Grid.Row="2"

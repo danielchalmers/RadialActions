@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -146,11 +147,7 @@ public partial class SettingsWindowViewModel : ObservableObject
     private int _selectedActionIndex = -1;
 
     public Settings Settings { get; }
-    public string FileVersion { get; } = FileVersionInfo.GetVersionInfo(App.MainFileInfo.FullName)?.FileVersion ?? "Unknown";
-    public string Architecture { get; } = RuntimeInformation.ProcessArchitecture.ToString();
-    public string RuntimeDescription { get; } = RuntimeInformation.FrameworkDescription;
-    public string OsDescription { get; } = RuntimeInformation.OSDescription;
-    public string ExecutablePath { get; } = App.MainFileInfo.FullName;
+    public string AppInfoText { get; } = BuildAppInfoText();
 
     /// <summary>
     /// Available action types for the dropdown.
@@ -177,6 +174,38 @@ public partial class SettingsWindowViewModel : ObservableObject
             SelectedActionIndex = 0;
             SelectedAction = Settings.Actions[0];
         }
+    }
+
+    private static string BuildAppInfoText()
+    {
+        var fileVersionInfo = FileVersionInfo.GetVersionInfo(App.MainFileInfo.FullName);
+        var builder = new StringBuilder();
+
+        AppendAppInfoLine(builder, "File Version", fileVersionInfo?.FileVersion);
+        AppendAppInfoLine(builder, "Product Version", fileVersionInfo?.ProductVersion);
+        AppendAppInfoLine(builder, "Architecture", RuntimeInformation.ProcessArchitecture.ToString());
+        AppendAppInfoLine(builder, "Runtime", RuntimeInformation.FrameworkDescription);
+        AppendAppInfoLine(builder, "OS", RuntimeInformation.OSDescription);
+        AppendAppInfoLine(builder, "Executable", App.MainFileInfo.FullName);
+        AppendAppInfoLine(builder, "Executable Folder", App.MainFileInfo.DirectoryName);
+        AppendAppInfoLine(builder, "Settings File", Settings.FilePath);
+        AppendAppInfoLine(builder, "Settings File Exists", Settings.Exists ? "Yes" : "No");
+        AppendAppInfoLine(builder, "Settings File Writable", Settings.CanBeSaved ? "Yes" : "No");
+        AppendAppInfoLine(builder, "Working Directory", Environment.CurrentDirectory);
+
+        return builder.ToString();
+    }
+
+    private static void AppendAppInfoLine(StringBuilder builder, string label, string value)
+    {
+        if (builder.Length > 0)
+        {
+            builder.AppendLine();
+        }
+
+        builder.Append(label);
+        builder.Append(": ");
+        builder.Append(string.IsNullOrWhiteSpace(value) ? "Unknown" : value);
     }
 
     public void SelectAction(PieAction action)
