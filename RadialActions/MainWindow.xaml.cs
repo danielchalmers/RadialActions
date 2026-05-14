@@ -279,7 +279,7 @@ public partial class MainWindow : Window
     /// Gets the system double-click interval in milliseconds.
     /// </summary>
     /// <returns>The system double-click interval in milliseconds.</returns>
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
     private static extern uint GetDoubleClickTime();
 
     private async Task CheckForUpdatesAsync()

@@ -17,7 +17,7 @@ internal sealed class TrayService : IDisposable
         var trayContextMenu = (ContextMenu)resources["MainContextMenu"];
         trayContextMenu.DataContext = dataContext;
         _trayIcon.ContextMenu = trayContextMenu;
-        _trayIcon.ToolTipText = "Radial Actions\nLeft click: Open menu\nDouble click: Open actions settings\nRight click: Open tray menu";
+        _trayIcon.ToolTipText = "Radial Actions\nLeft-click: Open menu\nDouble-click: Open actions settings\nRight-click: Open tray menu";
         _trayIcon.TrayBalloonTipClicked += OnTrayBalloonTipClicked;
         _trayIcon.ForceCreate(enablesEfficiencyMode: false);
         _trayIcon.ShowNotification("Radial Actions", $"Press {initialHotkey} to open the menu");
