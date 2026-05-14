@@ -1,5 +1,4 @@
-using System.ComponentModel;
-using System.Runtime.InteropServices;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -19,17 +18,11 @@ public partial class MainWindow : Window
     private readonly TrayService _trayService;
     private readonly HotkeyService _hotkeyService = new();
     private readonly MenuService _menuService;
-    private readonly DispatcherTimer _trayLeftClickTimer;
 
     public MainWindow()
     {
         InitializeComponent();
         DataContext = this;
-        _trayLeftClickTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(GetDoubleClickTime()),
-        };
-        _trayLeftClickTimer.Tick += OnTrayLeftClickTimerTick;
 
         Settings.Default.PropertyChanged += OnSettingsPropertyChanged;
         _trayService = new TrayService(Resources, this, Settings.Default.ActivationHotkey);
@@ -132,8 +125,6 @@ public partial class MainWindow : Window
     private void Window_Unloaded(object sender, RoutedEventArgs e)
     {
         Settings.Default.PropertyChanged -= OnSettingsPropertyChanged;
-        _trayLeftClickTimer.Stop();
-        _trayLeftClickTimer.Tick -= OnTrayLeftClickTimerTick;
         _hotkeyService.Dispose();
         _trayService.Dispose();
     }
@@ -154,23 +145,14 @@ public partial class MainWindow : Window
 
     private void OnTrayLeftMouseDown(object sender, RoutedEventArgs e)
     {
-        Log.Debug("Tray icon left clicked; waiting for double-click timeout");
-        _trayLeftClickTimer.Stop();
-        _trayLeftClickTimer.Start();
+        Log.Debug("Tray icon left clicked");
+        ShowMenuUsingConfiguredPosition();
     }
 
     private void OnTrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)
     {
         Log.Debug("Tray icon left double clicked");
-        _trayLeftClickTimer.Stop();
         OpenSettingsWindow(1);
-    }
-
-    private void OnTrayLeftClickTimerTick(object sender, EventArgs e)
-    {
-        _trayLeftClickTimer.Stop();
-        Log.Debug("Tray icon left click confirmed");
-        ShowMenuUsingConfiguredPosition();
     }
 
     private void OnTraySettingsMenuItemClick(object sender, RoutedEventArgs e)
@@ -275,13 +257,6 @@ public partial class MainWindow : Window
         _menuService.OnFadeOutCompleted();
     }
 
-    /// <summary>
-    /// Gets the system double-click interval in milliseconds.
-    /// </summary>
-    /// <returns>The system double-click interval in milliseconds.</returns>
-    [DllImport("user32.dll", CharSet = CharSet.Auto)]
-    private static extern uint GetDoubleClickTime();
-
     private async Task CheckForUpdatesAsync()
     {
         if (!Settings.Default.CheckForUpdatesOnStartup)
@@ -294,8 +269,7 @@ public partial class MainWindow : Window
         {
             var app = App.CurrentApp;
             Log.Information("Checking for updates on startup. Current version: {CurrentVersion}", app.CurrentVersion);
-            var latestRelease = await UpdateService.GetLatestRelease();
-            app.LatestVersion = latestRelease?.Version;
+            app.LatestVersion = await UpdateService.GetLatestVersion();
             app.IsUpdateAvailable = UpdateService.IsUpdateAvailable(app.CurrentVersion, app.LatestVersion);
             Log.Information(
                 "Startup update check completed. Current version: {CurrentVersion}, Latest version: {LatestVersion}, Update available: {IsUpdateAvailable}",
@@ -312,7 +286,7 @@ public partial class MainWindow : Window
             await Dispatcher.InvokeAsync(() =>
             {
                 Log.Information("Showing update available tray notification for version {LatestVersion}", app.LatestVersion);
-                _trayService.ShowUpdateAvailableNotification(app.LatestVersion, latestRelease?.Url ?? UpdateService.LatestReleasePageUrl);
+                _trayService.ShowUpdateAvailableNotification(app.LatestVersion);
             });
         }
         catch (Exception ex)

@@ -7,10 +7,9 @@ namespace RadialActions;
 public static class UpdateService
 {
     private const string GitHubReleasesApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases";
-    internal static readonly Uri LatestReleasePageUrl = new("https://github.com/danielchalmers/RadialActions/releases/latest");
     private static readonly HttpClient HttpClient = CreateHttpClient();
 
-    internal static async Task<ReleaseInfo> GetLatestRelease()
+    public static async Task<Version> GetLatestVersion()
     {
         try
         {
@@ -22,25 +21,19 @@ public static class UpdateService
             }
 
             var payload = await response.Content.ReadAsStringAsync();
-            if (!TryGetLatestRelease(payload, out var latestRelease))
+            if (!TryGetLatestReleaseVersion(payload, out var latestVersion))
             {
-                Log.Warning("Update check did not return a parseable latest non-draft release");
+                Log.Warning("Update check did not return a parseable latest non-draft release version");
                 return null;
             }
 
-            return latestRelease;
+            return latestVersion;
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Failed to check for updates");
             return null;
         }
-    }
-
-    public static async Task<Version> GetLatestVersion()
-    {
-        var latestRelease = await GetLatestRelease();
-        return latestRelease?.Version;
     }
 
     public static bool IsUpdateAvailable(Version currentVersion, Version latestVersion)
@@ -55,33 +48,21 @@ public static class UpdateService
 
     internal static bool TryGetLatestReleaseVersion(string payload, out Version latestVersion)
     {
-        if (!TryGetLatestRelease(payload, out var latestRelease))
+        var releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(payload);
+        if (releases == null)
         {
             latestVersion = null;
             return false;
         }
 
-        latestVersion = latestRelease.Version;
-        return true;
-    }
-
-    internal static bool TryGetLatestRelease(string payload, out ReleaseInfo latestRelease)
-    {
-        var releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(payload);
-        if (releases == null)
-        {
-            latestRelease = null;
-            return false;
-        }
-
-        latestRelease = releases
+        latestVersion = releases
             .Where(release => !release.Draft)
-            .Select(CreateReleaseInfo)
-            .Where(release => release != null)
-            .OrderByDescending(release => release.Version)
+            .Select(release => TryParseVersion(release.TagName))
+            .Where(version => version != null)
+            .OrderByDescending(version => version)
             .FirstOrDefault();
 
-        return latestRelease != null;
+        return latestVersion != null;
     }
 
     private static HttpClient CreateHttpClient()
@@ -112,42 +93,6 @@ public static class UpdateService
         return Version.TryParse(normalized, out var parsedVersion)
             ? parsedVersion
             : null;
-    }
-
-    private static ReleaseInfo CreateReleaseInfo(GitHubRelease release)
-    {
-        var version = TryParseVersion(release.TagName);
-        if (version == null)
-        {
-            return null;
-        }
-
-        return new ReleaseInfo(version, TryParseReleaseUrl(release.HtmlUrl) ?? LatestReleasePageUrl);
-    }
-
-    private static Uri TryParseReleaseUrl(string value)
-    {
-        return Uri.TryCreate(value, UriKind.Absolute, out var parsedUri)
-            ? parsedUri
-            : null;
-    }
-
-    internal sealed record ReleaseInfo
-    {
-        /// <summary>
-        /// Information about the latest stable GitHub release.
-        /// </summary>
-        /// <param name="version">The parsed release version.</param>
-        /// <param name="url">The release page URL to open for the update.</param>
-        public ReleaseInfo(Version version, Uri url)
-        {
-            Version = version;
-            Url = url;
-        }
-
-        public Version Version { get; }
-
-        public Uri Url { get; }
     }
 
     private sealed class GitHubRelease

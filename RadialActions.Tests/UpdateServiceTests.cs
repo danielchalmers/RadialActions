@@ -58,10 +58,10 @@ public class UpdateServiceTests
     {
         const string payload = """
         [
-          { "tag_name": "v2.4.1", "name": "v2.4.1", "html_url": "https://example.invalid/v2.4.1", "draft": false },
-          { "tag_name": "v9.9.9", "name": "v9.9.9", "html_url": "https://example.invalid/v9.9.9", "draft": true },
-          { "tag_name": "v1.2.3-preview1", "name": "v1.2.3-preview1", "html_url": "https://example.invalid/v1.2.3-preview1", "draft": false },
-          { "tag_name": "v3.0.0", "name": "v3.0.0", "html_url": "https://example.invalid/v3.0.0", "draft": false }
+          { "tag_name": "v2.4.1", "name": "v2.4.1", "draft": false },
+          { "tag_name": "v9.9.9", "name": "v9.9.9", "draft": true },
+          { "tag_name": "v1.2.3-preview1", "name": "v1.2.3-preview1", "draft": false },
+          { "tag_name": "v3.0.0", "name": "v3.0.0", "draft": false }
         ]
         """;
 
@@ -87,7 +87,7 @@ public class UpdateServiceTests
     {
         const string payload = """
         [
-          { "tag_name": "v1.5.0", "name": "v1.5.0", "html_url": "https://example.invalid/v1.5.0", "draft": true }
+          { "tag_name": "v1.5.0", "name": "v1.5.0", "draft": true }
         ]
         """;
 
@@ -102,7 +102,7 @@ public class UpdateServiceTests
     {
         const string payload = """
         [
-          { "tag_name": "not-a-version", "name": "still-not-a-version", "html_url": "https://example.invalid/not-a-version", "draft": false }
+          { "tag_name": "not-a-version", "name": "still-not-a-version", "draft": false }
         ]
         """;
 
@@ -110,37 +110,5 @@ public class UpdateServiceTests
 
         Assert.False(ok);
         Assert.Null(latestVersion);
-    }
-
-    [Fact]
-    public void TryGetLatestRelease_UsesReleaseUrlForHighestParseableStableTagVersion()
-    {
-        const string payload = """
-        [
-          { "tag_name": "v2.4.1", "name": "v2.4.1", "html_url": "https://example.invalid/v2.4.1", "draft": false },
-          { "tag_name": "v3.0.0", "name": "v3.0.0", "html_url": "https://example.invalid/v3.0.0", "draft": false }
-        ]
-        """;
-
-        var ok = UpdateService.TryGetLatestRelease(payload, out var latestRelease);
-
-        Assert.True(ok);
-        Assert.Equal(new Version(3, 0, 0), latestRelease.Version);
-        Assert.Equal("https://example.invalid/v3.0.0", latestRelease.Url.AbsoluteUri);
-    }
-
-    [Fact]
-    public void TryGetLatestRelease_MissingReleaseUrl_FallsBackToLatestReleasePage()
-    {
-        const string payload = """
-        [
-          { "tag_name": "v3.0.0", "name": "v3.0.0", "draft": false }
-        ]
-        """;
-
-        var ok = UpdateService.TryGetLatestRelease(payload, out var latestRelease);
-
-        Assert.True(ok);
-        Assert.Equal(UpdateService.LatestReleasePageUrl, latestRelease.Url);
     }
 }
