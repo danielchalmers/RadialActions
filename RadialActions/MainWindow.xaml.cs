@@ -278,6 +278,7 @@ public partial class MainWindow : Window
     /// <summary>
     /// Gets the system double-click interval in milliseconds.
     /// </summary>
+    /// <returns>The system double-click interval in milliseconds.</returns>
     [DllImport("user32.dll")]
     private static extern uint GetDoubleClickTime();
 
