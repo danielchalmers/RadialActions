@@ -133,7 +133,7 @@ public partial class MainWindow : Window
     {
         Log.Debug("Hotkey pressed");
 
-        if (ShouldHideMenuOnHotkey(IsVisible, IsActive))
+        if (IsVisible && IsActive)
         {
             _menuService.HideMenu();
         }
@@ -141,11 +141,6 @@ public partial class MainWindow : Window
         {
             ShowMenuUsingConfiguredPosition();
         }
-    }
-
-    internal static bool ShouldHideMenuOnHotkey(bool isWindowVisible, bool isWindowActive)
-    {
-        return isWindowVisible && isWindowActive;
     }
 
     private void OnTrayLeftMouseDown(object sender, RoutedEventArgs e)
