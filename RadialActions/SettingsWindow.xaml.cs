@@ -197,7 +197,7 @@ public partial class SettingsWindowViewModel : ObservableObject
         return builder.ToString();
     }
 
-    private static void AppendAppInfoLine(StringBuilder builder, string label, string value)
+    private static void AppendAppInfoLine(StringBuilder builder, string label, string? value)
     {
         if (builder.Length > 0)
         {
