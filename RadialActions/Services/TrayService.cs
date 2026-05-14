@@ -25,7 +25,7 @@ internal sealed class TrayService : IDisposable
     {
         _trayIcon.ShowNotification(
             "Update available",
-            $"{latestVersion} is available to download",
+            $"v{latestVersion} is available to download!",
             NotificationIcon.Info);
     }
 
