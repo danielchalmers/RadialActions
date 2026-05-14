@@ -132,6 +132,11 @@ public static class UpdateService
             : null;
     }
 
+    /// <summary>
+    /// Information about the latest stable GitHub release.
+    /// </summary>
+    /// <param name="Version">The parsed release version.</param>
+    /// <param name="Url">The release page URL to open for the update.</param>
     internal sealed record ReleaseInfo(Version Version, Uri Url);
 
     private sealed class GitHubRelease

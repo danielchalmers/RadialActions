@@ -275,6 +275,9 @@ public partial class MainWindow : Window
         _menuService.OnFadeOutCompleted();
     }
 
+    /// <summary>
+    /// Gets the system double-click interval in milliseconds.
+    /// </summary>
     [DllImport("user32.dll")]
     private static extern uint GetDoubleClickTime();
 
