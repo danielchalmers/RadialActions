@@ -147,7 +147,7 @@ public partial class SettingsWindowViewModel : ObservableObject
     private int _selectedActionIndex = -1;
 
     public Settings Settings { get; }
-    public string AppInfoText { get; } = BuildAppInfoText();
+    public string AppInfoText { get; }
 
     /// <summary>
     /// Available action types for the dropdown.
@@ -168,6 +168,7 @@ public partial class SettingsWindowViewModel : ObservableObject
     public SettingsWindowViewModel(Settings settings)
     {
         Settings = settings;
+        AppInfoText = BuildAppInfoText();
         TrackExistingDefaults();
         if (Settings.Actions.Count > 0)
         {
@@ -188,9 +189,9 @@ public partial class SettingsWindowViewModel : ObservableObject
         AppendAppInfoLine(builder, "OS", RuntimeInformation.OSDescription);
         AppendAppInfoLine(builder, "Executable", App.MainFileInfo.FullName);
         AppendAppInfoLine(builder, "Executable Folder", App.MainFileInfo.DirectoryName);
-        AppendAppInfoLine(builder, "Settings File", Settings.FilePath);
-        AppendAppInfoLine(builder, "Settings File Exists", Settings.Exists ? "Yes" : "No");
-        AppendAppInfoLine(builder, "Settings File Writable", Settings.CanBeSaved ? "Yes" : "No");
+        AppendAppInfoLine(builder, "Settings File", Properties.Settings.FilePath);
+        AppendAppInfoLine(builder, "Settings File Exists", Properties.Settings.Exists ? "Yes" : "No");
+        AppendAppInfoLine(builder, "Settings File Writable", Properties.Settings.CanBeSaved ? "Yes" : "No");
         AppendAppInfoLine(builder, "Working Directory", Environment.CurrentDirectory);
 
         return builder.ToString();
