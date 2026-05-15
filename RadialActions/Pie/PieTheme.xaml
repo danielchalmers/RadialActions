@@ -173,7 +173,7 @@
         <Setter Property="TextAlignment"
                 Value="Center" />
         <Setter Property="TextWrapping"
-                Value="Wrap" />
+                Value="NoWrap" />
         <Setter Property="TextTrimming"
                 Value="CharacterEllipsis" />
         <Setter Property="HorizontalAlignment"

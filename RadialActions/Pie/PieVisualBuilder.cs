@@ -173,9 +173,8 @@ public static class PieVisualBuilder
                 FontSize = labelFontSize,
                 FontWeight = FontWeights.SemiBold,
                 TextAlignment = TextAlignment.Center,
-                TextWrapping = TextWrapping.Wrap,
+                TextWrapping = TextWrapping.NoWrap,
                 TextTrimming = TextTrimming.CharacterEllipsis,
-                MaxLines = 2,
                 MaxWidth = Math.Max(MinimumLabelWidth, outerRadius * contentMaxWidthRatio),
             });
         }
