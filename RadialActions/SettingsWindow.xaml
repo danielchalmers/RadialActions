@@ -69,10 +69,7 @@
 
         <Style x:Key="ActionEditorLabelTextBlock"
                TargetType="TextBlock"
-               BasedOn="{StaticResource {x:Type TextBlock}}">
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="0,0,0,4" />
-        </Style>
+               BasedOn="{StaticResource LabelTextBlock}" />
 
         <Style TargetType="Hyperlink"
                BasedOn="{StaticResource {x:Type Hyperlink}}">
@@ -509,27 +506,27 @@
                                       Margin="0"
                                       Style="{StaticResource SettingsCardGroupBox}">
                                 <StackPanel>
-                                    <TextBlock Style="{StaticResource LabelTextBlock}"
+                                    <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
                                                Text="File Version:" />
                                     <TextBlock Margin="0,0,0,8"
                                                Text="{Binding FileVersion}"
                                                TextWrapping="Wrap" />
-                                    <TextBlock Style="{StaticResource LabelTextBlock}"
+                                    <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
                                                Text="Architecture:" />
                                     <TextBlock Margin="0,0,0,8"
                                                Text="{Binding Architecture}"
                                                TextWrapping="Wrap" />
-                                    <TextBlock Style="{StaticResource LabelTextBlock}"
+                                    <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
                                                Text="Runtime:" />
                                     <TextBlock Margin="0,0,0,8"
                                                Text="{Binding RuntimeDescription}"
                                                TextWrapping="Wrap" />
-                                    <TextBlock Style="{StaticResource LabelTextBlock}"
+                                    <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
                                                Text="OS:" />
                                     <TextBlock Margin="0,0,0,8"
                                                Text="{Binding OsDescription}"
                                                TextWrapping="Wrap" />
-                                    <TextBlock Style="{StaticResource LabelTextBlock}"
+                                    <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
                                                Text="Executable:" />
                                     <TextBlock Text="{Binding ExecutablePath}"
                                                TextWrapping="Wrap" />
