@@ -186,13 +186,13 @@ public partial class PieAction : ObservableObject
     private string ExecuteKeyAndReturnSuccess()
     {
         ExecuteKey();
-        return null;
+        return string.Empty;
     }
 
     private string ExecuteShellAndReturnSuccess()
     {
         ExecuteShell();
-        return null;
+        return string.Empty;
     }
 
     private void ExecuteKey()

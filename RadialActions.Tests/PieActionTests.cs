@@ -57,4 +57,18 @@ public class PieActionTests
 
         Assert.Equal("Launch target is not configured", failureReason);
     }
+
+    [Fact]
+    public void Execute_KeyActionWithInvalidShortcut_ReturnsFailureReason()
+    {
+        var action = new PieAction("Shortcut")
+        {
+            Type = ActionType.Key,
+            Parameter = "DefinitelyNotAHotkey"
+        };
+
+        var failureReason = action.Execute();
+
+        Assert.Equal("Shortcut is invalid", failureReason);
+    }
 }
