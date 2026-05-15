@@ -14,8 +14,8 @@ internal sealed class MenuService
     private readonly Dispatcher _dispatcher;
 
     private bool _isFadingOut;
-    private bool _isFadeInActive;
-    private bool _isFadeOutActive;
+    private bool _fadeInActive;
+    private bool _fadeOutActive;
 
     public MenuService(
         Window window,
@@ -28,8 +28,8 @@ internal sealed class MenuService
         _fadeInStoryboard = fadeInStoryboard;
         _fadeOutStoryboard = fadeOutStoryboard;
         _dispatcher = window.Dispatcher;
-        _fadeInStoryboard.Completed += (_, _) => _isFadeInActive = false;
-        _fadeOutStoryboard.Completed += (_, _) => _isFadeOutActive = false;
+        _fadeInStoryboard.Completed += (_, _) => _fadeInActive = false;
+        _fadeOutStoryboard.Completed += (_, _) => _fadeOutActive = false;
     }
 
     public void ShowMenu(bool atCursor)
@@ -121,7 +121,7 @@ internal sealed class MenuService
         }
 
         _isFadingOut = false;
-        _isFadeInActive = true;
+        _fadeInActive = true;
         _fadeInStoryboard.Begin(_window, HandoffBehavior.SnapshotAndReplace, true);
     }
 
@@ -137,22 +137,22 @@ internal sealed class MenuService
 
         _isFadingOut = true;
         _window.IsHitTestVisible = false;
-        _isFadeOutActive = true;
+        _fadeOutActive = true;
         _fadeOutStoryboard.Begin(_window, HandoffBehavior.SnapshotAndReplace, true);
     }
 
     private void StopFadeAnimations()
     {
-        if (_isFadeInActive)
+        if (_fadeInActive)
         {
             _fadeInStoryboard.Remove(_window);
-            _isFadeInActive = false;
+            _fadeInActive = false;
         }
 
-        if (_isFadeOutActive)
+        if (_fadeOutActive)
         {
             _fadeOutStoryboard.Remove(_window);
-            _isFadeOutActive = false;
+            _fadeOutActive = false;
         }
     }
 

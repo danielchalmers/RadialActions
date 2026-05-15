@@ -327,7 +327,7 @@ public partial class PieControl : UserControl
 
         return TryGetResource(Application.Current?.Resources, resourceKey, out var applicationResource)
             ? applicationResource
-            : TryFindResource(resourceKey);
+            : TryFindFrameworkResource(resourceKey);
     }
 
     private static bool TryGetResource(ResourceDictionary resources, string resourceKey, out object resource)
@@ -351,6 +351,11 @@ public partial class PieControl : UserControl
 
         resource = null;
         return false;
+    }
+
+    private object TryFindFrameworkResource(string resourceKey)
+    {
+        return TryFindResource(resourceKey);
     }
 
     private void CreatePieMenu()
