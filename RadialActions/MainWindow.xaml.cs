@@ -197,7 +197,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             Log.Error(ex, $"Failed to execute action: {e.Slice.Name}");
-            _trayService.ShowActionFailedNotification(e.Slice.Name, ex);
+            _trayService.ShowActionFailedNotification(e.Slice, ex);
         }
 
         if (!Settings.Default.KeepMenuOpenAfterSliceClick)
