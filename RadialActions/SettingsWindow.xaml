@@ -69,13 +69,7 @@
 
         <Style x:Key="ActionEditorLabelTextBlock"
                TargetType="TextBlock"
-               BasedOn="{StaticResource {x:Type TextBlock}}">
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="TextAlignment" Value="Right" />
-            <Setter Property="Margin" Value="0,0,8,4" />
-        </Style>
+               BasedOn="{StaticResource LabelTextBlock}" />
 
         <Style TargetType="Hyperlink"
                BasedOn="{StaticResource {x:Type Hyperlink}}">
@@ -329,12 +323,12 @@
                               VerticalContentAlignment="Stretch"
                               Style="{StaticResource SettingsCardGroupBox}"
                               IsEnabled="{Binding HasSelectedAction}">
-                        <Grid Grid.IsSharedSizeScope="True">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
+                        <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
@@ -343,58 +337,55 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0"
+                            <TextBlock Grid.Row="0"
                                        Text="Enabled:"
-                                       Margin="0,0,8,8"
                                        Style="{StaticResource ActionEditorLabelTextBlock}" />
-                            <CheckBox Grid.Row="0" Grid.Column="1"
+                            <CheckBox Grid.Row="1"
                                       Content="Show this action"
                                       IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}"
                                       Margin="0,0,0,8" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0"
+                            <TextBlock Grid.Row="2"
                                        Text="Name:"
                                        Style="{StaticResource ActionEditorLabelTextBlock}" />
-                            <TextBox Grid.Row="1" Grid.Column="1"
-                                     Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,0,0,4" />
+                            <TextBox Grid.Row="3"
+                                      Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Margin="0,0,0,8" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0"
+                            <TextBlock Grid.Row="4"
                                        Text="Icon:"
                                        Style="{StaticResource ActionEditorLabelTextBlock}" />
-                            <TextBox Grid.Row="2" Grid.Column="1"
-                                     Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,0,0,4" />
+                            <TextBox Grid.Row="5"
+                                      Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Margin="0,0,0,8" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0"
+                            <TextBlock Grid.Row="6"
                                        Text="Type:"
                                        Style="{StaticResource ActionEditorLabelTextBlock}" />
-                            <ComboBox Grid.Row="3" Grid.Column="1"
-                                      Margin="0,0,0,4"
-                                      ItemsSource="{Binding ActionTypes}"
-                                      SelectedItem="{Binding SelectedActionType, Mode=TwoWay}" />
+                            <ComboBox Grid.Row="7"
+                                       Margin="0,0,0,8"
+                                       ItemsSource="{Binding ActionTypes}"
+                                       SelectedItem="{Binding SelectedActionType, Mode=TwoWay}" />
 
-                            <Grid Grid.Row="4" Grid.ColumnSpan="2"
-                                  Margin="0,8,0,0"
+                            <Grid Grid.Row="8"
+                                  Margin="0,0,0,8"
                                   Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                <TextBlock Grid.Row="0"
                                            Text="Key Action:"
                                            Style="{StaticResource ActionEditorLabelTextBlock}" />
-                                <ComboBox Grid.Row="0" Grid.Column="1"
-                                          SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
-                                          SelectedValuePath="Id"
-                                          Margin="0,0,0,4"
-                                          IsTextSearchEnabled="True"
-                                          ItemsSource="{Binding KeyActionOptions}">
+                                <ComboBox Grid.Row="1"
+                                           SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
+                                           SelectedValuePath="Id"
+                                           Margin="0,0,0,8"
+                                           IsTextSearchEnabled="True"
+                                           ItemsSource="{Binding KeyActionOptions}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
@@ -408,34 +399,31 @@
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
 
-                                <TextBlock Grid.Row="1" Grid.Column="0"
+                                <TextBlock Grid.Row="2"
                                            Text="Shortcut:"
-                                           Margin="0,0,8,0"
                                            Style="{StaticResource ActionEditorLabelTextBlock}"
                                            Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
-                                <TextBox Grid.Row="1" Grid.Column="1"
-                                         Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
+                                <TextBox Grid.Row="3"
+                                          Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:SettingsWindowViewModel.CustomKeyActionId}}" />
                             </Grid>
 
-                            <Grid Grid.Row="5" Grid.ColumnSpan="2"
-                                  Margin="0,8,0,0"
+                            <Grid Grid.Row="9"
                                   Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Shell}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="ActionLabel" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                <TextBlock Grid.Row="0"
                                            Text="Target:"
                                            Style="{StaticResource ActionEditorLabelTextBlock}" />
-                                <Grid Grid.Row="0" Grid.Column="1"
-                                      Margin="0,0,0,4">
+                                <Grid Grid.Row="1"
+                                      Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="6" />
@@ -449,18 +437,17 @@
                                             Padding="8,2" />
                                 </Grid>
 
-                                <TextBlock Grid.Row="1" Grid.Column="0"
+                                <TextBlock Grid.Row="2"
                                            Text="Arguments:"
                                            Style="{StaticResource ActionEditorLabelTextBlock}" />
-                                <TextBox Grid.Row="1" Grid.Column="1"
-                                         Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         Margin="0,0,0,4" />
+                                <TextBox Grid.Row="3"
+                                          Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Margin="0,0,0,8" />
 
-                                <TextBlock Grid.Row="2" Grid.Column="0"
+                                <TextBlock Grid.Row="4"
                                            Text="Working Directory:"
-                                           Margin="0,0,8,0"
                                            Style="{StaticResource ActionEditorLabelTextBlock}" />
-                                <Grid Grid.Row="2" Grid.Column="1">
+                                <Grid Grid.Row="5">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="6" />
@@ -518,46 +505,32 @@
                                       Header="App Info"
                                       Margin="0"
                                       Style="{StaticResource SettingsCardGroupBox}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="12" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Grid.Column="0"
-                                               FontWeight="SemiBold"
-                                               Text="File Version" />
-                                    <TextBlock Grid.Row="0" Grid.Column="2"
-                                               Text="{Binding FileVersion}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="0"
-                                               FontWeight="SemiBold"
-                                               Text="Architecture" />
-                                    <TextBlock Grid.Row="1" Grid.Column="2"
-                                               Text="{Binding Architecture}" />
-                                    <TextBlock Grid.Row="2" Grid.Column="0"
-                                               FontWeight="SemiBold"
-                                               Text="Runtime" />
-                                    <TextBlock Grid.Row="2" Grid.Column="2"
-                                               Text="{Binding RuntimeDescription}" />
-                                    <TextBlock Grid.Row="3" Grid.Column="0"
-                                               FontWeight="SemiBold"
-                                               Text="OS" />
-                                    <TextBlock Grid.Row="3" Grid.Column="2"
-                                               Text="{Binding OsDescription}" />
-                                    <TextBlock Grid.Row="4" Grid.Column="0"
-                                               FontWeight="SemiBold"
-                                               Text="Executable" />
-                                    <TextBlock Grid.Row="4" Grid.Column="2"
-                                               Text="{Binding ExecutablePath}"
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                                               Text="File Version:" />
+                                    <TextBlock Margin="0,0,0,8"
+                                               Text="{Binding FileVersion}"
                                                TextWrapping="Wrap" />
-                                </Grid>
+                                    <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                                               Text="Architecture:" />
+                                    <TextBlock Margin="0,0,0,8"
+                                               Text="{Binding Architecture}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                                               Text="Runtime:" />
+                                    <TextBlock Margin="0,0,0,8"
+                                               Text="{Binding RuntimeDescription}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                                               Text="OS:" />
+                                    <TextBlock Margin="0,0,0,8"
+                                               Text="{Binding OsDescription}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                                               Text="Executable:" />
+                                    <TextBlock Text="{Binding ExecutablePath}"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
                             </GroupBox>
 
                             <GroupBox Grid.Row="2"
