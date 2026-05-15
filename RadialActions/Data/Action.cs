@@ -184,7 +184,7 @@ public partial class PieAction : ObservableObject
     private void ExecuteKey()
     {
         if (string.IsNullOrWhiteSpace(Parameter))
-            throw new InvalidOperationException("Shortcut is not configured");
+            throw new InvalidOperationException("Shortcut not configured");
 
         if (TryGetKeyAction(Parameter, out var definition))
         {
@@ -201,7 +201,7 @@ public partial class PieAction : ObservableObject
     private void ExecuteShell()
     {
         if (string.IsNullOrWhiteSpace(Parameter))
-            throw new InvalidOperationException("Launch target is not configured");
+            throw new InvalidOperationException("Launch target not configured");
 
         var psi = new ProcessStartInfo(Parameter)
         {

@@ -44,7 +44,6 @@ internal sealed class TrayService : IDisposable
             _ => "Could not launch action",
         };
 
-        Log.Debug("Showing action failed notification for action {ActionName}: {Reason}", action.Name, reason);
         _trayIcon.ShowNotification(
             "Action failed",
             reason,

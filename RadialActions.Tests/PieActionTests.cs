@@ -55,7 +55,7 @@ public class PieActionTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
-        Assert.Equal("Launch target is not configured", ex.Message);
+        Assert.Equal("Launch target not configured", ex.Message);
     }
 
     [Fact]
