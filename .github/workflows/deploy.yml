@@ -36,5 +36,5 @@ jobs:
         tag: ${{ env.RELEASE_TAG }}
         artifacts: "publish/*.zip,publish/*.msi"
         allowUpdates: true
-        replaceArtifacts: true
+        removeArtifacts: true
         omitBodyDuringUpdate: true
