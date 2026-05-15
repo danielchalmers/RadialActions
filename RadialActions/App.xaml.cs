@@ -35,7 +35,6 @@ public partial class App : Application
         base.OnStartup(e);
 
         Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
             .MinimumLevel.Verbose()
             .WriteTo.Debug()
             .CreateLogger();
