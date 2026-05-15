@@ -89,7 +89,7 @@
                         IconSource="RadialActions.ico" MenuActivation="RightClick"
                         TrayBalloonTipClicked="OnTrayBalloonTipClicked"
                         TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick"
-                        TrayLeftMouseDown="OnTrayLeftMouseDown" />
+                        TrayLeftMouseClick="OnTrayLeftMouseDown" />
     </Window.Resources>
 
     <local:PieControl x:Name="PieMenu"
