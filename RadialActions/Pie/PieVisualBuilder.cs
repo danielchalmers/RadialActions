@@ -8,10 +8,8 @@ namespace RadialActions;
 
 public static class PieVisualBuilder
 {
-    private const double MinimumLabelFontSize = 12;
     private const double MaximumLabelFontSize = 18;
     private const double LabelFontSizeRadiusRatio = 0.07;
-    private const double MinimumLabelWidth = 64;
 
     public readonly record struct CenterElements(
         Grid Target,
@@ -127,6 +125,7 @@ public static class PieVisualBuilder
         Color labelTextColor,
         double iconToLabelSpacing,
         double outerRadius,
+        double contentMinWidth,
         double contentMaxWidthRatio,
         Thickness contentPadding)
     {
@@ -160,9 +159,13 @@ public static class PieVisualBuilder
 
         if (!string.IsNullOrWhiteSpace(sliceAction.Name))
         {
+            var minimumLabelFontSize = GetStyleDoubleSetterValue(
+                labelTextStyle,
+                TextBlock.FontSizeProperty,
+                12);
             var labelFontSize = Math.Clamp(
                 outerRadius * LabelFontSizeRadiusRatio,
-                MinimumLabelFontSize,
+                minimumLabelFontSize,
                 MaximumLabelFontSize);
 
             contentPanel.Children.Add(new TextBlock
@@ -175,10 +178,28 @@ public static class PieVisualBuilder
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.NoWrap,
                 TextTrimming = TextTrimming.CharacterEllipsis,
-                MaxWidth = Math.Max(MinimumLabelWidth, outerRadius * contentMaxWidthRatio),
+                MaxWidth = Math.Max(contentMinWidth, outerRadius * contentMaxWidthRatio),
             });
         }
 
         return contentPanel;
+    }
+
+    private static double GetStyleDoubleSetterValue(Style style, DependencyProperty property, double fallbackValue)
+    {
+        if (style == null)
+        {
+            return fallbackValue;
+        }
+
+        foreach (var setter in style.Setters.OfType<Setter>())
+        {
+            if (setter.Property == property && setter.Value is double value)
+            {
+                return value;
+            }
+        }
+
+        return fallbackValue;
     }
 }

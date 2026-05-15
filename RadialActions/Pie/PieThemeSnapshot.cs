@@ -12,6 +12,7 @@ internal sealed class PieThemeSnapshot
     public required double SliceStrokeThickness { get; init; }
     public required double HubStrokeThickness { get; init; }
     public required double IconToLabelSpacing { get; init; }
+    public required double ContentMinWidth { get; init; }
     public required double ContentMaxWidthRatio { get; init; }
     public required Thickness ContentPadding { get; init; }
     public required Duration HoverDuration { get; init; }
@@ -111,6 +112,7 @@ internal sealed class PieThemeSnapshot
         var sliceStrokeThickness = Math.Max(1, ToDouble(ResolveResource("PieSliceStrokeThickness"), 1.5));
         var hubStrokeThickness = Math.Max(1, ToDouble(ResolveResource("PieHubStrokeThickness"), 1.5));
         var iconToLabelSpacing = Math.Max(0, ToDouble(ResolveResource("PieIconToLabelSpacing"), 3));
+        var contentMinWidth = Math.Max(40, ToDouble(ResolveResource("PieSliceContentMinWidth"), 64));
         var contentMaxWidthRatio = Math.Clamp(ToDouble(ResolveResource("PieSliceContentMaxWidthRatio"), 0.38), 0.2, 0.8);
         var contentPadding = ResolveResource("PieSliceContentPadding") as Thickness? ?? new Thickness(2);
 
@@ -167,6 +169,7 @@ internal sealed class PieThemeSnapshot
             SliceStrokeThickness = sliceStrokeThickness,
             HubStrokeThickness = hubStrokeThickness,
             IconToLabelSpacing = iconToLabelSpacing,
+            ContentMinWidth = contentMinWidth,
             ContentMaxWidthRatio = contentMaxWidthRatio,
             ContentPadding = contentPadding,
             HoverDuration = hoverDuration,

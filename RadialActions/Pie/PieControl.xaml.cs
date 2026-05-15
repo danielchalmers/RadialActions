@@ -598,6 +598,7 @@ public partial class PieControl : UserControl
                 theme.LabelTextColor,
                 theme.IconToLabelSpacing,
                 outerRadius,
+                theme.ContentMinWidth,
                 theme.ContentMaxWidthRatio,
                 theme.ContentPadding);
             if (contentPanel == null)
