@@ -171,7 +171,7 @@ public partial class PieAction : ObservableObject
             switch (Type)
             {
                 case ActionType.None:
-                    return "Action is not configured";
+                    return "No action configured";
                 case ActionType.Key:
                     ExecuteKey();
                     return string.Empty;

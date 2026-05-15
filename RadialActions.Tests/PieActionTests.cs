@@ -45,7 +45,7 @@ public class PieActionTests
 
         var failureReason = action.Execute();
 
-        Assert.Equal("Action is not configured", failureReason);
+        Assert.Equal("No action configured", failureReason);
     }
 
     [Fact]
