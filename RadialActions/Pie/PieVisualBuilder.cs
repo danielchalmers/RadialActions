@@ -8,6 +8,7 @@ namespace RadialActions;
 
 public static class PieVisualBuilder
 {
+    private const double DefaultLabelFontSize = 12;
     private const double MaximumLabelFontSize = 18;
     private const double LabelFontSizeRadiusRatio = 0.07;
 
@@ -162,7 +163,7 @@ public static class PieVisualBuilder
             var minimumLabelFontSize = GetStyleDoubleSetterValue(
                 labelTextStyle,
                 TextBlock.FontSizeProperty,
-                12);
+                DefaultLabelFontSize);
             var labelFontSize = Math.Clamp(
                 outerRadius * LabelFontSizeRadiusRatio,
                 minimumLabelFontSize,
