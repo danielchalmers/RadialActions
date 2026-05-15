@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace RadialActions;
@@ -161,7 +162,7 @@ public partial class PieAction : ObservableObject
     /// <summary>
     /// Executes the action.
     /// </summary>
-    public void Execute()
+    public string Execute()
     {
         Log.Information($"Executing action: {Name} ({Type})");
 
@@ -170,27 +171,32 @@ public partial class PieAction : ObservableObject
             switch (Type)
             {
                 case ActionType.None:
-                    Log.Warning("Action has no operation defined");
-                    break;
+                    return "Action is not configured";
                 case ActionType.Key:
                     ExecuteKey();
-                    break;
+                    return null;
 
                 case ActionType.Shell:
                     ExecuteShell();
-                    break;
+                    return null;
+
+                default:
+                    return "Action type is not supported";
             }
         }
         catch (Exception ex)
         {
             Log.Error(ex, $"Failed to execute action: {Name}");
+            return GetShortFailureReason(ex);
         }
+
+        return null;
     }
 
     private void ExecuteKey()
     {
         if (string.IsNullOrWhiteSpace(Parameter))
-            return;
+            throw new InvalidOperationException("Shortcut is not configured");
 
         if (TryGetKeyAction(Parameter, out var definition))
         {
@@ -198,13 +204,16 @@ public partial class PieAction : ObservableObject
             return;
         }
 
+        if (!HotkeyUtil.TryParse(Parameter, out _, out _))
+            throw new InvalidOperationException("Shortcut is invalid");
+
         ActionUtil.SimulateKeyboardShortcut(Parameter);
     }
 
     private void ExecuteShell()
     {
         if (string.IsNullOrWhiteSpace(Parameter))
-            return;
+            throw new InvalidOperationException("Launch target is not configured");
 
         var psi = new ProcessStartInfo(Parameter)
         {
@@ -218,6 +227,21 @@ public partial class PieAction : ObservableObject
         }
 
         Process.Start(psi);
+    }
+
+    private static string GetShortFailureReason(Exception ex)
+    {
+        return ex switch
+        {
+            InvalidOperationException => ex.Message,
+            FileNotFoundException => "Target was not found",
+            DirectoryNotFoundException => "Folder was not found",
+            UnauthorizedAccessException => "Access was denied",
+            NotSupportedException => "Target is not supported",
+            _ => string.IsNullOrWhiteSpace(ex.Message)
+                ? "Could not launch action"
+                : ex.Message,
+        };
     }
 
     public override string ToString() => Name;

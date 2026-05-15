@@ -37,4 +37,24 @@ public class PieActionTests
         Assert.NotNull(definition);
         Assert.Equal("PlayPause", definition.Id);
     }
+
+    [Fact]
+    public void Execute_NoneAction_ReturnsFailureReason()
+    {
+        var action = new PieAction();
+
+        var failureReason = action.Execute();
+
+        Assert.Equal("Action is not configured", failureReason);
+    }
+
+    [Fact]
+    public void Execute_ShellActionWithoutTarget_ReturnsFailureReason()
+    {
+        var action = PieAction.CreateShellAction("Docs", string.Empty);
+
+        var failureReason = action.Execute();
+
+        Assert.Equal("Launch target is not configured", failureReason);
+    }
 }

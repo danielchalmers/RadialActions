@@ -28,6 +28,18 @@ internal sealed class TrayService : IDisposable
             NotificationIcon.Info);
     }
 
+    public void ShowActionFailedNotification(string actionName, string reason)
+    {
+        var title = string.IsNullOrWhiteSpace(actionName)
+            ? "Action failed"
+            : $"Action failed: {actionName}";
+
+        _trayIcon.ShowNotification(
+            title,
+            reason,
+            NotificationIcon.Error);
+    }
+
     public void Dispose()
     {
         _trayIcon.Dispose();

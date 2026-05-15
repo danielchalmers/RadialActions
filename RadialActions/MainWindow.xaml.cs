@@ -190,7 +190,12 @@ public partial class MainWindow : Window
     private void OnSliceClicked(object sender, SliceClickEventArgs e)
     {
         Log.Debug($"Slice clicked: {e.Slice.Name}");
-        e.Slice.Execute();
+        var failureReason = e.Slice.Execute();
+        if (!string.IsNullOrWhiteSpace(failureReason))
+        {
+            _trayService.ShowActionFailedNotification(e.Slice.Name, failureReason);
+        }
+
         if (!Settings.Default.KeepMenuOpenAfterSliceClick)
         {
             _menuService.HideMenu();
