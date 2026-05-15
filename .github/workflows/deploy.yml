@@ -1,34 +1,41 @@
 name: Release and deploy
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version number for the app'
-        required: true
-        default: ''
-      updateRelease:
-        description: 'Update existing release'
-        required: true
-        default: 'false'
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
 
 jobs:
   deploy:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
+
+    - name: Validate release tag
+      shell: bash
+      run: |
+        if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Release tags must match vX.Y.Z"
+          exit 1
+        fi
+
+        echo "RELEASE_TAG=$GITHUB_REF_NAME" >> "$GITHUB_ENV"
+        echo "RELEASE_VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
     
     - uses: ./.github/actions/full-build
       with:
-        version: ${{ github.event.inputs.version }}
+        version: ${{ env.RELEASE_VERSION }}
 
-    - name: Create GitHub release
-      uses: ncipollo/release-action@v1
+    - name: Attach release artifacts
+      uses: ncipollo/release-action@v1.21.0
       with:
-        tag: "v${{ github.event.inputs.version }}"
+        tag: ${{ env.RELEASE_TAG }}
+        name: ${{ env.RELEASE_TAG }}
         artifacts: "publish/*.zip,publish/*.msi"
-        generateReleaseNotes: true
-        prerelease: ${{ contains(github.event.inputs.version, 'preview') }}
-        allowUpdates: ${{ github.event.inputs.updateRelease }}
-        removeArtifacts: true
+        allowUpdates: true
+        replacesArtifacts: true
         omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true
