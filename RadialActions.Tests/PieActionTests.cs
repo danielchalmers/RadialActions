@@ -39,27 +39,27 @@ public class PieActionTests
     }
 
     [Fact]
-    public void Execute_NoneAction_ReturnsFailureReason()
+    public void Execute_NoneAction_ThrowsInvalidOperationException()
     {
         var action = new PieAction();
 
-        var failureReason = action.Execute();
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
-        Assert.Equal("No action configured", failureReason);
+        Assert.Equal("No action configured", ex.Message);
     }
 
     [Fact]
-    public void Execute_ShellActionWithoutTarget_ReturnsFailureReason()
+    public void Execute_ShellActionWithoutTarget_ThrowsInvalidOperationException()
     {
         var action = PieAction.CreateShellAction("Docs", string.Empty);
 
-        var failureReason = action.Execute();
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
-        Assert.Equal("Launch target is not configured", failureReason);
+        Assert.Equal("Launch target is not configured", ex.Message);
     }
 
     [Fact]
-    public void Execute_KeyActionWithInvalidShortcut_ReturnsFailureReason()
+    public void Execute_KeyActionWithInvalidShortcut_ThrowsInvalidOperationException()
     {
         var action = new PieAction("Shortcut")
         {
@@ -67,8 +67,8 @@ public class PieActionTests
             Parameter = "DefinitelyNotAHotkey"
         };
 
-        var failureReason = action.Execute();
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
-        Assert.Equal("Shortcut is invalid", failureReason);
+        Assert.Equal("Shortcut is invalid", ex.Message);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using H.NotifyIcon;
 using H.NotifyIcon.Core;
@@ -38,6 +39,26 @@ internal sealed class TrayService : IDisposable
             title,
             reason,
             NotificationIcon.Error);
+    }
+
+    internal static string GetActionFailureReason(Exception exception)
+    {
+        ArgumentNullException.ThrowIfNull(exception);
+
+        return exception switch
+        {
+            InvalidOperationException => exception.Message,
+            FileNotFoundException => "Target was not found",
+            DirectoryNotFoundException => "Folder was not found",
+            UnauthorizedAccessException => "Access was denied",
+            NotSupportedException => "Target is not supported",
+            _ => "Could not launch action",
+        };
+    }
+
+    public void ShowActionFailedNotification(string actionName, Exception exception)
+    {
+        ShowActionFailedNotification(actionName, GetActionFailureReason(exception));
     }
 
     public void Dispose()

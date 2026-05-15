@@ -162,30 +162,22 @@ public partial class PieAction : ObservableObject
     /// <summary>
     /// Executes the action.
     /// </summary>
-    public string Execute()
+    public void Execute()
     {
         Log.Information($"Executing action: {Name} ({Type})");
 
-        try
+        switch (Type)
         {
-            switch (Type)
-            {
-                case ActionType.None:
-                    return "No action configured";
-                case ActionType.Key:
-                    ExecuteKey();
-                    return string.Empty;
-                case ActionType.Shell:
-                    ExecuteShell();
-                    return string.Empty;
-                default:
-                    return "Action type is not supported";
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to execute action: {Name}");
-            return GetShortFailureReason(ex);
+            case ActionType.None:
+                throw new InvalidOperationException("No action configured");
+            case ActionType.Key:
+                ExecuteKey();
+                return;
+            case ActionType.Shell:
+                ExecuteShell();
+                return;
+            default:
+                throw new NotSupportedException("Action type is not supported");
         }
     }
 
@@ -224,19 +216,5 @@ public partial class PieAction : ObservableObject
 
         Process.Start(psi);
     }
-
-    private static string GetShortFailureReason(Exception ex)
-    {
-        return ex switch
-        {
-            InvalidOperationException => ex.Message,
-            FileNotFoundException => "Target was not found",
-            DirectoryNotFoundException => "Folder was not found",
-            UnauthorizedAccessException => "Access was denied",
-            NotSupportedException => "Target is not supported",
-            _ => "Could not launch action",
-        };
-    }
-
     public override string ToString() => Name;
 }
