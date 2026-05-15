@@ -38,12 +38,12 @@ internal sealed class PieThemeSnapshot
     public required Color LabelTextColor { get; init; }
 
     public static PieThemeSnapshot Capture(
-        Func<string, object?> tryFindResource,
+        Func<string, object> tryFindResource,
         bool isDarkModeEnabled)
     {
         var isHighContrast = SystemParameters.HighContrast;
 
-        object? ResolveResource(string resourceKey)
+        object ResolveResource(string resourceKey)
         {
             if (isHighContrast)
             {
@@ -63,7 +63,7 @@ internal sealed class PieThemeSnapshot
             return tryFindResource(resourceKey);
         }
 
-        static SolidColorBrush ToSolidColorBrush(object? value, Color fallbackColor)
+        static SolidColorBrush ToSolidColorBrush(object value, Color fallbackColor)
         {
             if (value is SolidColorBrush brush)
             {
@@ -78,7 +78,7 @@ internal sealed class PieThemeSnapshot
             return new SolidColorBrush(fallbackColor);
         }
 
-        static double ToDouble(object? value, double fallbackValue)
+        static double ToDouble(object value, double fallbackValue)
         {
             if (value is double doubleValue)
             {
@@ -93,7 +93,7 @@ internal sealed class PieThemeSnapshot
             return fallbackValue;
         }
 
-        static Duration ToDuration(object? value, Duration fallbackValue)
+        static Duration ToDuration(object value, Duration fallbackValue)
         {
             if (value is Duration duration)
             {

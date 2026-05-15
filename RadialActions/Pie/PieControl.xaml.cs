@@ -310,7 +310,7 @@ public partial class PieControl : UserControl
         RequestRenderRefresh();
     }
 
-    private object? TryFindThemeResource(string resourceKey)
+    private object TryFindThemeResource(string resourceKey)
     {
         for (DependencyObject current = this; current != null; current = LogicalTreeHelper.GetParent(current))
         {
@@ -330,7 +330,7 @@ public partial class PieControl : UserControl
             : TryFindResource(resourceKey);
     }
 
-    private static bool TryGetResource(ResourceDictionary resources, string resourceKey, out object? resource)
+    private static bool TryGetResource(ResourceDictionary resources, string resourceKey, out object resource)
     {
         if (resources != null)
         {
