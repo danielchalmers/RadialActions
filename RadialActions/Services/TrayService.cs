@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using H.NotifyIcon;
 using H.NotifyIcon.Core;
@@ -26,6 +27,27 @@ internal sealed class TrayService : IDisposable
             "Update available",
             $"Get v{latestVersion} from Settings",
             NotificationIcon.Info);
+    }
+
+    public void ShowActionFailedNotification(PieAction action, Exception exception)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        ArgumentNullException.ThrowIfNull(exception);
+
+        var reason = exception switch
+        {
+            InvalidOperationException => exception.Message,
+            FileNotFoundException => "Target was not found",
+            DirectoryNotFoundException => "Folder was not found",
+            UnauthorizedAccessException => "Access was denied",
+            NotSupportedException => "Target is not supported",
+            _ => "Could not launch action",
+        };
+
+        _trayIcon.ShowNotification(
+            "Action failed",
+            reason,
+            NotificationIcon.Error);
     }
 
     public void Dispose()

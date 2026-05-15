@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace RadialActions;
@@ -165,32 +166,25 @@ public partial class PieAction : ObservableObject
     {
         Log.Information($"Executing action: {Name} ({Type})");
 
-        try
+        switch (Type)
         {
-            switch (Type)
-            {
-                case ActionType.None:
-                    Log.Warning("Action has no operation defined");
-                    break;
-                case ActionType.Key:
-                    ExecuteKey();
-                    break;
-
-                case ActionType.Shell:
-                    ExecuteShell();
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to execute action: {Name}");
+            case ActionType.None:
+                throw new InvalidOperationException("No action configured");
+            case ActionType.Key:
+                ExecuteKey();
+                return;
+            case ActionType.Shell:
+                ExecuteShell();
+                return;
+            default:
+                throw new NotSupportedException("Action type is not supported");
         }
     }
 
     private void ExecuteKey()
     {
         if (string.IsNullOrWhiteSpace(Parameter))
-            return;
+            throw new InvalidOperationException("Shortcut not configured");
 
         if (TryGetKeyAction(Parameter, out var definition))
         {
@@ -198,13 +192,16 @@ public partial class PieAction : ObservableObject
             return;
         }
 
+        if (!HotkeyUtil.TryParse(Parameter, out _, out _))
+            throw new InvalidOperationException("Shortcut is invalid");
+
         ActionUtil.SimulateKeyboardShortcut(Parameter);
     }
 
     private void ExecuteShell()
     {
         if (string.IsNullOrWhiteSpace(Parameter))
-            return;
+            throw new InvalidOperationException("Launch target not configured");
 
         var psi = new ProcessStartInfo(Parameter)
         {

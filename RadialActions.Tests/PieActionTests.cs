@@ -37,4 +37,38 @@ public class PieActionTests
         Assert.NotNull(definition);
         Assert.Equal("PlayPause", definition.Id);
     }
+
+    [Fact]
+    public void Execute_NoneAction_ThrowsInvalidOperationException()
+    {
+        var action = new PieAction();
+
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
+
+        Assert.Equal("No action configured", ex.Message);
+    }
+
+    [Fact]
+    public void Execute_ShellActionWithoutTarget_ThrowsInvalidOperationException()
+    {
+        var action = PieAction.CreateShellAction("Docs", string.Empty);
+
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
+
+        Assert.Equal("Launch target not configured", ex.Message);
+    }
+
+    [Fact]
+    public void Execute_KeyActionWithInvalidShortcut_ThrowsInvalidOperationException()
+    {
+        var action = new PieAction("Shortcut")
+        {
+            Type = ActionType.Key,
+            Parameter = "DefinitelyNotAHotkey"
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
+
+        Assert.Equal("Shortcut is invalid", ex.Message);
+    }
 }
