@@ -168,28 +168,30 @@ public partial class PieAction : ObservableObject
 
         try
         {
-            switch (Type)
+            return Type switch
             {
-                case ActionType.None:
-                    return "Action is not configured";
-                case ActionType.Key:
-                    ExecuteKey();
-                    return null;
-
-                case ActionType.Shell:
-                    ExecuteShell();
-                    return null;
-
-                default:
-                    return "Action type is not supported";
-            }
+                ActionType.None => "Action is not configured",
+                ActionType.Key => ExecuteKeyAndReturnSuccess(),
+                ActionType.Shell => ExecuteShellAndReturnSuccess(),
+                _ => "Action type is not supported",
+            };
         }
         catch (Exception ex)
         {
             Log.Error(ex, $"Failed to execute action: {Name}");
             return GetShortFailureReason(ex);
         }
+    }
 
+    private string ExecuteKeyAndReturnSuccess()
+    {
+        ExecuteKey();
+        return null;
+    }
+
+    private string ExecuteShellAndReturnSuccess()
+    {
+        ExecuteShell();
         return null;
     }
 
