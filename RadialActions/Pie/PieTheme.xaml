@@ -80,7 +80,7 @@
     <!-- Geometry and spacing -->
     <sys:Double x:Key="PieSliceStrokeThickness">1.5</sys:Double>
     <sys:Double x:Key="PieHubStrokeThickness">1.5</sys:Double>
-    <sys:Double x:Key="PieSliceContentMaxWidthRatio">0.38</sys:Double>
+    <sys:Double x:Key="PieSliceContentMaxWidthRatio">0.46</sys:Double>
     <sys:Double x:Key="PieIconToLabelSpacing">3</sys:Double>
     <Thickness x:Key="PieSliceContentPadding">2,2,2,2</Thickness>
 
@@ -167,13 +167,13 @@
         <Setter Property="Foreground"
                 Value="{DynamicResource PieTextBrush}" />
         <Setter Property="FontSize"
-                Value="11" />
+                Value="12" />
         <Setter Property="FontWeight"
                 Value="SemiBold" />
         <Setter Property="TextAlignment"
                 Value="Center" />
         <Setter Property="TextWrapping"
-                Value="NoWrap" />
+                Value="Wrap" />
         <Setter Property="TextTrimming"
                 Value="CharacterEllipsis" />
         <Setter Property="HorizontalAlignment"

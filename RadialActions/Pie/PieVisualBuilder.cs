@@ -8,6 +8,11 @@ namespace RadialActions;
 
 public static class PieVisualBuilder
 {
+    private const double MinimumLabelFontSize = 12;
+    private const double MaximumLabelFontSize = 18;
+    private const double LabelFontSizeRadiusRatio = 0.07;
+    private const double MinimumLabelWidth = 64;
+
     public readonly record struct CenterElements(
         Grid Target,
         SolidColorBrush FillBrush,
@@ -155,17 +160,23 @@ public static class PieVisualBuilder
 
         if (!string.IsNullOrWhiteSpace(sliceAction.Name))
         {
+            var labelFontSize = Math.Clamp(
+                outerRadius * LabelFontSizeRadiusRatio,
+                MinimumLabelFontSize,
+                MaximumLabelFontSize);
+
             contentPanel.Children.Add(new TextBlock
             {
                 Style = labelTextStyle,
                 Text = sliceAction.Name,
                 Foreground = new SolidColorBrush(labelTextColor),
-                FontSize = 11,
+                FontSize = labelFontSize,
                 FontWeight = FontWeights.SemiBold,
                 TextAlignment = TextAlignment.Center,
-                TextWrapping = TextWrapping.NoWrap,
+                TextWrapping = TextWrapping.Wrap,
                 TextTrimming = TextTrimming.CharacterEllipsis,
-                MaxWidth = Math.Max(56, outerRadius * contentMaxWidthRatio),
+                MaxLines = 2,
+                MaxWidth = Math.Max(MinimumLabelWidth, outerRadius * contentMaxWidthRatio),
             });
         }
 
