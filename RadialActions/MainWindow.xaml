@@ -86,10 +86,11 @@
         </ContextMenu>
 
         <tb:TaskbarIcon x:Key="TrayIcon" x:Shared="False"
+                        ToolTipText="Radial Actions"
                         IconSource="RadialActions.ico" MenuActivation="RightClick"
                         TrayBalloonTipClicked="OnTrayBalloonTipClicked"
                         TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick"
-                        TrayLeftMouseDown="OnTrayLeftMouseDown" />
+                        TrayLeftMouseClick="OnTrayLeftMouseDown" />
     </Window.Resources>
 
     <local:PieControl x:Name="PieMenu"

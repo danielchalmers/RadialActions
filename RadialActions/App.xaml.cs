@@ -91,15 +91,13 @@ public partial class App : Application
         var window = Current.Windows.OfType<T>().FirstOrDefault() ?? new T();
         window.Owner = owner;
 
-        // Restore an existing window.
-        if (window.IsVisible)
+        window.Show();
+
+        if (window.WindowState == WindowState.Minimized)
         {
             SystemCommands.RestoreWindow(window);
-            window.Activate();
-            return;
         }
 
-        // Show the new window.
-        window.Show();
+        window.Activate();
     }
 }
