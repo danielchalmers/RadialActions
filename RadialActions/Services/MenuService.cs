@@ -28,6 +28,8 @@ internal sealed class MenuService
         _fadeInStoryboard = fadeInStoryboard;
         _fadeOutStoryboard = fadeOutStoryboard;
         _dispatcher = window.Dispatcher;
+        _fadeInStoryboard.Completed += (_, _) => _isFadeInActive = false;
+        _fadeOutStoryboard.Completed += (_, _) => _isFadeOutActive = false;
     }
 
     public void ShowMenu(bool atCursor)
