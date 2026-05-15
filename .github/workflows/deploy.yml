@@ -29,6 +29,7 @@ jobs:
       with:
         version: ${{ env.RELEASE_VERSION }}
 
+    # The release is created alongside the tag in GitHub; this workflow only replaces its artifacts.
     - name: Attach release artifacts
       uses: ncipollo/release-action@v1.21.0
       with:
