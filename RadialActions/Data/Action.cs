@@ -178,9 +178,9 @@ public partial class PieAction : ObservableObject
                 case ActionType.Shell:
                     ExecuteShell();
                     return string.Empty;
+                default:
+                    return "Action type is not supported";
             }
-
-            return "Action type is not supported";
         }
         catch (Exception ex)
         {
