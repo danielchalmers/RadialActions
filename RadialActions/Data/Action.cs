@@ -178,9 +178,9 @@ public partial class PieAction : ObservableObject
                 case ActionType.Shell:
                     ExecuteShell();
                     return string.Empty;
-                default:
-                    return "Action type is not supported";
             }
+
+            return "Action type is not supported";
         }
         catch (Exception ex)
         {
@@ -234,9 +234,7 @@ public partial class PieAction : ObservableObject
             DirectoryNotFoundException => "Folder was not found",
             UnauthorizedAccessException => "Access was denied",
             NotSupportedException => "Target is not supported",
-            _ => string.IsNullOrWhiteSpace(ex.Message)
-                ? "Could not launch action"
-                : ex.Message,
+            _ => "Could not launch action",
         };
     }
 
