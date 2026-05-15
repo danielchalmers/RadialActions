@@ -86,6 +86,7 @@
         </ContextMenu>
 
         <tb:TaskbarIcon x:Key="TrayIcon" x:Shared="False"
+                        ToolTipText="Radial Actions"
                         IconSource="RadialActions.ico" MenuActivation="RightClick"
                         TrayBalloonTipClicked="OnTrayBalloonTipClicked"
                         TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick"
