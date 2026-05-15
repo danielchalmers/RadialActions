@@ -310,6 +310,49 @@ public partial class PieControl : UserControl
         RequestRenderRefresh();
     }
 
+    private object? TryFindThemeResource(string resourceKey)
+    {
+        for (DependencyObject current = this; current != null; current = LogicalTreeHelper.GetParent(current))
+        {
+            if (current is FrameworkElement element && TryGetResource(element.Resources, resourceKey, out var elementResource))
+            {
+                return elementResource;
+            }
+
+            if (current is FrameworkContentElement contentElement && TryGetResource(contentElement.Resources, resourceKey, out var contentResource))
+            {
+                return contentResource;
+            }
+        }
+
+        return TryGetResource(Application.Current?.Resources, resourceKey, out var applicationResource)
+            ? applicationResource
+            : TryFindResource(resourceKey);
+    }
+
+    private static bool TryGetResource(ResourceDictionary resources, string resourceKey, out object? resource)
+    {
+        if (resources != null)
+        {
+            if (resources.Contains(resourceKey))
+            {
+                resource = resources[resourceKey];
+                return true;
+            }
+
+            for (var i = resources.MergedDictionaries.Count - 1; i >= 0; i--)
+            {
+                if (TryGetResource(resources.MergedDictionaries[i], resourceKey, out resource))
+                {
+                    return true;
+                }
+            }
+        }
+
+        resource = null;
+        return false;
+    }
+
     private void CreatePieMenu()
     {
         const int contentZIndex = 15;
@@ -337,7 +380,7 @@ public partial class PieControl : UserControl
         }
 
         var theme = PieThemeSnapshot.Capture(
-            TryFindResource,
+            TryFindThemeResource,
             PieThemeSnapshot.IsAppDarkModeEnabled());
         _renderState.ApplyTheme(theme);
 

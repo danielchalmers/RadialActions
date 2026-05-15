@@ -14,6 +14,8 @@ internal sealed class MenuService
     private readonly Dispatcher _dispatcher;
 
     private bool _isFadingOut;
+    private bool _isFadeInActive;
+    private bool _isFadeOutActive;
 
     public MenuService(
         Window window,
@@ -117,6 +119,7 @@ internal sealed class MenuService
         }
 
         _isFadingOut = false;
+        _isFadeInActive = true;
         _fadeInStoryboard.Begin(_window, HandoffBehavior.SnapshotAndReplace, true);
     }
 
@@ -132,13 +135,23 @@ internal sealed class MenuService
 
         _isFadingOut = true;
         _window.IsHitTestVisible = false;
+        _isFadeOutActive = true;
         _fadeOutStoryboard.Begin(_window, HandoffBehavior.SnapshotAndReplace, true);
     }
 
     private void StopFadeAnimations()
     {
-        _fadeInStoryboard.Remove(_window);
-        _fadeOutStoryboard.Remove(_window);
+        if (_isFadeInActive)
+        {
+            _fadeInStoryboard.Remove(_window);
+            _isFadeInActive = false;
+        }
+
+        if (_isFadeOutActive)
+        {
+            _fadeOutStoryboard.Remove(_window);
+            _isFadeOutActive = false;
+        }
     }
 
     private static bool IsReducedMotionEnabled()
