@@ -29,23 +29,12 @@ internal sealed class TrayService : IDisposable
             NotificationIcon.Info);
     }
 
-    public void ShowActionFailedNotification(string actionName, string reason)
+    public void ShowActionFailedNotification(PieAction action, Exception exception)
     {
-        var title = string.IsNullOrWhiteSpace(actionName)
-            ? "Action failed"
-            : $"Action failed: {actionName}";
-
-        _trayIcon.ShowNotification(
-            title,
-            reason,
-            NotificationIcon.Error);
-    }
-
-    internal static string GetActionFailureReason(Exception exception)
-    {
+        ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(exception);
 
-        return exception switch
+        var reason = exception switch
         {
             InvalidOperationException => exception.Message,
             FileNotFoundException => "Target was not found",
@@ -54,11 +43,12 @@ internal sealed class TrayService : IDisposable
             NotSupportedException => "Target is not supported",
             _ => "Could not launch action",
         };
-    }
 
-    public void ShowActionFailedNotification(string actionName, Exception exception)
-    {
-        ShowActionFailedNotification(actionName, GetActionFailureReason(exception));
+        Log.Debug("Showing action failed notification for action {ActionName}: {Reason}", action.Name, reason);
+        _trayIcon.ShowNotification(
+            "Action failed",
+            reason,
+            NotificationIcon.Error);
     }
 
     public void Dispose()

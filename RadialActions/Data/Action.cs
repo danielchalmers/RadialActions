@@ -216,5 +216,6 @@ public partial class PieAction : ObservableObject
 
         Process.Start(psi);
     }
+
     public override string ToString() => Name;
 }
