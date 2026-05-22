@@ -179,9 +179,11 @@ public static class WpfUtil
         }
         catch (DllNotFoundException)
         {
+            // Older Windows versions may not expose shcore; fall back to 100% scaling.
         }
         catch (EntryPointNotFoundException)
         {
+            // If monitor DPI APIs are unavailable, use default DPI so positioning still works.
         }
 
         return new Point(1, 1);
