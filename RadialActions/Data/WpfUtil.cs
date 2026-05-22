@@ -59,7 +59,6 @@ public static class WpfUtil
     private const uint SWP_NOSIZE = 0x0001;
     private const uint MONITOR_DEFAULTTONEAREST = 2;
     private const int DefaultDpi = 96;
-    private const uint MaxSupportedDpi = 10_000;
 
     /// <summary>
     /// Centers the window on the cursor position, keeping it within screen bounds.
@@ -149,8 +148,7 @@ public static class WpfUtil
     private static bool TryGetMonitorInfo(POINT point, out IntPtr monitor, out MONITORINFO monitorInfo)
     {
         monitor = MonitorFromPoint(point, MONITOR_DEFAULTTONEAREST);
-        monitorInfo = new MONITORINFO();
-        monitorInfo.cbSize = Marshal.SizeOf<MONITORINFO>();
+        monitorInfo = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
         return monitor != IntPtr.Zero && GetMonitorInfo(monitor, ref monitorInfo);
     }
 
@@ -174,7 +172,7 @@ public static class WpfUtil
         try
         {
             var result = GetDpiForMonitor(monitor, MonitorDpiType.Effective, out var dpiX, out var dpiY);
-            if (result == 0 && dpiX > 0 && dpiY > 0 && dpiX <= MaxSupportedDpi && dpiY <= MaxSupportedDpi)
+            if (result == 0 && dpiX > 0 && dpiY > 0)
             {
                 return new Point(dpiX / (double)DefaultDpi, dpiY / (double)DefaultDpi);
             }
