@@ -128,13 +128,11 @@ public partial class SettingsWindow : Window
 public partial class SettingsWindowViewModel : ObservableObject
 {
     public const string CustomKeyActionId = "__custom__";
-    private const string LegacyDefaultIcon = "⭐";
 
     private static readonly KeyActionDefinition CustomKeyActionOption =
         new(CustomKeyActionId, "Custom Shortcut...", "⌨️", 0);
 
-    private readonly Dictionary<PieAction, KeyActionDefinition> _autoKeyDefaults = [];
-    private readonly Dictionary<PieAction, ShellDefaults> _autoShellDefaults = [];
+    private readonly ActionDefaultsService _actionDefaultsService;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedAction))]
@@ -171,7 +169,8 @@ public partial class SettingsWindowViewModel : ObservableObject
     public SettingsWindowViewModel(Settings settings)
     {
         Settings = settings;
-        TrackExistingDefaults();
+        _actionDefaultsService = new ActionDefaultsService();
+        _actionDefaultsService.TrackExistingDefaults(Settings.Actions);
         if (Settings.Actions.Count > 0)
         {
             SelectedActionIndex = 0;
@@ -213,7 +212,7 @@ public partial class SettingsWindowViewModel : ObservableObject
             }
             else if (value == ActionType.Key)
             {
-                EnsureKeyDefaults(SelectedAction);
+                _actionDefaultsService.EnsureKeyDefaults(SelectedAction);
             }
             else if (value == ActionType.Shell)
             {
@@ -255,7 +254,7 @@ public partial class SettingsWindowViewModel : ObservableObject
                 SelectedAction.Parameter = value ?? string.Empty;
                 if (PieAction.TryGetKeyAction(SelectedAction.Parameter, out var definition))
                 {
-                    ApplyKeyDefaults(SelectedAction, definition);
+                    _actionDefaultsService.ApplyKeyDefaults(SelectedAction, definition);
                 }
             }
 
@@ -286,8 +285,7 @@ public partial class SettingsWindowViewModel : ObservableObject
             return;
 
         var index = SelectedActionIndex;
-        _autoKeyDefaults.Remove(SelectedAction);
-        _autoShellDefaults.Remove(SelectedAction);
+        _actionDefaultsService.Forget(SelectedAction);
         Settings.Actions.Remove(SelectedAction);
 
         if (Settings.Actions.Count > 0)
@@ -362,7 +360,7 @@ public partial class SettingsWindowViewModel : ObservableObject
             Title = "Select a working directory"
         };
 
-        var suggested = GetShellDefaults(SelectedAction.Parameter)?.WorkingDirectory;
+        var suggested = _actionDefaultsService.GetShellDefaults(SelectedAction.Parameter)?.WorkingDirectory;
         if (!string.IsNullOrWhiteSpace(SelectedAction.WorkingDirectory))
         {
             dialog.InitialDirectory = SelectedAction.WorkingDirectory;
@@ -433,7 +431,7 @@ public partial class SettingsWindowViewModel : ObservableObject
         if (newValue != null)
         {
             newValue.PropertyChanged += SelectedActionPropertyChanged;
-            EnsureKeyDefaults(newValue);
+            _actionDefaultsService.EnsureKeyDefaults(newValue);
         }
 
         OnPropertyChanged(nameof(SelectedActionType));
@@ -457,153 +455,13 @@ public partial class SettingsWindowViewModel : ObservableObject
 
             if (SelectedActionType == ActionType.Shell)
             {
-                ApplyShellDefaults(SelectedAction, SelectedAction.Parameter);
+                _actionDefaultsService.ApplyShellDefaults(SelectedAction, SelectedAction.Parameter);
             }
             else if (SelectedActionType == ActionType.Key &&
                      PieAction.TryGetKeyAction(SelectedAction.Parameter, out var definition))
             {
-                ApplyKeyDefaults(SelectedAction, definition);
+                _actionDefaultsService.ApplyKeyDefaults(SelectedAction, definition);
             }
         }
     }
-
-    private void TrackExistingDefaults()
-    {
-        _autoKeyDefaults.Clear();
-        _autoShellDefaults.Clear();
-
-        foreach (var action in Settings.Actions)
-        {
-            if (action.Type == ActionType.Key)
-            {
-                if (PieAction.TryGetKeyAction(action.Parameter, out var definition))
-                {
-                    _autoKeyDefaults[action] = definition;
-                }
-            }
-            else if (action.Type == ActionType.Shell)
-            {
-                var defaults = GetShellDefaults(action.Parameter);
-                if (defaults.HasValue)
-                {
-                    _autoShellDefaults[action] = defaults.Value;
-                }
-            }
-        }
-    }
-
-    private void EnsureKeyDefaults(PieAction action)
-    {
-        if (action.Type != ActionType.Key)
-            return;
-
-        if (string.IsNullOrWhiteSpace(action.Parameter))
-        {
-            action.Parameter = PieAction.KeyActions[0].Id;
-        }
-
-        if (PieAction.TryGetKeyAction(action.Parameter, out var definition))
-        {
-            ApplyKeyDefaults(action, definition);
-        }
-    }
-
-    private void ApplyKeyDefaults(PieAction action, KeyActionDefinition definition)
-    {
-        _autoKeyDefaults.TryGetValue(action, out var previous);
-
-        if (ShouldApplyDefault(action.Icon, PieAction.DefaultIcon, previous?.Icon ?? string.Empty) ||
-            action.Icon == LegacyDefaultIcon)
-        {
-            action.Icon = definition.Icon;
-        }
-
-        _autoKeyDefaults[action] = definition;
-    }
-
-    private void ApplyShellDefaults(PieAction action, string target)
-    {
-        if (action.Type != ActionType.Shell)
-            return;
-
-        var defaults = GetShellDefaults(target);
-        if (!defaults.HasValue)
-            return;
-
-        _autoShellDefaults.TryGetValue(action, out var previous);
-        var next = defaults.Value;
-
-        if (ShouldApplyDefault(action.Name, PieAction.DefaultName, previous.Name ?? string.Empty))
-        {
-            action.Name = next.Name;
-        }
-
-        if (ShouldApplyDefault(action.Icon, PieAction.DefaultIcon, previous.Icon ?? string.Empty) ||
-            action.Icon == LegacyDefaultIcon)
-        {
-            action.Icon = next.Icon;
-        }
-
-        if (ShouldApplyDefault(action.WorkingDirectory, string.Empty, previous.WorkingDirectory ?? string.Empty) &&
-            !string.IsNullOrWhiteSpace(next.WorkingDirectory))
-        {
-            action.WorkingDirectory = next.WorkingDirectory;
-        }
-
-        _autoShellDefaults[action] = next;
-    }
-
-    private static ShellDefaults? GetShellDefaults(string target)
-    {
-        if (string.IsNullOrWhiteSpace(target))
-            return null;
-
-        if (Uri.TryCreate(target, UriKind.Absolute, out var uri))
-        {
-            if (uri.IsFile)
-            {
-                return BuildShellDefaultsFromPath(uri.LocalPath);
-            }
-
-            var name = string.IsNullOrWhiteSpace(uri.Host) ? uri.AbsoluteUri : uri.Host;
-            return new ShellDefaults(name, "🌐", string.Empty);
-        }
-
-        return BuildShellDefaultsFromPath(target);
-    }
-
-    private static ShellDefaults BuildShellDefaultsFromPath(string path)
-    {
-        var name = Path.GetFileNameWithoutExtension(path);
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            name = Path.GetFileName(path);
-        }
-
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            name = "Open";
-        }
-
-        var icon = Directory.Exists(path) ? "📂" : "📁";
-        var workingDirectory = Directory.Exists(path) ? path : Path.GetDirectoryName(path) ?? string.Empty;
-
-        return new ShellDefaults(name, icon, workingDirectory);
-    }
-
-    private static bool ShouldApplyDefault(string currentValue, string defaultValue, string previousValue)
-    {
-        if (string.IsNullOrWhiteSpace(currentValue))
-            return true;
-
-        if (!string.IsNullOrWhiteSpace(defaultValue) && currentValue == defaultValue)
-            return true;
-
-        if (!string.IsNullOrWhiteSpace(previousValue) && currentValue == previousValue)
-            return true;
-
-        return false;
-    }
-
-    private readonly record struct ShellDefaults(string Name, string Icon, string WorkingDirectory);
 }
