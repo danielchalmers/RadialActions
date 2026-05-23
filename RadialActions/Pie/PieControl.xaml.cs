@@ -6,7 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Win32;
@@ -19,7 +18,6 @@ namespace RadialActions;
 public partial class PieControl : UserControl
 {
     private const double DefaultCenterHoleRatio = 0.25;
-    private const int NoSelectedSliceIndex = -1;
     private const int SliceZIndex = 10;
     private const int HoveredSliceZIndex = 14;
     private const double MouseMoveThreshold = 0.25;
@@ -30,32 +28,14 @@ public partial class PieControl : UserControl
         Keyboard,
     }
 
-    private sealed class SliceVisual
-    {
-        public required int Index { get; init; }
-        public required double MidAngle { get; init; }
-        public required PieAction Action { get; init; }
-        public required Path Path { get; init; }
-        public required SolidColorBrush FillBrush { get; init; }
-        public required SolidColorBrush StrokeBrush { get; init; }
-        public required ContextMenu ContextMenu { get; init; }
-    }
-
-    private sealed class CenterVisual
-    {
-        public required Grid Target { get; init; }
-        public required SolidColorBrush FillBrush { get; init; }
-        public required SolidColorBrush StrokeBrush { get; init; }
-        public required TextBlock Icon { get; init; }
-    }
-
     private bool _renderRefreshPending;
     private bool _renderRefreshQueued;
-    private readonly List<SliceVisual> _sliceVisuals = [];
-    private CenterVisual _centerVisual;
+    private readonly List<PieSliceVisual> _sliceVisuals = [];
+    private PieCenterVisual _centerVisual;
+    private readonly PieAnimationService _animationService = new();
+    private readonly PieSelectionController _selectionController = new();
     private readonly PieRenderState _renderState = new();
     private InteractionMode _interactionMode = InteractionMode.Mouse;
-    private int _selectedSliceIndex = NoSelectedSliceIndex;
     private Point _keyboardModeMousePosition;
     private bool _hasKeyboardModeMousePosition;
 
@@ -156,29 +136,10 @@ public partial class PieControl : UserControl
 
     private void HandleArrowKey(Key key)
     {
-        if (_sliceVisuals.Count == 0)
+        _selectionController.HandleArrowKey(key, GetSelectionItems());
+        if (_selectionController.SelectedIndex == PieSelectionController.NoSelection)
         {
             return;
-        }
-
-        if (_selectedSliceIndex == NoSelectedSliceIndex)
-        {
-            _selectedSliceIndex = key switch
-            {
-                Key.Up => GetSliceIndexClosestToAngle(-90),
-                Key.Right => GetSliceIndexClosestToAngle(0),
-                Key.Down => GetSliceIndexClosestToAngle(90),
-                Key.Left => GetSliceIndexClosestToAngle(180),
-                _ => NoSelectedSliceIndex
-            };
-        }
-        else if (key is Key.Right or Key.Down)
-        {
-            _selectedSliceIndex = (_selectedSliceIndex + 1) % _sliceVisuals.Count;
-        }
-        else if (key is Key.Left or Key.Up)
-        {
-            _selectedSliceIndex = (_selectedSliceIndex - 1 + _sliceVisuals.Count) % _sliceVisuals.Count;
         }
 
         _interactionMode = InteractionMode.Keyboard;
@@ -210,37 +171,9 @@ public partial class PieControl : UserControl
         return true;
     }
 
-    private SliceVisual GetSelectedSliceVisual()
+    private PieSliceVisual GetSelectedSliceVisual()
     {
-        if (_selectedSliceIndex == NoSelectedSliceIndex)
-        {
-            return null;
-        }
-
-        return _sliceVisuals.FirstOrDefault(slice => slice.Index == _selectedSliceIndex);
-    }
-
-    private int GetSliceIndexClosestToAngle(double targetAngle)
-    {
-        if (_sliceVisuals.Count == 0)
-        {
-            return 0;
-        }
-
-        var bestIndex = 0;
-        var bestDistance = double.MaxValue;
-
-        foreach (var sliceVisual in _sliceVisuals)
-        {
-            var distance = Math.Abs(PieLayoutCalculator.NormalizeSignedAngle(sliceVisual.MidAngle - targetAngle));
-            if (distance < bestDistance)
-            {
-                bestDistance = distance;
-                bestIndex = sliceVisual.Index;
-            }
-        }
-
-        return bestIndex;
+        return _sliceVisuals.FirstOrDefault(slice => slice.Index == _selectionController.SelectedIndex);
     }
 
     public static readonly DependencyProperty SlicesProperty =
@@ -332,7 +265,7 @@ public partial class PieControl : UserControl
                 Slices?.Count ?? 0,
                 ActualWidth,
                 ActualHeight);
-            _selectedSliceIndex = NoSelectedSliceIndex;
+            _selectionController.Reset();
             return;
         }
 
@@ -393,7 +326,7 @@ public partial class PieControl : UserControl
                 theme.HubContainerStyle,
                 theme.IconTextStyle);
 
-            var centerVisual = new CenterVisual
+            var centerVisual = new PieCenterVisual
             {
                 Target = centerElements.Target,
                 FillBrush = centerElements.FillBrush,
@@ -427,14 +360,14 @@ public partial class PieControl : UserControl
                 }
 
                 isCenterMouseDown = false;
-                AnimateSliceClickUp(centerElements.Target, pressDuration, _renderState.StandardEasing);
+                _animationService.AnimateClickUp(centerElements.Target, pressDuration, _renderState.StandardEasing);
             };
 
             centerElements.Target.MouseLeftButtonDown += (_, e) =>
             {
                 EnterMouseInteractionMode(refreshVisualState: false, animate: false);
                 isCenterMouseDown = true;
-                AnimateSliceClickDown(centerElements.Target, pressDuration, _renderState.StandardEasing);
+                _animationService.AnimateClickDown(centerElements.Target, pressDuration, _renderState.StandardEasing);
                 e.Handled = true;
             };
 
@@ -446,7 +379,7 @@ public partial class PieControl : UserControl
                 }
 
                 isCenterMouseDown = false;
-                AnimateSliceClickUp(centerElements.Target, pressDuration, _renderState.StandardEasing);
+                _animationService.AnimateClickUp(centerElements.Target, pressDuration, _renderState.StandardEasing);
                 if (_interactionMode == InteractionMode.Mouse)
                 {
                     if (centerElements.Target.IsMouseOver)
@@ -506,7 +439,7 @@ public partial class PieControl : UserControl
             var contextMenu = CreateSliceContextMenu(sliceAction);
             slice.ContextMenu = contextMenu;
 
-            var sliceVisual = new SliceVisual
+            var sliceVisual = new PieSliceVisual
             {
                 Index = i,
                 MidAngle = (startAngle + endAngle) / 2,
@@ -524,9 +457,9 @@ public partial class PieControl : UserControl
             {
                 EnterMouseInteractionMode(refreshVisualState: false, animate: false);
                 isMouseDown = true;
-                AnimateSliceColor(fillBrush, theme.PressedColor, pressDuration, _renderState.StandardEasing);
-                AnimateSliceColor(strokeBrush, _renderState.BorderHoverColor, pressDuration, _renderState.StandardEasing);
-                AnimateSliceClickDown(slice, pressDuration, _renderState.StandardEasing);
+                _animationService.AnimateBrushColor(fillBrush, theme.PressedColor, pressDuration, _renderState.StandardEasing);
+                _animationService.AnimateBrushColor(strokeBrush, _renderState.BorderHoverColor, pressDuration, _renderState.StandardEasing);
+                _animationService.AnimateClickDown(slice, pressDuration, _renderState.StandardEasing);
                 e.Handled = true;
             };
 
@@ -538,7 +471,7 @@ public partial class PieControl : UserControl
                 }
 
                 isMouseDown = false;
-                AnimateSliceClickUp(slice, pressDuration, _renderState.StandardEasing);
+                _animationService.AnimateClickUp(slice, pressDuration, _renderState.StandardEasing);
                 if (_interactionMode == InteractionMode.Mouse)
                 {
                     if (slice.IsMouseOver)
@@ -582,7 +515,7 @@ public partial class PieControl : UserControl
                 }
 
                 isMouseDown = false;
-                AnimateSliceClickUp(slice, pressDuration, _renderState.StandardEasing);
+                _animationService.AnimateClickUp(slice, pressDuration, _renderState.StandardEasing);
             };
             Panel.SetZIndex(slice, SliceZIndex);
             PieCanvas.Children.Add(slice);
@@ -615,11 +548,7 @@ public partial class PieControl : UserControl
             PieCanvas.Children.Add(contentPanel);
         }
 
-        if (_selectedSliceIndex != NoSelectedSliceIndex
-            && _sliceVisuals.All(sliceVisual => sliceVisual.Index != _selectedSliceIndex))
-        {
-            _selectedSliceIndex = NoSelectedSliceIndex;
-        }
+        _selectionController.EnsureSelectionIsValid(GetSelectionItems());
 
         Log.Debug(
             "Pie menu rendered with {SliceCount} slices at {CanvasSize}px",
@@ -631,7 +560,7 @@ public partial class PieControl : UserControl
     private void EnterMouseInteractionMode(bool refreshVisualState, bool animate)
     {
         _interactionMode = InteractionMode.Mouse;
-        _selectedSliceIndex = NoSelectedSliceIndex;
+        _selectionController.Reset();
         _hasKeyboardModeMousePosition = false;
 
         if (refreshVisualState)
@@ -654,7 +583,7 @@ public partial class PieControl : UserControl
         foreach (var sliceVisual in _sliceVisuals)
         {
             var isSelectedOrHovered = _interactionMode == InteractionMode.Keyboard
-                ? _selectedSliceIndex == sliceVisual.Index
+                ? _selectionController.SelectedIndex == sliceVisual.Index
                 : sliceVisual.Path.IsMouseOver;
 
             if (isSelectedOrHovered)
@@ -683,18 +612,18 @@ public partial class PieControl : UserControl
         }
     }
 
-    private void ApplySliceNormalVisual(SliceVisual sliceVisual, bool animate)
+    private void ApplySliceNormalVisual(PieSliceVisual sliceVisual, bool animate)
     {
         Panel.SetZIndex(sliceVisual.Path, SliceZIndex);
-        ApplyBrushColor(sliceVisual.FillBrush, _renderState.SliceColor, animate);
-        ApplyBrushColor(sliceVisual.StrokeBrush, _renderState.BorderColor, animate);
+        _animationService.ApplyBrushColor(sliceVisual.FillBrush, _renderState.SliceColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
+        _animationService.ApplyBrushColor(sliceVisual.StrokeBrush, _renderState.BorderColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
     }
 
-    private void ApplySliceHoverVisual(SliceVisual sliceVisual, bool animate)
+    private void ApplySliceHoverVisual(PieSliceVisual sliceVisual, bool animate)
     {
         Panel.SetZIndex(sliceVisual.Path, HoveredSliceZIndex);
-        ApplyBrushColor(sliceVisual.FillBrush, _renderState.HoverColor, animate);
-        ApplyBrushColor(sliceVisual.StrokeBrush, _renderState.BorderHoverColor, animate);
+        _animationService.ApplyBrushColor(sliceVisual.FillBrush, _renderState.HoverColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
+        _animationService.ApplyBrushColor(sliceVisual.StrokeBrush, _renderState.BorderHoverColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
     }
 
     private void ApplyCenterNormalVisual(bool animate)
@@ -710,7 +639,7 @@ public partial class PieControl : UserControl
 
         if (animate)
         {
-            AnimateOpacity(centerVisual.Icon, 0, _renderState.HoverDuration, _renderState.StandardEasing, () =>
+            _animationService.AnimateOpacity(centerVisual.Icon, 0, _renderState.HoverDuration, _renderState.StandardEasing, () =>
             {
                 if (!centerVisual.Target.IsMouseOver || _interactionMode == InteractionMode.Keyboard)
                 {
@@ -740,7 +669,7 @@ public partial class PieControl : UserControl
 
         if (animate)
         {
-            AnimateOpacity(centerVisual.Icon, 1, _renderState.HoverDuration, _renderState.StandardEasing);
+            _animationService.AnimateOpacity(centerVisual.Icon, 1, _renderState.HoverDuration, _renderState.StandardEasing);
         }
         else
         {
@@ -751,14 +680,7 @@ public partial class PieControl : UserControl
 
     private void ApplyBrushColor(SolidColorBrush brush, Color color, bool animate)
     {
-        if (animate)
-        {
-            AnimateSliceColor(brush, color, _renderState.HoverDuration, _renderState.StandardEasing);
-            return;
-        }
-
-        brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
-        brush.Color = color;
+        _animationService.ApplyBrushColor(brush, color, animate, _renderState.HoverDuration, _renderState.StandardEasing);
     }
 
     private void OnSystemParametersChanged(object sender, PropertyChangedEventArgs e)
@@ -804,119 +726,9 @@ public partial class PieControl : UserControl
         }, DispatcherPriority.Background);
     }
 
-    private void AnimateSliceColor(
-        SolidColorBrush brush,
-        Color toColor,
-        Duration duration,
-        IEasingFunction easingFunction)
+    private PieSelectionController.Item[] GetSelectionItems()
     {
-        if (IsReducedMotionEnabled())
-        {
-            brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
-            brush.Color = toColor;
-            return;
-        }
-
-        var colorAnimation = new ColorAnimation
-        {
-            To = toColor,
-            Duration = duration,
-            EasingFunction = easingFunction,
-        };
-
-        brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation, HandoffBehavior.SnapshotAndReplace);
-    }
-
-    private void AnimateOpacity(
-        UIElement element,
-        double toOpacity,
-        Duration duration,
-        IEasingFunction easingFunction,
-        Action onCompleted = null)
-    {
-        if (IsReducedMotionEnabled())
-        {
-            element.BeginAnimation(UIElement.OpacityProperty, null);
-            element.Opacity = toOpacity;
-            onCompleted?.Invoke();
-            return;
-        }
-
-        var opacityAnimation = new DoubleAnimation
-        {
-            To = toOpacity,
-            Duration = duration,
-            EasingFunction = easingFunction,
-        };
-
-        if (onCompleted != null)
-        {
-            opacityAnimation.Completed += (_, _) => onCompleted();
-        }
-
-        element.BeginAnimation(UIElement.OpacityProperty, opacityAnimation, HandoffBehavior.SnapshotAndReplace);
-    }
-
-    private void AnimateSliceClickDown(UIElement target, Duration duration, IEasingFunction easingFunction)
-    {
-        if (target.RenderTransform is not ScaleTransform scaleTransform)
-        {
-            scaleTransform = new ScaleTransform(1, 1);
-            target.RenderTransform = scaleTransform;
-            target.RenderTransformOrigin = new Point(0.5, 0.5);
-        }
-
-        if (IsReducedMotionEnabled())
-        {
-            scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-            scaleTransform.ScaleX = 0.95;
-            scaleTransform.ScaleY = 0.95;
-            return;
-        }
-
-        var scaleAnimation = new DoubleAnimation
-        {
-            To = 0.95,
-            Duration = duration,
-            EasingFunction = easingFunction,
-            FillBehavior = FillBehavior.HoldEnd,
-        };
-
-        scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
-        scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
-    }
-
-    private void AnimateSliceClickUp(UIElement target, Duration duration, IEasingFunction easingFunction)
-    {
-        if (target.RenderTransform is not ScaleTransform scaleTransform)
-        {
-            return;
-        }
-
-        if (IsReducedMotionEnabled())
-        {
-            scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-            scaleTransform.ScaleX = 1;
-            scaleTransform.ScaleY = 1;
-            return;
-        }
-
-        var scaleAnimation = new DoubleAnimation
-        {
-            To = 1,
-            Duration = duration,
-            EasingFunction = easingFunction,
-        };
-
-        scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
-        scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
-    }
-
-    private static bool IsReducedMotionEnabled()
-    {
-        return !SystemParameters.ClientAreaAnimation;
+        return _sliceVisuals.Select(static slice => slice.ToSelectionItem()).ToArray();
     }
 
     private Point SnapPoint(Point point)
