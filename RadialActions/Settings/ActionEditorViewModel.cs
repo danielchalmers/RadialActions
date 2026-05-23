@@ -20,6 +20,10 @@ public partial class ActionEditorViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(SelectedKeyActionId))]
     private PieAction _selectedAction;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasValidationIssues))]
+    private IReadOnlyList<ActionValidationIssue> _validationIssues = [];
+
     public ActionEditorViewModel(ActionDefaultsService actionDefaultsService, IEnumerable<PieAction> actions)
     {
         _actionDefaultsService = actionDefaultsService;
@@ -30,6 +34,7 @@ public partial class ActionEditorViewModel : ObservableObject
     public IReadOnlyList<KeyActionDefinition> KeyActionOptions { get; } =
         [.. PieAction.KeyActions, CustomKeyActionOption];
     public bool HasSelectedAction => SelectedAction != null;
+    public bool HasValidationIssues => ValidationIssues.Count > 0;
 
     public ActionType SelectedActionType
     {
@@ -165,6 +170,7 @@ public partial class ActionEditorViewModel : ObservableObject
 
         OnPropertyChanged(nameof(SelectedActionType));
         OnPropertyChanged(nameof(SelectedKeyActionId));
+        RefreshValidation();
     }
 
     private void SelectedActionPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -192,5 +198,12 @@ public partial class ActionEditorViewModel : ObservableObject
         {
             _actionDefaultsService.ApplyKeyDefaults(SelectedAction, definition);
         }
+
+        RefreshValidation();
+    }
+
+    private void RefreshValidation()
+    {
+        ValidationIssues = ActionValidator.Validate(SelectedAction);
     }
 }
