@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="RadialActions.GeneralSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:RadialActions"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=local:GeneralSettingsViewModel}"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/RadialActions;component/Settings/SettingsViewResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="0"
+              MinHeight="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportHeight}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="12" />
+            </Grid.RowDefinitions>
+
+            <GroupBox Grid.Row="0"
+                      Grid.Column="0"
+                      Header="Activation"
+                      Margin="0"
+                      Style="{StaticResource SettingsCardGroupBox}">
+                <StackPanel>
+                    <TextBlock Text="Hotkey:"
+                               Style="{StaticResource LabelTextBlock}" />
+                    <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Tag="ActivationHotkeyInput" />
+                    <TextBlock Text="Press the key combination directly (for example: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z)."
+                               Style="{StaticResource DescriptionTextBlock}" />
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Grid.Row="0"
+                      Grid.Column="2"
+                      Header="Appearance"
+                      Margin="0"
+                      Style="{StaticResource SettingsCardGroupBox}">
+                <StackPanel>
+                    <TextBlock Text="Menu Size (pixels):"
+                               Style="{StaticResource LabelTextBlock}" />
+                    <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text="Recommended: 300-500"
+                               Style="{StaticResource DescriptionTextBlock}" />
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Grid.Row="2"
+                      Grid.Column="0"
+                      Header="Behavior"
+                      Margin="0"
+                      Style="{StaticResource SettingsCardGroupBox}">
+                <StackPanel>
+                    <CheckBox Content="Keep menu open after clicking a slice"
+                              IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
+                    <TextBlock Text="The menu stays open until you click another app or press Escape."
+                               Style="{StaticResource DescriptionTextBlock}" />
+                    <CheckBox Margin="0,8,0,0"
+                              Content="Always open menu in screen center"
+                              IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}" />
+                    <TextBlock Text="Useful for keyboard navigation when the pointer may be far from your focus."
+                               Style="{StaticResource DescriptionTextBlock}" />
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Grid.Row="2"
+                      Grid.Column="2"
+                      Header="Startup"
+                      Margin="0"
+                      Style="{StaticResource SettingsCardGroupBox}">
+                <StackPanel>
+                    <CheckBox Content="Run on Windows startup"
+                              IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
+                    <TextBlock Text="Starts the app minimized to tray when you log in."
+                               Style="{StaticResource DescriptionTextBlock}" />
+                </StackPanel>
+            </GroupBox>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
