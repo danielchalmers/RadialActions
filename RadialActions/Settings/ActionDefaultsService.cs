@@ -1,4 +1,4 @@
-namespace RadialActions.Settings;
+namespace RadialActions;
 
 public sealed class ActionDefaultsService
 {

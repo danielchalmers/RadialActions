@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace RadialActions.Settings;
+namespace RadialActions;
 
 public sealed class ShellActionDefaultsProvider
 {

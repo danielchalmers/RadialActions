@@ -1,5 +1,3 @@
-using RadialActions.Settings;
-
 namespace RadialActions.Tests;
 
 public sealed class ShellActionDefaultsTests : IDisposable

@@ -1,5 +1,3 @@
-using RadialActions.Settings;
-
 namespace RadialActions.Tests;
 
 public sealed class ActionDefaultsServiceTests : IDisposable
@@ -9,8 +7,12 @@ public sealed class ActionDefaultsServiceTests : IDisposable
     [Fact]
     public void ApplyKeyDefaults_UpdatesIconOnlyForBlankDefaultOrPreviousAutoValue()
     {
-        var action = new PieAction("Volume") { Type = ActionType.Key, Parameter = "Mute" };
         var service = new ActionDefaultsService();
+        var blankAction = new PieAction("Blank") { Type = ActionType.Key, Parameter = "Mute", Icon = string.Empty };
+        var action = new PieAction("Volume") { Type = ActionType.Key, Parameter = "Mute" };
+
+        service.ApplyKeyDefaults(blankAction, FindKeyAction("Mute"));
+        Assert.Equal("🔇", blankAction.Icon);
 
         service.ApplyKeyDefaults(action, FindKeyAction("Mute"));
         Assert.Equal("🔇", action.Icon);
