@@ -10,20 +10,24 @@ public sealed class ActionDefaultsServiceTests : IDisposable
         var service = new ActionDefaultsService();
         var blankAction = new PieAction("Blank") { Type = ActionType.Key, Parameter = "Mute", Icon = string.Empty };
         var action = new PieAction("Volume") { Type = ActionType.Key, Parameter = "Mute" };
+        var autoAction = new PieAction("Auto") { Type = ActionType.Key, Parameter = "Mute" };
+        var mute = FindKeyAction("Mute");
+        var volumeUp = FindKeyAction("VolumeUp");
 
-        service.ApplyKeyDefaults(blankAction, FindKeyAction("Mute"));
-        Assert.Equal("🔇", blankAction.Icon);
+        service.ApplyKeyDefaults(blankAction, mute);
+        Assert.Equal(mute.Icon, blankAction.Icon);
 
-        service.ApplyKeyDefaults(action, FindKeyAction("Mute"));
-        Assert.Equal("🔇", action.Icon);
+        service.ApplyKeyDefaults(action, mute);
+        Assert.Equal(mute.Icon, action.Icon);
 
-        action.Icon = "🎵";
-        service.ApplyKeyDefaults(action, FindKeyAction("VolumeUp"));
-        Assert.Equal("🎵", action.Icon);
+        action.Icon = "\U0001F3B5";
+        service.ApplyKeyDefaults(action, volumeUp);
+        Assert.Equal("\U0001F3B5", action.Icon);
 
-        action.Icon = "🔇";
-        service.ApplyKeyDefaults(action, FindKeyAction("VolumeUp"));
-        Assert.Equal("🔊", action.Icon);
+        service.ApplyKeyDefaults(autoAction, mute);
+        autoAction.Icon = mute.Icon;
+        service.ApplyKeyDefaults(autoAction, volumeUp);
+        Assert.Equal(volumeUp.Icon, autoAction.Icon);
     }
 
     [Fact]
@@ -38,7 +42,7 @@ public sealed class ActionDefaultsServiceTests : IDisposable
         var secondPath = Path.Combine(secondRoot, "Second.exe");
 
         var service = new ActionDefaultsService();
-        var action = PieAction.CreateShellAction("Manual Name", firstPath, "🛠️", workingDirectory: _tempRoot);
+        var action = PieAction.CreateShellAction("Manual Name", firstPath, "\U0001F6E0\uFE0F", workingDirectory: _tempRoot);
 
         service.TrackExistingDefaults([action]);
 
@@ -46,7 +50,7 @@ public sealed class ActionDefaultsServiceTests : IDisposable
         service.ApplyShellDefaults(action, action.Parameter);
 
         Assert.Equal("Manual Name", action.Name);
-        Assert.Equal("🛠️", action.Icon);
+        Assert.Equal("\U0001F6E0\uFE0F", action.Icon);
         Assert.Equal(_tempRoot, action.WorkingDirectory);
     }
 
@@ -60,7 +64,7 @@ public sealed class ActionDefaultsServiceTests : IDisposable
 
         service.ApplyShellDefaults(action, action.Parameter);
 
-        Assert.Equal("📁", action.Icon);
+        Assert.Equal(ShellActionDefaults.FileIcon, action.Icon);
     }
 
     public void Dispose()

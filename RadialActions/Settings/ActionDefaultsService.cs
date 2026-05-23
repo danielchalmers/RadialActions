@@ -2,23 +2,12 @@ namespace RadialActions;
 
 public sealed class ActionDefaultsService
 {
-    public const string LegacyDefaultIcon = "⭐";
+    public const string LegacyDefaultIcon = "\u2B50";
 
-    private readonly ShellActionDefaultsProvider _shellDefaultsProvider;
     private readonly Dictionary<PieAction, KeyActionDefinition> _autoKeyDefaults = [];
     private readonly Dictionary<PieAction, ShellActionDefaults> _autoShellDefaults = [];
 
-    public ActionDefaultsService()
-        : this(new ShellActionDefaultsProvider())
-    {
-    }
-
-    public ActionDefaultsService(ShellActionDefaultsProvider shellDefaultsProvider)
-    {
-        _shellDefaultsProvider = shellDefaultsProvider;
-    }
-
-    public ShellActionDefaults? GetShellDefaults(string target) => _shellDefaultsProvider.GetDefaults(target);
+    public ShellActionDefaults? GetShellDefaults(string target) => ShellActionDefaults.FromTarget(target);
 
     public void Forget(PieAction action)
     {
