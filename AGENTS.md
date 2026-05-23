@@ -7,6 +7,8 @@ This file is the root harness for coding agents working on Radial Actions. Keep 
 - `RadialActions.sln` is the entry point.
 - `RadialActions/` contains the WPF desktop app targeting `net10.0-windows`.
 - `RadialActions.Tests/` contains xUnit v3 tests for deterministic behavior.
+- Production code is grouped by ownership: `Actions/`, `Hotkeys/`, `Interop/`, `Pie/`, `Services/`, `Settings/`, and `Properties/`.
+- Tests mirror the production ownership folders where practical.
 - `.github/actions/full-build/action.yml` defines the CI build: `dotnet build`, `dotnet test`, publish x64/arm64 binaries, zip them, and build MSI installers.
 - `Package.wxs` defines the MSI packaging shape.
 - `Settings.XamlStyler` is the XAML style configuration.
@@ -43,7 +45,10 @@ For documentation-only changes, explain why build or test commands were skipped.
 ## Architecture Boundaries
 
 - Keep app code in the `RadialActions` namespace unless there is a strong reason to introduce a narrower namespace.
-- `RadialActions/Data/` holds action, hotkey, conversion, and Windows interop helpers. Keep parsing and validation logic pure where possible so it can be tested without global hooks or shell execution.
+- `RadialActions/Actions/` holds action models, defaults, and execution helpers. User-configured actions must not run during tests, settings load, preview rendering, or validation.
+- `RadialActions/Hotkeys/` holds hotkey parsing, validation, registration, and service glue. Keep parsing and validation logic pure where possible so it can be tested without global hooks.
+- `RadialActions/Interop/` holds WPF conversion helpers and narrow Windows/WPF interop utilities.
+- `RadialActions/Settings/` holds settings views and view models. Reusable action or hotkey behavior belongs in its owning folder rather than in Settings.
 - `RadialActions/Services/` holds application services such as tray, hotkey, menu, and updates. Keep OS side effects isolated here or behind small helpers.
 - `RadialActions/Pie/` owns radial menu layout, rendering state, visual construction, and theme snapshots. Deterministic geometry belongs in `PieLayoutCalculator` or a similarly testable helper.
 - `RadialActions/Properties/Settings*.cs` owns persisted settings. When adding persisted fields, handle missing, null, or old values in normalization and cover serialization behavior in tests.
