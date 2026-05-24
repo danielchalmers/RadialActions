@@ -13,67 +13,53 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <TextBlock Grid.Row="0"
-                   Text="Enabled:"
+    <StackPanel>
+        <TextBlock Text="Enabled:"
                    Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <CheckBox Grid.Row="1"
-                  Content="Show this action"
-                  IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}"
-                  Margin="0,0,0,8" />
+        <CheckBox Content="Show this action in the menu"
+                  IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}" />
+        <TextBlock Text="Turn this off to keep the action configured without showing it as a menu slice."
+                   Style="{StaticResource DescriptionTextBlock}" />
 
-        <TextBlock Grid.Row="2"
-                   Text="Name:"
+        <TextBlock Text="Name:"
                    Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <TextBox Grid.Row="3"
-                 Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 Margin="0,0,0,8" />
+        <TextBox Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Text="This label appears next to the icon in the radial menu."
+                   Style="{StaticResource DescriptionTextBlock}" />
 
-        <TextBlock Grid.Row="4"
-                   Text="Icon:"
+        <TextBlock Text="Icon:"
                    Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <TextBox Grid.Row="5"
-                 Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 Margin="0,0,0,8" />
+        <TextBox Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Text="Use a short symbol or emoji that fits inside the slice."
+                   Style="{StaticResource DescriptionTextBlock}" />
 
-        <TextBlock Grid.Row="6"
-                   Text="Type:"
+        <TextBlock Text="Type:"
                    Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <ComboBox Grid.Row="7"
-                  Margin="0,0,0,8"
-                  ItemsSource="{Binding ActionTypes}"
-                  SelectedItem="{Binding SelectedActionType, Mode=TwoWay}" />
+        <ComboBox ItemsSource="{Binding ActionTypes}"
+                  SelectedValue="{Binding SelectedActionType, Mode=TwoWay}"
+                  SelectedValuePath="Type">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Icon}"
+                                   Width="20"
+                                   FontSize="14" />
+                        <TextBlock Text="{Binding Name}"
+                                   Margin="4,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <TextBlock Text="Choose Key for keyboard or media controls, or Shell to launch an app, file, folder, or URL."
+                   Style="{StaticResource DescriptionTextBlock}" />
 
-        <Grid Grid.Row="8"
-              Margin="0,0,0,8"
+        <StackPanel Margin="0,0,0,4"
               Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <TextBlock Grid.Row="0"
-                       Text="Key Action:"
+            <TextBlock Text="Key Action:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <ComboBox Grid.Row="1"
-                      SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
+            <ComboBox SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
                       SelectedValuePath="Id"
-                      Margin="0,0,0,8"
                       IsTextSearchEnabled="True"
                       ItemsSource="{Binding KeyActionOptions}">
                 <ComboBox.ItemTemplate>
@@ -89,32 +75,24 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+            <TextBlock Text="Pick a built-in media or volume command, or choose Custom Shortcut to enter one manually."
+                       Style="{StaticResource DescriptionTextBlock}" />
 
-            <TextBlock Grid.Row="2"
-                       Text="Shortcut:"
+            <TextBlock Text="Shortcut:"
                        Style="{StaticResource ActionEditorLabelTextBlock}"
                        Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
-            <TextBox Grid.Row="3"
-                     Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
-        </Grid>
+            <TextBlock Text="Enter a shortcut such as Ctrl+Shift+M when Custom Shortcut is selected."
+                       Style="{StaticResource DescriptionTextBlock}"
+                       Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
+        </StackPanel>
 
-        <Grid Grid.Row="9"
+        <StackPanel
               Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Shell}}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <TextBlock Grid.Row="0"
-                       Text="Target:"
+            <TextBlock Text="Target:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <Grid Grid.Row="1"
-                  Margin="0,0,0,8">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="6" />
@@ -127,18 +105,18 @@
                         Command="{Binding BrowseShellTargetCommand}"
                         Padding="8,2" />
             </Grid>
+            <TextBlock Text="Select the app, file, folder, URL, or command this action should open."
+                       Style="{StaticResource DescriptionTextBlock}" />
 
-            <TextBlock Grid.Row="2"
-                       Text="Arguments:"
+            <TextBlock Text="Arguments:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <TextBox Grid.Row="3"
-                     Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Margin="0,0,0,8" />
+            <TextBox Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="Optional command-line arguments passed to the target."
+                       Style="{StaticResource DescriptionTextBlock}" />
 
-            <TextBlock Grid.Row="4"
-                       Text="Working Directory:"
+            <TextBlock Text="Working Directory:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <Grid Grid.Row="5">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="6" />
@@ -151,6 +129,8 @@
                         Command="{Binding BrowseWorkingDirectoryCommand}"
                         Padding="8,2" />
             </Grid>
-        </Grid>
-    </Grid>
+            <TextBlock Text="Optional folder used as the starting location when the target runs."
+                       Style="{StaticResource DescriptionTextBlock}" />
+        </StackPanel>
+    </StackPanel>
 </UserControl>

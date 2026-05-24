@@ -48,18 +48,31 @@ public sealed class ActionsSettingsViewModelTests
     }
 
     [Fact]
-    public void AddAction_AppendsBlankActionAndSelectsIt()
+    public void AddAction_InsertsBlankActionAfterSelectedActionAndSelectsIt()
     {
-        var viewModel = CreateViewModel(PieAction.CreateKeyAction("Mute"));
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var third = PieAction.CreateKeyAction("VolumeDown");
+        var viewModel = CreateViewModel(first, second, third);
+        viewModel.SelectAction(second);
 
         viewModel.AddActionCommand.Execute(null);
 
-        var added = Assert.Single(viewModel.Actions.Skip(1));
+        var added = viewModel.Actions[2];
+        Assert.Equal([first, second, added, third], viewModel.Actions);
         Assert.Equal("Blank action", added.Name);
         Assert.Equal(ActionType.None, added.Type);
         Assert.Same(added, viewModel.SelectedAction);
-        Assert.Equal(1, viewModel.SelectedActionIndex);
+        Assert.Equal(2, viewModel.SelectedActionIndex);
         Assert.Same(added, viewModel.Editor.SelectedAction);
+    }
+
+    [Fact]
+    public void ActionEditorViewModel_ActionTypes_HidesNoneType()
+    {
+        var viewModel = new ActionEditorViewModel(new ActionDefaultsService(), []);
+
+        Assert.Equal([ActionType.Key, ActionType.Shell], viewModel.ActionTypes.Select(option => option.Type));
     }
 
     [Fact]

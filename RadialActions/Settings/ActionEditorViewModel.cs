@@ -26,7 +26,12 @@ public partial class ActionEditorViewModel : ObservableObject
         _actionDefaultsService.TrackExistingDefaults(actions);
     }
 
-    public ActionType[] ActionTypes { get; } = [ActionType.None, ActionType.Key, ActionType.Shell];
+    public IReadOnlyList<ActionTypeOption> ActionTypes { get; } =
+    [
+        new(ActionType.Key, "Key", "⌨️"),
+        new(ActionType.Shell, "Shell", "🚀"),
+    ];
+
     public IReadOnlyList<KeyActionDefinition> KeyActionOptions { get; } =
         [.. PieAction.KeyActions, CustomKeyActionOption];
     public bool HasSelectedAction => SelectedAction != null;
@@ -193,4 +198,18 @@ public partial class ActionEditorViewModel : ObservableObject
             _actionDefaultsService.ApplyKeyDefaults(SelectedAction, definition);
         }
     }
+}
+
+public sealed class ActionTypeOption
+{
+    public ActionTypeOption(ActionType type, string name, string icon)
+    {
+        Type = type;
+        Name = name;
+        Icon = icon;
+    }
+
+    public ActionType Type { get; }
+    public string Name { get; }
+    public string Icon { get; }
 }

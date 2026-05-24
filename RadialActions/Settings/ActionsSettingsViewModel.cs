@@ -46,8 +46,12 @@ public partial class ActionsSettingsViewModel : ObservableObject
     private void AddAction()
     {
         var newAction = new PieAction("Blank action") { Type = ActionType.None };
-        Actions.Add(newAction);
-        SelectedActionIndex = Actions.Count - 1;
+
+        var selectedIndex = SelectedAction == null ? -1 : Actions.IndexOf(SelectedAction);
+        var insertionIndex = selectedIndex >= 0 ? selectedIndex + 1 : Actions.Count;
+
+        Actions.Insert(insertionIndex, newAction);
+        SelectedActionIndex = insertionIndex;
         SelectedAction = newAction;
         Log.Debug("Added new action");
     }
