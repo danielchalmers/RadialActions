@@ -31,12 +31,13 @@
                   Style="{StaticResource SettingsCardGroupBox}">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" MinHeight="150" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <ListBox Grid.Row="0"
-                         MinHeight="150"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          ItemsSource="{Binding Actions}"
                          SelectedIndex="{Binding SelectedActionIndex}"
                          SelectedItem="{Binding SelectedAction}">
@@ -110,7 +111,10 @@
                   VerticalContentAlignment="Stretch"
                   Style="{StaticResource SettingsCardGroupBox}"
                   IsEnabled="{Binding Editor.HasSelectedAction}">
-            <local:ActionEditorView DataContext="{Binding Editor}" />
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <local:ActionEditorView DataContext="{Binding Editor}" />
+            </ScrollViewer>
         </GroupBox>
     </Grid>
 </UserControl>
