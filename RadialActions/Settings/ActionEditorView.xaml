@@ -18,19 +18,19 @@
                    Style="{StaticResource ActionEditorLabelTextBlock}" />
         <CheckBox Content="Show this action in the menu"
                   IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}" />
-        <TextBlock Text="Turn this off to keep the action configured without showing it as a menu slice."
+        <TextBlock Text="Hide this action without removing its configuration."
                    Style="{StaticResource DescriptionTextBlock}" />
 
         <TextBlock Text="Name:"
                    Style="{StaticResource ActionEditorLabelTextBlock}" />
         <TextBox Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Text="This label appears next to the icon in the radial menu."
+        <TextBlock Text="Shown next to the icon in the radial menu."
                    Style="{StaticResource DescriptionTextBlock}" />
 
         <TextBlock Text="Icon:"
                    Style="{StaticResource ActionEditorLabelTextBlock}" />
         <TextBox Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Text="Use a short symbol or emoji that fits inside the slice."
+        <TextBlock Text="Use a short symbol or emoji that fits in a slice."
                    Style="{StaticResource DescriptionTextBlock}" />
 
         <TextBlock Text="Type:"
@@ -51,7 +51,7 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock Text="Choose Key for keyboard or media controls, or Shell to launch an app, file, folder, or URL."
+        <TextBlock Text="Use Key for shortcuts and media controls; Shell for apps, files, folders, URLs, or commands."
                    Style="{StaticResource DescriptionTextBlock}" />
 
         <StackPanel Margin="0,0,0,4"
@@ -75,7 +75,7 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <TextBlock Text="Pick a built-in media or volume command, or choose Custom Shortcut to enter one manually."
+            <TextBlock Text="Choose a built-in command or Custom Shortcut."
                        Style="{StaticResource DescriptionTextBlock}" />
 
             <TextBlock Text="Shortcut:"
@@ -83,7 +83,7 @@
                        Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
             <TextBox Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
-            <TextBlock Text="Enter a shortcut such as Ctrl+Shift+M when Custom Shortcut is selected."
+            <TextBlock Text="Enter a shortcut, such as Ctrl+Shift+M."
                        Style="{StaticResource DescriptionTextBlock}"
                        Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
         </StackPanel>
@@ -105,13 +105,13 @@
                         Command="{Binding BrowseShellTargetCommand}"
                         Padding="8,2" />
             </Grid>
-            <TextBlock Text="Select the app, file, folder, URL, or command this action should open."
+            <TextBlock Text="Choose the app, file, folder, URL, or command to open."
                        Style="{StaticResource DescriptionTextBlock}" />
 
             <TextBlock Text="Arguments:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
             <TextBox Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="Optional command-line arguments passed to the target."
+            <TextBlock Text="Optional command-line arguments for the target."
                        Style="{StaticResource DescriptionTextBlock}" />
 
             <TextBlock Text="Working Directory:"
@@ -129,7 +129,7 @@
                         Command="{Binding BrowseWorkingDirectoryCommand}"
                         Padding="8,2" />
             </Grid>
-            <TextBlock Text="Optional folder used as the starting location when the target runs."
+            <TextBlock Text="Optional folder to use as the target's start location."
                        Style="{StaticResource DescriptionTextBlock}" />
         </StackPanel>
     </StackPanel>
