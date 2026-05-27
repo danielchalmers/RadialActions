@@ -35,7 +35,7 @@
                 <StackPanel>
                     <CheckBox Content="Check for updates"
                               IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
-                    <TextBlock Text="Checks the latest stable GitHub release on startup."
+                    <TextBlock Text="Checks GitHub for stable releases on startup."
                                Style="{StaticResource DescriptionTextBlock}" />
                 </StackPanel>
             </GroupBox>

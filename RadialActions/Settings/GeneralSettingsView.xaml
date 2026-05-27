@@ -39,7 +39,7 @@
                                Style="{StaticResource LabelTextBlock}" />
                     <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              Tag="ActivationHotkeyInput" />
-                    <TextBlock Text="Press the key combination directly (for example: Ctrl+Alt+Space, Ctrl+Shift+R, Win+Z)."
+                    <TextBlock Text="Press a key combination, such as Ctrl+Alt+Space."
                                Style="{StaticResource DescriptionTextBlock}" />
                 </StackPanel>
             </GroupBox>
@@ -53,7 +53,7 @@
                     <TextBlock Text="Menu Size (pixels):"
                                Style="{StaticResource LabelTextBlock}" />
                     <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Text="Recommended: 300-500"
+                    <TextBlock Text="Recommended range: 300-500 pixels."
                                Style="{StaticResource DescriptionTextBlock}" />
                 </StackPanel>
             </GroupBox>
@@ -66,12 +66,12 @@
                 <StackPanel>
                     <CheckBox Content="Keep menu open after clicking a slice"
                               IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
-                    <TextBlock Text="The menu stays open until you click another app or press Escape."
+                    <TextBlock Text="Keeps the menu open until Escape or focus changes."
                                Style="{StaticResource DescriptionTextBlock}" />
                     <CheckBox Margin="0,8,0,0"
                               Content="Always open menu in screen center"
                               IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}" />
-                    <TextBlock Text="Useful for keyboard navigation when the pointer may be far from your focus."
+                    <TextBlock Text="Opens at screen center instead of the pointer."
                                Style="{StaticResource DescriptionTextBlock}" />
                 </StackPanel>
             </GroupBox>
@@ -84,7 +84,7 @@
                 <StackPanel>
                     <CheckBox Content="Run on Windows startup"
                               IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
-                    <TextBlock Text="Starts the app minimized to tray when you log in."
+                    <TextBlock Text="Starts Radial Actions minimized to the tray after sign-in."
                                Style="{StaticResource DescriptionTextBlock}" />
                 </StackPanel>
             </GroupBox>

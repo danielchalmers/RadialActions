@@ -52,7 +52,9 @@
            BasedOn="{StaticResource {x:Type TextBlock}}">
         <Setter Property="FontStyle" Value="Normal" />
         <Setter Property="FontSize" Value="12" />
-        <Setter Property="Margin" Value="0,4,0,12" />
+        <Setter Property="LineHeight" Value="16" />
+        <Setter Property="Margin" Value="0,2,0,10" />
+        <Setter Property="Opacity" Value="0.72" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
