@@ -14,9 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Set release version
+        id: release
+        shell: bash
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
       - uses: ./.github/actions/full-build
         with:
-          version: ${{ github.ref_name }}
+          version: ${{ steps.release.outputs.version }}
 
       # The release is created alongside the tag in GitHub; this workflow only replaces its artifacts.
       - name: Attach release artifacts
