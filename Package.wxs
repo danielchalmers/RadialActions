@@ -40,7 +40,6 @@
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="MainExecutable" Guid="*">
         <File Id="RadialActionsExe" Source="publish/$(var.Arch)/RadialActions.exe" KeyPath="yes" />
-        <RemoveFile Id="RemoveOldFiles" Name="*.*" On="both" />
         <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
       </Component>
       <Component Id="StartMenuShortcut" Guid="*">
