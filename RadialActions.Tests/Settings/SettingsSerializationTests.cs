@@ -109,4 +109,119 @@ public class SettingsSerializationTests
         Assert.Single(settings.Actions);
         Assert.True(settings.Actions[0].IsEnabled);
     }
+
+    [Fact]
+    public void Load_MalformedPrimary_PreservesCorruptPrimaryBeforeDefaultsCanSave()
+    {
+        var directory = CreateTempDirectory();
+        var settingsPath = Path.Combine(directory, "RadialActions.settings");
+        File.WriteAllText(settingsPath, "{");
+
+        var settings = Settings.LoadAndInitializePersistenceState(settingsPath, out var canBeSaved);
+
+        Assert.True(canBeSaved);
+        Assert.Equal(Settings.DefaultActivationHotkey, settings.ActivationHotkey);
+        Assert.Equal(Settings.DefaultSize, settings.Size);
+        Assert.Equal("{", File.ReadAllText(settingsPath));
+
+        var corruptPath = Assert.Single(Directory.GetFiles(directory, "RadialActions.settings.corrupt-*"));
+        Assert.Equal("{", File.ReadAllText(corruptPath));
+    }
+
+    [Fact]
+    public void Load_EmptyExistingFile_IsTreatedAsCorruptionNotFreshInstall()
+    {
+        var directory = CreateTempDirectory();
+        var settingsPath = Path.Combine(directory, "RadialActions.settings");
+        File.WriteAllText(settingsPath, string.Empty);
+
+        var settings = Settings.LoadFromFileWithRecovery(settingsPath);
+
+        Assert.Equal(Settings.DefaultActivationHotkey, settings.ActivationHotkey);
+        Assert.Equal(Settings.DefaultSize, settings.Size);
+        Assert.True(File.Exists(settingsPath));
+        Assert.Single(Directory.GetFiles(directory, "RadialActions.settings.corrupt-*"));
+    }
+
+    [Fact]
+    public void StartupWritableProbe_DoesNotRewriteSettingsFile()
+    {
+        var directory = CreateTempDirectory();
+        var settingsPath = Path.Combine(directory, "RadialActions.settings");
+        const string json = """
+        {
+          "ActivationHotkey": "Ctrl+Alt+P",
+          "Size": 480
+        }
+        """;
+        File.WriteAllText(settingsPath, json);
+        var lastWriteTime = new DateTime(2025, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+        File.SetLastWriteTimeUtc(settingsPath, lastWriteTime);
+
+        var settings = Settings.LoadAndInitializePersistenceState(settingsPath, out var canBeSaved);
+
+        Assert.True(canBeSaved);
+        Assert.Equal("Ctrl+Alt+P", settings.ActivationHotkey);
+        Assert.Equal(json, File.ReadAllText(settingsPath));
+        Assert.Equal(lastWriteTime, File.GetLastWriteTimeUtc(settingsPath));
+    }
+
+    [Fact]
+    public void Load_LockedUnreadablePrimary_DisablesSavingRecoveredDefaults()
+    {
+        var directory = CreateTempDirectory();
+        var settingsPath = Path.Combine(directory, "RadialActions.settings");
+        File.WriteAllText(settingsPath, "{");
+
+        using var lockedSettingsFile = new FileStream(settingsPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+
+        var settings = Settings.LoadAndInitializePersistenceState(settingsPath, out var canBeSaved);
+
+        Assert.False(canBeSaved);
+        Assert.Equal(Settings.DefaultActivationHotkey, settings.ActivationHotkey);
+        Assert.Empty(Directory.GetFiles(directory, "RadialActions.settings.corrupt-*"));
+    }
+
+    [Fact]
+    public void Save_WritesAtomicallyAndLeavesNoTemporaryFileAfterSuccess()
+    {
+        var directory = CreateTempDirectory();
+        var settingsPath = Path.Combine(directory, "RadialActions.settings");
+        var settings = Settings.DeserializeFromJson("{}");
+        settings.ActivationHotkey = "Ctrl+Shift+S";
+        settings.Size = 640;
+
+        var saved = settings.SaveToFile(settingsPath);
+
+        Assert.True(saved);
+        Assert.Contains("Ctrl+Shift+S", File.ReadAllText(settingsPath));
+        Assert.Empty(Directory.GetFiles(directory, "*.tmp"));
+    }
+
+    [Fact]
+    public void Deserialize_PropertyLevelErrors_NormalizeWithoutDroppingUnrelatedValidSettings()
+    {
+        const string json = """
+        {
+          "ActivationHotkey": "Ctrl+Alt+L",
+          "Size": 420,
+          "Actions": "not a collection",
+          "OpenMenuInScreenCenter": true
+        }
+        """;
+
+        var settings = Settings.DeserializeFromJson(json);
+
+        Assert.Equal("Ctrl+Alt+L", settings.ActivationHotkey);
+        Assert.Equal(420, settings.Size);
+        Assert.True(settings.OpenMenuInScreenCenter);
+        Assert.Equal(Settings.CreateDefaultActions().Count, settings.Actions.Count);
+    }
+
+    private static string CreateTempDirectory()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "RadialActions.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(path);
+        return path;
+    }
 }
