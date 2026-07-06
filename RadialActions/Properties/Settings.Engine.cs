@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace RadialActions.Properties;
 
@@ -146,6 +147,10 @@ public sealed partial class Settings : ObservableObject
         var settings = new Settings();
         if (!string.IsNullOrWhiteSpace(json))
         {
+            // Reject malformed documents up front so corrupt files trigger recovery;
+            // the serializer's error handler would otherwise swallow syntax errors and quietly load defaults.
+            JToken.Parse(json);
+
             JsonConvert.PopulateObject(json, settings, _jsonSerializerSettings);
         }
 
