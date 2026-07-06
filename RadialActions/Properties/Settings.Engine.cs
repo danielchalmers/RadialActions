@@ -1,12 +1,13 @@
 ﻿using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace RadialActions.Properties;
 
 public sealed partial class Settings : ObservableObject
 {
-    private static readonly Lazy<Settings> _default = new(LoadAndAttemptSave);
+    private static readonly Lazy<Settings> _default = new(LoadAndProbeWritability);
 
     private static readonly JsonSerializerSettings _jsonSerializerSettings = new()
     {
@@ -60,9 +61,14 @@ public sealed partial class Settings : ObservableObject
     /// <summary>
     /// Saves to the default path in JSON format.
     /// </summary>
-    public bool Save()
+    public bool Save() => SaveToFile(FilePath);
+
+    /// <summary>
+    /// Saves to the given path in JSON format, keeping the previous version as a backup.
+    /// </summary>
+    internal bool SaveToFile(string filePath)
     {
-        Log.Information($"Saving to {FilePath}");
+        Log.Information($"Saving to {filePath}");
 
         try
         {
@@ -73,7 +79,7 @@ public sealed partial class Settings : ObservableObject
             {
                 try
                 {
-                    File.WriteAllText(FilePath, json);
+                    WriteAllTextAtomically(filePath, json);
                     return true;
                 }
                 catch
@@ -92,6 +98,45 @@ public sealed partial class Settings : ObservableObject
         return false;
     }
 
+    /// <summary>
+    /// Writes through a temporary file and replaces the destination atomically so a crash mid-write can't truncate it.
+    /// The previous version is kept next to the file as a last-known-good backup.
+    /// </summary>
+    private static void WriteAllTextAtomically(string filePath, string contents)
+    {
+        var tempFilePath = filePath + ".tmp";
+
+        try
+        {
+            File.WriteAllText(tempFilePath, contents);
+
+            if (File.Exists(filePath))
+            {
+                File.Replace(tempFilePath, filePath, BackupPath(filePath));
+            }
+            else
+            {
+                File.Move(tempFilePath, filePath);
+            }
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(tempFilePath);
+            }
+            catch
+            {
+                // A leftover temp file is harmless; it gets overwritten by the next save.
+            }
+        }
+    }
+
+    /// <summary>
+    /// The path of the last-known-good backup kept alongside a settings file.
+    /// </summary>
+    private static string BackupPath(string filePath) => filePath + ".bak";
+
     public string SerializeToJson()
     {
         return JsonConvert.SerializeObject(this, _jsonSerializerSettings);
@@ -102,6 +147,10 @@ public sealed partial class Settings : ObservableObject
         var settings = new Settings();
         if (!string.IsNullOrWhiteSpace(json))
         {
+            // Reject malformed documents up front so corrupt files trigger recovery;
+            // the serializer's error handler would otherwise swallow syntax errors and quietly load defaults.
+            JToken.Parse(json);
+
             JsonConvert.PopulateObject(json, settings, _jsonSerializerSettings);
         }
 
@@ -110,46 +159,135 @@ public sealed partial class Settings : ObservableObject
     }
 
     /// <summary>
-    /// Reads settings from the default path.
+    /// Reads settings from the given path.
     /// </summary>
-    private static string ReadJsonFromFile()
+    private static string ReadJsonFromFile(string filePath)
     {
-        using var fileStream = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         using var streamReader = new StreamReader(fileStream);
         return streamReader.ReadToEnd();
     }
 
     /// <summary>
-    /// Loads from the default path in JSON format.
+    /// Loads a single settings file, treating an existing but empty file as corrupt.
     /// </summary>
-    private static Settings LoadFromFile()
+    private static Settings LoadSettingsFile(string filePath)
     {
+        var json = ReadJsonFromFile(filePath);
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            throw new InvalidDataException($"Settings file is empty: {filePath}");
+        }
+
+        return DeserializeFromJson(json);
+    }
+
+    /// <summary>
+    /// Loads from the given path in JSON format, recovering from an unreadable file instead of silently resetting.
+    /// </summary>
+    /// <param name="canBeSaved">
+    /// <c>false</c> when the file is unreadable and couldn't be copied aside, so saving would destroy it.
+    /// </param>
+    internal static Settings LoadFromFile(string filePath, out bool canBeSaved)
+    {
+        canBeSaved = true;
+
+        if (!File.Exists(filePath))
+        {
+            Log.Information("No settings file; Creating new settings");
+            return CreateDefault();
+        }
+
         try
         {
-            var json = ReadJsonFromFile();
-            return DeserializeFromJson(json);
+            return LoadSettingsFile(filePath);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, $"Failed to load {FilePath}");
-            Log.Information("Creating new settings");
-            var settings = new Settings();
-            settings.NormalizeAfterLoad();
-            return settings;
+            Log.Error(ex, $"Failed to load {filePath}");
+        }
+
+        // Keep the unreadable file for manual recovery; never save over it if that fails.
+        canBeSaved = TryPreserveCorruptFile(filePath);
+
+        var backupPath = BackupPath(filePath);
+        if (File.Exists(backupPath))
+        {
+            try
+            {
+                var settings = LoadSettingsFile(backupPath);
+                Log.Warning($"Restored settings from backup {backupPath}");
+                return settings;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Failed to load backup {backupPath}");
+            }
+        }
+
+        Log.Information("Creating new settings");
+        return CreateDefault();
+    }
+
+    private static Settings CreateDefault()
+    {
+        var settings = new Settings();
+        settings.NormalizeAfterLoad();
+        return settings;
+    }
+
+    /// <summary>
+    /// Copies an unreadable settings file to a timestamped path so it can be recovered manually.
+    /// </summary>
+    private static bool TryPreserveCorruptFile(string filePath)
+    {
+        var corruptPath = $"{filePath}.corrupt-{DateTime.UtcNow:yyyyMMddHHmmss}";
+
+        try
+        {
+            File.Copy(filePath, corruptPath, overwrite: true);
+            Log.Warning($"Preserved unreadable settings file at {corruptPath}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to preserve unreadable settings file {filePath}");
+            return false;
         }
     }
 
     /// <summary>
-    /// Loads from the default path in JSON format then attempts to save in order to check if it can be done.
+    /// Loads from the default path in JSON format then probes whether the file could be saved later.
     /// </summary>
-    private static Settings LoadAndAttemptSave()
+    private static Settings LoadAndProbeWritability()
     {
-        var settings = LoadFromFile();
+        var settings = LoadFromFile(FilePath, out var canBeSaved);
 
-        CanBeSaved = settings.Save();
+        CanBeSaved = canBeSaved && ProbeCanWrite(FilePath);
         Log.Debug($"Settings can be saved: {CanBeSaved}");
 
         return settings;
+    }
+
+    /// <summary>
+    /// Checks that the settings folder is writable without touching the settings file itself.
+    /// </summary>
+    private static bool ProbeCanWrite(string filePath)
+    {
+        var probePath = filePath + ".probe.tmp";
+
+        try
+        {
+            File.WriteAllText(probePath, string.Empty);
+            File.Delete(probePath);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Settings folder is not writable");
+            return false;
+        }
     }
 
 }
