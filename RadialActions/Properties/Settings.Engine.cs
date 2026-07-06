@@ -60,9 +60,14 @@ public sealed partial class Settings : ObservableObject
     /// <summary>
     /// Saves to the default path in JSON format.
     /// </summary>
-    public bool Save()
+    public bool Save() => SaveToFile(FilePath);
+
+    /// <summary>
+    /// Saves to the given path in JSON format, keeping the previous version as a backup.
+    /// </summary>
+    internal bool SaveToFile(string filePath)
     {
-        Log.Information($"Saving to {FilePath}");
+        Log.Information($"Saving to {filePath}");
 
         try
         {
@@ -73,7 +78,7 @@ public sealed partial class Settings : ObservableObject
             {
                 try
                 {
-                    File.WriteAllText(FilePath, json);
+                    WriteAllTextAtomically(filePath, json);
                     return true;
                 }
                 catch
@@ -91,6 +96,45 @@ public sealed partial class Settings : ObservableObject
 
         return false;
     }
+
+    /// <summary>
+    /// Writes through a temporary file and replaces the destination atomically so a crash mid-write can't truncate it.
+    /// The previous version is kept next to the file as a last-known-good backup.
+    /// </summary>
+    private static void WriteAllTextAtomically(string filePath, string contents)
+    {
+        var tempFilePath = filePath + ".tmp";
+
+        try
+        {
+            File.WriteAllText(tempFilePath, contents);
+
+            if (File.Exists(filePath))
+            {
+                File.Replace(tempFilePath, filePath, BackupPath(filePath));
+            }
+            else
+            {
+                File.Move(tempFilePath, filePath);
+            }
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(tempFilePath);
+            }
+            catch
+            {
+                // A leftover temp file is harmless; it gets overwritten by the next save.
+            }
+        }
+    }
+
+    /// <summary>
+    /// The path of the last-known-good backup kept alongside a settings file.
+    /// </summary>
+    private static string BackupPath(string filePath) => filePath + ".bak";
 
     public string SerializeToJson()
     {
