@@ -6,7 +6,7 @@ namespace RadialActions.Properties;
 
 public sealed partial class Settings : ObservableObject
 {
-    private static readonly Lazy<Settings> _default = new(LoadAndAttemptSave);
+    private static readonly Lazy<Settings> _default = new(LoadAndProbeWritability);
 
     private static readonly JsonSerializerSettings _jsonSerializerSettings = new()
     {
@@ -253,16 +253,36 @@ public sealed partial class Settings : ObservableObject
     }
 
     /// <summary>
-    /// Loads from the default path in JSON format then attempts to save in order to check if it can be done.
+    /// Loads from the default path in JSON format then probes whether the file could be saved later.
     /// </summary>
-    private static Settings LoadAndAttemptSave()
+    private static Settings LoadAndProbeWritability()
     {
         var settings = LoadFromFile(FilePath, out var canBeSaved);
 
-        CanBeSaved = canBeSaved && settings.Save();
+        CanBeSaved = canBeSaved && ProbeCanWrite(FilePath);
         Log.Debug($"Settings can be saved: {CanBeSaved}");
 
         return settings;
+    }
+
+    /// <summary>
+    /// Checks that the settings folder is writable without touching the settings file itself.
+    /// </summary>
+    private static bool ProbeCanWrite(string filePath)
+    {
+        var probePath = filePath + ".probe.tmp";
+
+        try
+        {
+            File.WriteAllText(probePath, string.Empty);
+            File.Delete(probePath);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Settings folder is not writable");
+            return false;
+        }
     }
 
 }
