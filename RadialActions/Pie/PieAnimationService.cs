@@ -76,9 +76,40 @@ internal sealed class PieAnimationService
         element.BeginAnimation(UIElement.OpacityProperty, opacityAnimation, HandoffBehavior.SnapshotAndReplace);
     }
 
+    public void AnimateRotationAngle(
+        RotateTransform transform,
+        double toAngle,
+        Duration duration,
+        IEasingFunction easingFunction,
+        Action onCompleted = null)
+    {
+        if (IsReducedMotionEnabled())
+        {
+            transform.BeginAnimation(RotateTransform.AngleProperty, null);
+            transform.Angle = toAngle;
+            onCompleted?.Invoke();
+            return;
+        }
+
+        var rotationAnimation = new DoubleAnimation
+        {
+            To = toAngle,
+            Duration = duration,
+            EasingFunction = easingFunction,
+        };
+
+        if (onCompleted != null)
+        {
+            rotationAnimation.Completed += (_, _) => onCompleted();
+        }
+
+        transform.BeginAnimation(RotateTransform.AngleProperty, rotationAnimation, HandoffBehavior.SnapshotAndReplace);
+    }
+
     public void AnimateClickDown(UIElement target, Duration duration, IEasingFunction easingFunction)
     {
-        if (target.RenderTransform is not ScaleTransform scaleTransform)
+        var scaleTransform = FindScaleTransform(target);
+        if (scaleTransform == null)
         {
             scaleTransform = new ScaleTransform(1, 1);
             target.RenderTransform = scaleTransform;
@@ -108,7 +139,8 @@ internal sealed class PieAnimationService
 
     public void AnimateClickUp(UIElement target, Duration duration, IEasingFunction easingFunction)
     {
-        if (target.RenderTransform is not ScaleTransform scaleTransform)
+        var scaleTransform = FindScaleTransform(target);
+        if (scaleTransform == null)
         {
             return;
         }
@@ -136,5 +168,15 @@ internal sealed class PieAnimationService
     public static bool IsReducedMotionEnabled()
     {
         return !SystemParameters.ClientAreaAnimation;
+    }
+
+    private static ScaleTransform FindScaleTransform(UIElement target)
+    {
+        return target.RenderTransform switch
+        {
+            ScaleTransform scaleTransform => scaleTransform,
+            TransformGroup transformGroup => transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault(),
+            _ => null,
+        };
     }
 }

@@ -20,7 +20,11 @@ public partial class PieControl : UserControl
     private const double DefaultCenterHoleRatio = 0.25;
     private const int SliceZIndex = 10;
     private const int HoveredSliceZIndex = 14;
+    private const int SliceContentZIndex = 15;
+    private const int DraggedSliceZIndex = 16;
+    private const int DraggedSliceContentZIndex = 17;
     private const double MouseMoveThreshold = 0.25;
+    private static readonly Duration ReorderDuration = new(TimeSpan.FromMilliseconds(150));
 
     private enum InteractionMode
     {
@@ -38,6 +42,20 @@ public partial class PieControl : UserControl
     private InteractionMode _interactionMode = InteractionMode.Mouse;
     private Point _keyboardModeMousePosition;
     private bool _hasKeyboardModeMousePosition;
+    private Point _layoutCenter;
+    private double _layoutAngleStep;
+    private PieSliceVisual _dragCandidate;
+    private Point _dragPressPosition;
+    private DragReorderState _drag;
+    private bool _isReleasingDragCapture;
+
+    private sealed class DragReorderState
+    {
+        public required PieSliceVisual Slice { get; init; }
+        public required double LastPointerAngle { get; set; }
+        public required double RotationOffset { get; set; }
+        public required int TargetSlot { get; set; }
+    }
 
     public PieControl()
     {
@@ -245,13 +263,14 @@ public partial class PieControl : UserControl
 
     private void CreatePieMenu()
     {
-        const int contentZIndex = 15;
         const int centerZIndex = 20;
 
         PieCanvas.Children.Clear();
         _sliceVisuals.Clear();
         _centerVisual = null;
         _renderRefreshPending = false;
+        _drag = null;
+        _dragCandidate = null;
 
         var enabledSlices = Slices?
             .Where(slice => slice?.IsEnabled == true)
@@ -313,6 +332,8 @@ public partial class PieControl : UserControl
             theme.AmbientShadowEffect);
 
         var angleStep = layout.AngleStep;
+        _layoutCenter = center;
+        _layoutAngleStep = angleStep;
 
         if (innerRadius > 0)
         {
@@ -436,6 +457,16 @@ public partial class PieControl : UserControl
             slice.Cursor = Cursors.Hand;
             slice.SnapsToDevicePixels = true;
 
+            // Press scale and reorder rotation live in one group so both effects can apply at once.
+            var pathBounds = slice.Data.Bounds;
+            var pressScale = new ScaleTransform(1, 1)
+            {
+                CenterX = pathBounds.X + (pathBounds.Width / 2),
+                CenterY = pathBounds.Y + (pathBounds.Height / 2),
+            };
+            var reorderRotation = new RotateTransform(0, center.X, center.Y);
+            slice.RenderTransform = new TransformGroup { Children = { pressScale, reorderRotation } };
+
             var contextMenu = CreateSliceContextMenu(sliceAction);
             slice.ContextMenu = contextMenu;
 
@@ -448,6 +479,8 @@ public partial class PieControl : UserControl
                 FillBrush = fillBrush,
                 StrokeBrush = strokeBrush,
                 ContextMenu = contextMenu,
+                PathRotation = reorderRotation,
+                CurrentSlot = i,
             };
             _sliceVisuals.Add(sliceVisual);
 
@@ -460,11 +493,23 @@ public partial class PieControl : UserControl
                 _animationService.AnimateBrushColor(fillBrush, theme.PressedColor, pressDuration, _renderState.StandardEasing);
                 _animationService.AnimateBrushColor(strokeBrush, _renderState.BorderHoverColor, pressDuration, _renderState.StandardEasing);
                 _animationService.AnimateClickDown(slice, pressDuration, _renderState.StandardEasing);
+                BeginDragTracking(sliceVisual, e.GetPosition(PieCanvas));
                 e.Handled = true;
             };
 
+            slice.MouseMove += (_, e) => HandleSliceMouseMove(sliceVisual, e);
+
+            slice.LostMouseCapture += (_, _) => OnSliceLostMouseCapture(sliceVisual);
+
             slice.MouseLeftButtonUp += (_, e) =>
             {
+                if (EndDragTracking(sliceVisual))
+                {
+                    isMouseDown = false;
+                    e.Handled = true;
+                    return;
+                }
+
                 if (!isMouseDown)
                 {
                     return;
@@ -494,7 +539,7 @@ public partial class PieControl : UserControl
 
             slice.MouseEnter += (_, _) =>
             {
-                if (_interactionMode != InteractionMode.Mouse)
+                if (_interactionMode != InteractionMode.Mouse || _drag != null)
                 {
                     return;
                 }
@@ -504,7 +549,12 @@ public partial class PieControl : UserControl
 
             slice.MouseLeave += (_, _) =>
             {
-                if (_interactionMode == InteractionMode.Mouse)
+                if (_drag?.Slice == sliceVisual)
+                {
+                    return;
+                }
+
+                if (_interactionMode == InteractionMode.Mouse && _drag == null)
                 {
                     ApplySliceNormalVisual(sliceVisual, animate: true);
                 }
@@ -541,10 +591,28 @@ public partial class PieControl : UserControl
             contentPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             var contentSize = contentPanel.DesiredSize;
 
-            Canvas.SetLeft(contentPanel, SnapToDevicePixel(textPosition.X - (contentSize.Width / 2), isXAxis: true));
-            Canvas.SetTop(contentPanel, SnapToDevicePixel(textPosition.Y - (contentSize.Height / 2), isXAxis: false));
+            var contentLeft = SnapToDevicePixel(textPosition.X - (contentSize.Width / 2), isXAxis: true);
+            var contentTop = SnapToDevicePixel(textPosition.Y - (contentSize.Height / 2), isXAxis: false);
+            Canvas.SetLeft(contentPanel, contentLeft);
+            Canvas.SetTop(contentPanel, contentTop);
 
-            Panel.SetZIndex(contentPanel, contentZIndex);
+            // Counter-rotate about the content's own center first, then orbit around the pie
+            // center, so the content follows its slice during reordering but stays upright.
+            var contentMargin = contentPanel.Margin;
+            var contentCounter = new RotateTransform(
+                0,
+                (contentSize.Width - contentMargin.Left - contentMargin.Right) / 2,
+                (contentSize.Height - contentMargin.Top - contentMargin.Bottom) / 2);
+            var contentOrbit = new RotateTransform(
+                0,
+                center.X - contentLeft - contentMargin.Left,
+                center.Y - contentTop - contentMargin.Top);
+            contentPanel.RenderTransform = new TransformGroup { Children = { contentCounter, contentOrbit } };
+            sliceVisual.ContentPanel = contentPanel;
+            sliceVisual.ContentCounter = contentCounter;
+            sliceVisual.ContentOrbit = contentOrbit;
+
+            Panel.SetZIndex(contentPanel, SliceContentZIndex);
             PieCanvas.Children.Add(contentPanel);
         }
 
@@ -566,6 +634,212 @@ public partial class PieControl : UserControl
         if (refreshVisualState)
         {
             RefreshVisualState(animate);
+        }
+    }
+
+    private void BeginDragTracking(PieSliceVisual sliceVisual, Point pressPosition)
+    {
+        if (_sliceVisuals.Count < 2)
+        {
+            _dragCandidate = null;
+            return;
+        }
+
+        _dragCandidate = sliceVisual;
+        _dragPressPosition = pressPosition;
+    }
+
+    private void HandleSliceMouseMove(PieSliceVisual sliceVisual, MouseEventArgs e)
+    {
+        if (_drag != null)
+        {
+            if (_drag.Slice == sliceVisual)
+            {
+                UpdateDrag(e.GetPosition(PieCanvas));
+            }
+
+            return;
+        }
+
+        if (_dragCandidate != sliceVisual || e.LeftButton != MouseButtonState.Pressed)
+        {
+            return;
+        }
+
+        var position = e.GetPosition(PieCanvas);
+        if (Math.Abs(position.X - _dragPressPosition.X) < SystemParameters.MinimumHorizontalDragDistance
+            && Math.Abs(position.Y - _dragPressPosition.Y) < SystemParameters.MinimumVerticalDragDistance)
+        {
+            return;
+        }
+
+        StartDrag(sliceVisual, position);
+    }
+
+    private void StartDrag(PieSliceVisual sliceVisual, Point position)
+    {
+        Log.Debug("Started dragging slice to reorder: {SliceName}", sliceVisual.Action.Name);
+
+        _drag = new DragReorderState
+        {
+            Slice = sliceVisual,
+            LastPointerAngle = PieReorderCalculator.GetPointerAngle(_layoutCenter, position),
+            RotationOffset = sliceVisual.RotationOffset,
+            TargetSlot = sliceVisual.CurrentSlot,
+        };
+
+        // Release any running reorder animations so the angle can be driven directly.
+        sliceVisual.PathRotation?.BeginAnimation(RotateTransform.AngleProperty, null);
+        sliceVisual.ContentOrbit?.BeginAnimation(RotateTransform.AngleProperty, null);
+        sliceVisual.ContentCounter?.BeginAnimation(RotateTransform.AngleProperty, null);
+
+        _animationService.AnimateClickUp(sliceVisual.Path, _renderState.PressDuration, _renderState.StandardEasing);
+        ApplySliceHoverVisual(sliceVisual, animate: true);
+        Panel.SetZIndex(sliceVisual.Path, DraggedSliceZIndex);
+        if (sliceVisual.ContentPanel != null)
+        {
+            Panel.SetZIndex(sliceVisual.ContentPanel, DraggedSliceContentZIndex);
+        }
+
+        sliceVisual.Path.CaptureMouse();
+    }
+
+    private void UpdateDrag(Point position)
+    {
+        var drag = _drag;
+        var pointerAngle = PieReorderCalculator.GetPointerAngle(_layoutCenter, position);
+        drag.RotationOffset += PieLayoutCalculator.NormalizeSignedAngle(pointerAngle - drag.LastPointerAngle);
+        drag.LastPointerAngle = pointerAngle;
+
+        SetSliceRotation(drag.Slice, drag.RotationOffset);
+
+        var targetSlot = PieReorderCalculator.GetTargetSlot(
+            drag.Slice.Index,
+            drag.RotationOffset,
+            _layoutAngleStep,
+            _sliceVisuals.Count);
+        if (targetSlot == drag.TargetSlot)
+        {
+            return;
+        }
+
+        drag.TargetSlot = targetSlot;
+        var slots = PieReorderCalculator.GetSlotAssignments(_sliceVisuals.Count, drag.Slice.Index, targetSlot);
+        foreach (var sliceVisual in _sliceVisuals)
+        {
+            if (sliceVisual == drag.Slice)
+            {
+                continue;
+            }
+
+            sliceVisual.CurrentSlot = slots[sliceVisual.Index];
+            var targetRotation = PieReorderCalculator.GetNearestEquivalentAngle(
+                sliceVisual.RotationOffset,
+                (sliceVisual.CurrentSlot - sliceVisual.Index) * _layoutAngleStep);
+            sliceVisual.RotationOffset = targetRotation;
+            AnimateSliceRotation(sliceVisual, targetRotation);
+        }
+    }
+
+    private bool EndDragTracking(PieSliceVisual sliceVisual)
+    {
+        _dragCandidate = null;
+
+        if (_drag?.Slice != sliceVisual)
+        {
+            return false;
+        }
+
+        var drag = _drag;
+        _drag = null;
+
+        _isReleasingDragCapture = true;
+        try
+        {
+            sliceVisual.Path.ReleaseMouseCapture();
+        }
+        finally
+        {
+            _isReleasingDragCapture = false;
+        }
+
+        sliceVisual.CurrentSlot = drag.TargetSlot;
+        var settledRotation = PieReorderCalculator.GetNearestEquivalentAngle(
+            drag.RotationOffset,
+            (drag.TargetSlot - sliceVisual.Index) * _layoutAngleStep);
+        sliceVisual.RotationOffset = settledRotation;
+        AnimateSliceRotation(sliceVisual, settledRotation, () => CommitReorder(sliceVisual, drag.TargetSlot));
+        return true;
+    }
+
+    private void CommitReorder(PieSliceVisual sliceVisual, int targetSlot)
+    {
+        if (targetSlot == sliceVisual.Index)
+        {
+            Log.Debug("Slice drag ended in its original slot: {SliceName}", sliceVisual.Action.Name);
+            if (sliceVisual.ContentPanel != null)
+            {
+                Panel.SetZIndex(sliceVisual.ContentPanel, SliceContentZIndex);
+            }
+
+            RefreshVisualState(animate: true);
+            return;
+        }
+
+        // Move the dragged action to the position of the action that was built at the target
+        // slot; disabled actions keep their relative placement in the collection.
+        var targetAction = _sliceVisuals.First(visual => visual.Index == targetSlot).Action;
+        var fromIndex = Slices.IndexOf(sliceVisual.Action);
+        var toIndex = Slices.IndexOf(targetAction);
+        if (fromIndex < 0 || toIndex < 0 || fromIndex == toIndex)
+        {
+            Log.Warning(
+                "Could not commit slice reorder (FromIndex={FromIndex}, ToIndex={ToIndex})",
+                fromIndex,
+                toIndex);
+            RequestRenderRefresh();
+            return;
+        }
+
+        Log.Information(
+            "Reordered slice by dragging: {SliceName} ({FromIndex} -> {ToIndex})",
+            sliceVisual.Action.Name,
+            fromIndex,
+            toIndex);
+        Slices.Move(fromIndex, toIndex);
+        SlicesReordered?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnSliceLostMouseCapture(PieSliceVisual sliceVisual)
+    {
+        if (_isReleasingDragCapture || _drag?.Slice != sliceVisual)
+        {
+            return;
+        }
+
+        Log.Debug("Slice drag canceled because mouse capture was lost: {SliceName}", sliceVisual.Action.Name);
+        _drag = null;
+        _dragCandidate = null;
+        RequestRenderRefresh();
+    }
+
+    private static void SetSliceRotation(PieSliceVisual sliceVisual, double angle)
+    {
+        sliceVisual.PathRotation.Angle = angle;
+        if (sliceVisual.ContentOrbit != null)
+        {
+            sliceVisual.ContentOrbit.Angle = angle;
+            sliceVisual.ContentCounter.Angle = -angle;
+        }
+    }
+
+    private void AnimateSliceRotation(PieSliceVisual sliceVisual, double toAngle, Action onCompleted = null)
+    {
+        _animationService.AnimateRotationAngle(sliceVisual.PathRotation, toAngle, ReorderDuration, _renderState.StandardEasing, onCompleted);
+        if (sliceVisual.ContentOrbit != null)
+        {
+            _animationService.AnimateRotationAngle(sliceVisual.ContentOrbit, toAngle, ReorderDuration, _renderState.StandardEasing);
+            _animationService.AnimateRotationAngle(sliceVisual.ContentCounter, -toAngle, ReorderDuration, _renderState.StandardEasing);
         }
     }
 
@@ -754,6 +1028,11 @@ public partial class PieControl : UserControl
     /// Occurs when a slice is clicked.
     /// </summary>
     public event EventHandler<SliceClickEventArgs> SliceClicked;
+
+    /// <summary>
+    /// Occurs after the <see cref="Slices"/> collection is reordered by dragging a slice.
+    /// </summary>
+    public event EventHandler SlicesReordered;
 
     /// <summary>
     /// Occurs when the center close target is clicked.

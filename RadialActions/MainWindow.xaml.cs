@@ -206,6 +206,15 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnSlicesReordered(object sender, EventArgs e)
+    {
+        Log.Debug("Slices reordered by dragging");
+        if (Settings.CanBeSaved)
+        {
+            Settings.Default.Save();
+        }
+    }
+
     private void OnCenterClicked(object sender, EventArgs e)
     {
         Log.Debug("Center close target clicked");
