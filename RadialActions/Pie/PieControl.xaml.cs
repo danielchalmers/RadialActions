@@ -24,6 +24,14 @@ public partial class PieControl : UserControl
     private const int DraggedSliceZIndex = 16;
     private const int DraggedSliceContentZIndex = 17;
     private const double MouseMoveThreshold = 0.25;
+
+    /// <summary>
+    /// How far the pointer must travel with the button held before a press becomes a drag.
+    /// Deliberately much larger than the system drag threshold so held-but-jittering clicks
+    /// during normal use never start reordering.
+    /// </summary>
+    private const double DragStartThreshold = 20;
+
     private static readonly Duration ReorderDuration = new(TimeSpan.FromMilliseconds(150));
 
     private enum InteractionMode
@@ -667,8 +675,8 @@ public partial class PieControl : UserControl
         }
 
         var position = e.GetPosition(PieCanvas);
-        if (Math.Abs(position.X - _dragPressPosition.X) < SystemParameters.MinimumHorizontalDragDistance
-            && Math.Abs(position.Y - _dragPressPosition.Y) < SystemParameters.MinimumVerticalDragDistance)
+        var distance = (position - _dragPressPosition).Length;
+        if (distance < DragStartThreshold)
         {
             return;
         }
