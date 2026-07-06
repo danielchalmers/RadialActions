@@ -154,32 +154,101 @@ public sealed partial class Settings : ObservableObject
     }
 
     /// <summary>
-    /// Reads settings from the default path.
+    /// Reads settings from the given path.
     /// </summary>
-    private static string ReadJsonFromFile()
+    private static string ReadJsonFromFile(string filePath)
     {
-        using var fileStream = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         using var streamReader = new StreamReader(fileStream);
         return streamReader.ReadToEnd();
     }
 
     /// <summary>
-    /// Loads from the default path in JSON format.
+    /// Loads a single settings file, treating an existing but empty file as corrupt.
     /// </summary>
-    private static Settings LoadFromFile()
+    private static Settings LoadSettingsFile(string filePath)
     {
+        var json = ReadJsonFromFile(filePath);
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            throw new InvalidDataException($"Settings file is empty: {filePath}");
+        }
+
+        return DeserializeFromJson(json);
+    }
+
+    /// <summary>
+    /// Loads from the given path in JSON format, recovering from an unreadable file instead of silently resetting.
+    /// </summary>
+    /// <param name="canBeSaved">
+    /// <c>false</c> when the file is unreadable and couldn't be copied aside, so saving would destroy it.
+    /// </param>
+    internal static Settings LoadFromFile(string filePath, out bool canBeSaved)
+    {
+        canBeSaved = true;
+
+        if (!File.Exists(filePath))
+        {
+            Log.Information("No settings file; Creating new settings");
+            return CreateDefault();
+        }
+
         try
         {
-            var json = ReadJsonFromFile();
-            return DeserializeFromJson(json);
+            return LoadSettingsFile(filePath);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, $"Failed to load {FilePath}");
-            Log.Information("Creating new settings");
-            var settings = new Settings();
-            settings.NormalizeAfterLoad();
-            return settings;
+            Log.Error(ex, $"Failed to load {filePath}");
+        }
+
+        // Keep the unreadable file for manual recovery; never save over it if that fails.
+        canBeSaved = TryPreserveCorruptFile(filePath);
+
+        var backupPath = BackupPath(filePath);
+        if (File.Exists(backupPath))
+        {
+            try
+            {
+                var settings = LoadSettingsFile(backupPath);
+                Log.Warning($"Restored settings from backup {backupPath}");
+                return settings;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Failed to load backup {backupPath}");
+            }
+        }
+
+        Log.Information("Creating new settings");
+        return CreateDefault();
+    }
+
+    private static Settings CreateDefault()
+    {
+        var settings = new Settings();
+        settings.NormalizeAfterLoad();
+        return settings;
+    }
+
+    /// <summary>
+    /// Copies an unreadable settings file to a timestamped path so it can be recovered manually.
+    /// </summary>
+    private static bool TryPreserveCorruptFile(string filePath)
+    {
+        var corruptPath = $"{filePath}.corrupt-{DateTime.UtcNow:yyyyMMddHHmmss}";
+
+        try
+        {
+            File.Copy(filePath, corruptPath, overwrite: true);
+            Log.Warning($"Preserved unreadable settings file at {corruptPath}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to preserve unreadable settings file {filePath}");
+            return false;
         }
     }
 
@@ -188,9 +257,9 @@ public sealed partial class Settings : ObservableObject
     /// </summary>
     private static Settings LoadAndAttemptSave()
     {
-        var settings = LoadFromFile();
+        var settings = LoadFromFile(FilePath, out var canBeSaved);
 
-        CanBeSaved = settings.Save();
+        CanBeSaved = canBeSaved && settings.Save();
         Log.Debug($"Settings can be saved: {CanBeSaved}");
 
         return settings;
