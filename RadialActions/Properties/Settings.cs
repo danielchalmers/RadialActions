@@ -73,6 +73,28 @@ public sealed partial class Settings
         ];
     }
 
+    private static void NormalizeMacroSteps(PieAction action)
+    {
+        if (action.MacroSteps == null)
+        {
+            action.MacroSteps = [];
+            return;
+        }
+
+        for (var i = action.MacroSteps.Count - 1; i >= 0; i--)
+        {
+            if (action.MacroSteps[i] == null)
+            {
+                action.MacroSteps.RemoveAt(i);
+            }
+        }
+
+        foreach (var step in action.MacroSteps)
+        {
+            step.NormalizeAfterLoad();
+        }
+    }
+
     internal void NormalizeAfterLoad()
     {
         ActivationHotkey ??= DefaultActivationHotkey;
@@ -107,6 +129,8 @@ public sealed partial class Settings
             {
                 action.Type = ActionType.None;
             }
+
+            NormalizeMacroSteps(action);
         }
     }
 }

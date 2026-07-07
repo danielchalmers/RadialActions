@@ -38,6 +38,10 @@ public static class ActionUtil
     private const uint INPUT_KEYBOARD = 1;
     private const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
     private const uint KEYEVENTF_KEYUP = 0x0002;
+    private const uint KEYEVENTF_UNICODE = 0x0004;
+
+    private const byte VK_RETURN = 0x0D;
+    private const byte VK_TAB = 0x09;
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, IntPtr dwExtraInfo);
@@ -164,6 +168,63 @@ public static class ActionUtil
         var lParam = (IntPtr)(appCommand << 16);
         SendMessage(hwnd, WM_APPCOMMAND, hwnd, lParam);
         return true;
+    }
+
+    /// <summary>
+    /// Types a string of text into the focused window using Unicode keyboard input.
+    /// </summary>
+    /// <param name="text">The text to type. Newlines are sent as Enter and tabs as Tab.</param>
+    public static void SimulateText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        foreach (var ch in text)
+        {
+            switch (ch)
+            {
+                case '\r':
+                    // Skip so "\r\n" produces a single Enter press.
+                    continue;
+                case '\n':
+                    SendKey(VK_RETURN, isKeyUp: false);
+                    SendKey(VK_RETURN, isKeyUp: true);
+                    continue;
+                case '\t':
+                    SendKey(VK_TAB, isKeyUp: false);
+                    SendKey(VK_TAB, isKeyUp: true);
+                    continue;
+                default:
+                    SendUnicodeChar(ch, isKeyUp: false);
+                    SendUnicodeChar(ch, isKeyUp: true);
+                    continue;
+            }
+        }
+    }
+
+    private static void SendUnicodeChar(char ch, bool isKeyUp)
+    {
+        var flags = KEYEVENTF_UNICODE;
+        if (isKeyUp)
+            flags |= KEYEVENTF_KEYUP;
+
+        var input = new INPUT
+        {
+            type = INPUT_KEYBOARD,
+            U = new InputUnion
+            {
+                ki = new KEYBDINPUT
+                {
+                    wVk = 0,
+                    wScan = ch,
+                    dwFlags = flags,
+                    time = 0,
+                    dwExtraInfo = IntPtr.Zero
+                }
+            }
+        };
+
+        SendInput(1, new[] { input }, Marshal.SizeOf<INPUT>());
     }
 
     /// <summary>

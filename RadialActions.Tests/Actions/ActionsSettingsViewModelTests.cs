@@ -72,7 +72,7 @@ public sealed class ActionsSettingsViewModelTests
     {
         var viewModel = new ActionEditorViewModel(new ActionDefaultsService(), []);
 
-        Assert.Equal([ActionType.Key, ActionType.Shell], viewModel.ActionTypes.Select(option => option.Type));
+        Assert.Equal([ActionType.Key, ActionType.Shell, ActionType.Macro], viewModel.ActionTypes.Select(option => option.Type));
     }
 
     [Fact]

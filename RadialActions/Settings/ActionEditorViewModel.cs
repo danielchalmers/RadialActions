@@ -30,6 +30,14 @@ public partial class ActionEditorViewModel : ObservableObject
     [
         new(ActionType.Key, "Key", "⌨️"),
         new(ActionType.Shell, "Shell", "🚀"),
+        new(ActionType.Macro, "Macro", "🎬"),
+    ];
+
+    public IReadOnlyList<MacroStepTypeOption> MacroStepTypes { get; } =
+    [
+        new(MacroStepType.Shortcut, "Keys", "⌨️"),
+        new(MacroStepType.Text, "Text", "🔤"),
+        new(MacroStepType.Delay, "Delay", "⏱️"),
     ];
 
     public IReadOnlyList<KeyActionDefinition> KeyActionOptions { get; } =
@@ -51,6 +59,7 @@ public partial class ActionEditorViewModel : ObservableObject
                 SelectedAction.Parameter = string.Empty;
                 SelectedAction.Arguments = string.Empty;
                 SelectedAction.WorkingDirectory = string.Empty;
+                SelectedAction.MacroSteps?.Clear();
             }
             else if (value == ActionType.Key)
             {
@@ -59,6 +68,13 @@ public partial class ActionEditorViewModel : ObservableObject
             else if (value == ActionType.Shell)
             {
                 SelectedAction.Parameter = string.Empty;
+            }
+            else if (value == ActionType.Macro)
+            {
+                SelectedAction.Parameter = string.Empty;
+                SelectedAction.Arguments = string.Empty;
+                SelectedAction.WorkingDirectory = string.Empty;
+                EnsureMacroSteps(SelectedAction);
             }
 
             OnPropertyChanged();
@@ -107,6 +123,80 @@ public partial class ActionEditorViewModel : ObservableObject
     public void Forget(PieAction action)
     {
         _actionDefaultsService.Forget(action);
+    }
+
+    /// <summary>
+    /// Makes sure a macro action has a steps collection and at least one step to edit.
+    /// </summary>
+    private static void EnsureMacroSteps(PieAction action)
+    {
+        action.MacroSteps ??= [];
+
+        if (action.MacroSteps.Count == 0)
+        {
+            action.MacroSteps.Add(new MacroStep());
+        }
+    }
+
+    [RelayCommand]
+    private void AddMacroStep()
+    {
+        if (SelectedAction == null)
+            return;
+
+        SelectedAction.MacroSteps ??= [];
+        SelectedAction.MacroSteps.Add(new MacroStep());
+    }
+
+    [RelayCommand]
+    private void RemoveMacroStep(MacroStep step)
+    {
+        if (step == null)
+            return;
+
+        SelectedAction?.MacroSteps?.Remove(step);
+    }
+
+    [RelayCommand]
+    private void DuplicateMacroStep(MacroStep step)
+    {
+        var steps = SelectedAction?.MacroSteps;
+        if (step == null || steps == null)
+            return;
+
+        var index = steps.IndexOf(step);
+        if (index < 0)
+            return;
+
+        steps.Insert(index + 1, step.Clone());
+    }
+
+    [RelayCommand]
+    private void MoveMacroStepUp(MacroStep step)
+    {
+        var steps = SelectedAction?.MacroSteps;
+        if (step == null || steps == null)
+            return;
+
+        var index = steps.IndexOf(step);
+        if (index <= 0)
+            return;
+
+        steps.Move(index, index - 1);
+    }
+
+    [RelayCommand]
+    private void MoveMacroStepDown(MacroStep step)
+    {
+        var steps = SelectedAction?.MacroSteps;
+        if (step == null || steps == null)
+            return;
+
+        var index = steps.IndexOf(step);
+        if (index < 0 || index >= steps.Count - 1)
+            return;
+
+        steps.Move(index, index + 1);
     }
 
     [RelayCommand]
@@ -166,6 +256,11 @@ public partial class ActionEditorViewModel : ObservableObject
         {
             newValue.PropertyChanged += SelectedActionPropertyChanged;
             _actionDefaultsService.EnsureKeyDefaults(newValue);
+
+            if (newValue.Type == ActionType.Macro)
+            {
+                EnsureMacroSteps(newValue);
+            }
         }
 
         OnPropertyChanged(nameof(SelectedActionType));
@@ -210,6 +305,20 @@ public sealed class ActionTypeOption
     }
 
     public ActionType Type { get; }
+    public string Name { get; }
+    public string Icon { get; }
+}
+
+public sealed class MacroStepTypeOption
+{
+    public MacroStepTypeOption(MacroStepType type, string name, string icon)
+    {
+        Type = type;
+        Name = name;
+        Icon = icon;
+    }
+
+    public MacroStepType Type { get; }
     public string Name { get; }
     public string Icon { get; }
 }

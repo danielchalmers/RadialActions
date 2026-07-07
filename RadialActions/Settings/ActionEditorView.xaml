@@ -51,7 +51,7 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock Text="Use Key for shortcuts and media controls; Shell for apps, files, folders, URLs, or commands."
+        <TextBlock Text="Use Key for shortcuts and media controls; Shell for apps, files, folders, URLs, or commands; Macro for a sequence of keystrokes, text, and delays."
                    Style="{StaticResource DescriptionTextBlock}" />
 
         <StackPanel Margin="0,0,0,4"
@@ -130,6 +130,150 @@
                         Padding="8,2" />
             </Grid>
             <TextBlock Text="Optional folder to use as the target's start location."
+                       Style="{StaticResource DescriptionTextBlock}" />
+        </StackPanel>
+
+        <StackPanel
+              Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Macro}}">
+            <TextBlock Text="Steps:"
+                       Style="{StaticResource ActionEditorLabelTextBlock}" />
+            <ItemsControl ItemsSource="{Binding SelectedAction.MacroSteps}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,0,6"
+                                Padding="8"
+                                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="6" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="6" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <ComboBox Grid.Row="0"
+                                          Grid.Column="0"
+                                          MinWidth="96"
+                                          VerticalAlignment="Center"
+                                          ItemsSource="{Binding DataContext.MacroStepTypes, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          SelectedValue="{Binding Type, Mode=TwoWay}"
+                                          SelectedValuePath="Type">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Icon}"
+                                                           Width="20"
+                                                           FontSize="14" />
+                                                <TextBlock Text="{Binding Name}"
+                                                           Margin="4,0,0,0"
+                                                           VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="2"
+                                         VerticalAlignment="Center"
+                                         Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox"
+                                               BasedOn="{StaticResource {x:Type TextBox}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Type}"
+                                                             Value="Delay">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+
+                                <Grid Grid.Row="0"
+                                      Grid.Column="2"
+                                      Visibility="{Binding Type, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:MacroStepType.Delay}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="4" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             VerticalAlignment="Center"
+                                             Text="{Binding DelayMilliseconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Grid.Column="2"
+                                               VerticalAlignment="Center"
+                                               Opacity="0.72"
+                                               Text="ms" />
+                                </Grid>
+
+                                <StackPanel Grid.Row="0"
+                                            Grid.Column="4"
+                                            Orientation="Horizontal"
+                                            VerticalAlignment="Center">
+                                    <Button Content="▲"
+                                            ToolTip="Move step up"
+                                            Padding="6,2"
+                                            Command="{Binding DataContext.MoveMacroStepUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+                                    <Button Content="▼"
+                                            ToolTip="Move step down"
+                                            Margin="4,0,0,0"
+                                            Padding="6,2"
+                                            Command="{Binding DataContext.MoveMacroStepDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+                                    <Button Content="⧉"
+                                            ToolTip="Duplicate step"
+                                            Margin="4,0,0,0"
+                                            Padding="6,2"
+                                            Command="{Binding DataContext.DuplicateMacroStepCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+                                    <Button Content="✕"
+                                            ToolTip="Remove step"
+                                            Margin="4,0,0,0"
+                                            Padding="6,2"
+                                            Command="{Binding DataContext.RemoveMacroStepCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="0"
+                                           Grid.ColumnSpan="5"
+                                           Margin="0,4,0,0"
+                                           FontSize="12"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                                           Text="{Binding ValidationError}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock"
+                                               BasedOn="{StaticResource {x:Type TextBlock}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ValidationError}"
+                                                             Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Button Content="Add Step"
+                    HorizontalAlignment="Left"
+                    Padding="8,2"
+                    Command="{Binding AddMacroStepCommand}" />
+            <TextBlock Text="Steps run in order. Keys sends a shortcut such as Ctrl+C or a media key like PlayPause; Text types into the focused window; Delay waits before the next step. Start with a short Delay if the target window needs time to regain focus."
                        Style="{StaticResource DescriptionTextBlock}" />
         </StackPanel>
     </StackPanel>

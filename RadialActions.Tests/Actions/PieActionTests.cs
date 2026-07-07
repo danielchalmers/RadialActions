@@ -59,6 +59,39 @@ public class PieActionTests
     }
 
     [Fact]
+    public void Execute_MacroActionWithoutSteps_ThrowsInvalidOperationException()
+    {
+        var action = new PieAction("Macro") { Type = ActionType.Macro };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
+
+        Assert.Equal("Macro has no steps", ex.Message);
+    }
+
+    [Fact]
+    public void Execute_MacroActionWithInvalidStep_ThrowsInvalidOperationException()
+    {
+        var action = new PieAction("Macro") { Type = ActionType.Macro };
+        action.MacroSteps.Add(new MacroStep { Type = MacroStepType.Delay, DelayMilliseconds = 100 });
+        action.MacroSteps.Add(new MacroStep { Type = MacroStepType.Shortcut, Value = "DefinitelyNotAHotkey" });
+
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
+
+        Assert.StartsWith("Step 2:", ex.Message);
+    }
+
+    [Fact]
+    public void Execute_MacroActionWithNullStep_ThrowsInvalidOperationException()
+    {
+        var action = new PieAction("Macro") { Type = ActionType.Macro };
+        action.MacroSteps.Add(null);
+
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
+
+        Assert.StartsWith("Step 1:", ex.Message);
+    }
+
+    [Fact]
     public void Execute_KeyActionWithInvalidShortcut_ThrowsInvalidOperationException()
     {
         var action = new PieAction("Shortcut")

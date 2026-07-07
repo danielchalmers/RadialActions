@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -23,6 +24,11 @@ public enum ActionType
     /// Launch an app, open a file, or open a URL using shell execution.
     /// </summary>
     Shell = 2,
+
+    /// <summary>
+    /// Run a sequence of macro steps such as shortcuts, typed text, and delays.
+    /// </summary>
+    Macro = 3,
 }
 
 /// <summary>
@@ -117,6 +123,12 @@ public partial class PieAction : ObservableObject
     private string _workingDirectory = string.Empty;
 
     /// <summary>
+    /// The ordered steps to run for macro actions.
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<MacroStep> _macroSteps = [];
+
+    /// <summary>
     /// Creates a new empty action.
     /// </summary>
     public PieAction() { }
@@ -176,6 +188,9 @@ public partial class PieAction : ObservableObject
             case ActionType.Shell:
                 ExecuteShell();
                 return;
+            case ActionType.Macro:
+                ExecuteMacro();
+                return;
             default:
                 throw new NotSupportedException("Action type is not supported");
         }
@@ -186,16 +201,71 @@ public partial class PieAction : ObservableObject
         if (string.IsNullOrWhiteSpace(Parameter))
             throw new InvalidOperationException("Shortcut not configured");
 
-        if (TryGetKeyAction(Parameter, out var definition))
+        if (!TryGetKeyAction(Parameter, out _) && !HotkeyUtil.TryParse(Parameter, out _, out _))
+            throw new InvalidOperationException("Shortcut is invalid");
+
+        SimulateConfiguredShortcut(Parameter);
+    }
+
+    /// <summary>
+    /// Simulates a predefined key action or a parsed keyboard shortcut. The value must already be validated.
+    /// </summary>
+    private static void SimulateConfiguredShortcut(string value)
+    {
+        if (TryGetKeyAction(value, out var definition))
         {
             ActionUtil.SimulateKey(definition.VirtualKey);
             return;
         }
 
-        if (!HotkeyUtil.TryParse(Parameter, out _, out _))
-            throw new InvalidOperationException("Shortcut is invalid");
+        ActionUtil.SimulateKeyboardShortcut(value);
+    }
 
-        ActionUtil.SimulateKeyboardShortcut(Parameter);
+    private void ExecuteMacro()
+    {
+        if (MacroSteps == null || MacroSteps.Count == 0)
+            throw new InvalidOperationException("Macro has no steps");
+
+        // Snapshot the steps so edits made while the macro runs can't change or break it mid-flight.
+        var steps = MacroSteps.Select(step => step?.Clone()).ToArray();
+
+        for (var i = 0; i < steps.Length; i++)
+        {
+            var error = MacroStep.GetValidationError(steps[i]);
+            if (error != null)
+                throw new InvalidOperationException($"Step {i + 1}: {error}");
+        }
+
+        // Run on a background thread so delay steps don't freeze the menu.
+        Task.Run(() => RunMacroSteps(Name, steps));
+    }
+
+    private static void RunMacroSteps(string macroName, MacroStep[] steps)
+    {
+        try
+        {
+            foreach (var step in steps)
+            {
+                switch (step.Type)
+                {
+                    case MacroStepType.Shortcut:
+                        SimulateConfiguredShortcut(step.Value);
+                        break;
+                    case MacroStepType.Text:
+                        ActionUtil.SimulateText(step.Value);
+                        break;
+                    case MacroStepType.Delay:
+                        Thread.Sleep(Math.Clamp(step.DelayMilliseconds, 1, MacroStep.MaxDelayMilliseconds));
+                        break;
+                }
+            }
+
+            Log.Information($"Macro finished: {macroName}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Macro failed: {macroName}");
+        }
     }
 
     private void ExecuteShell()

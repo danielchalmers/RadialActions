@@ -89,6 +89,71 @@ public class SettingsSerializationTests
     }
 
     [Fact]
+    public void SerializeToJson_RoundTripsMacroSteps()
+    {
+        var settings = Settings.DeserializeFromJson("{}");
+        var macro = new PieAction("My Macro") { Type = ActionType.Macro };
+        macro.MacroSteps.Add(new MacroStep { Type = MacroStepType.Shortcut, Value = "Ctrl+C" });
+        macro.MacroSteps.Add(new MacroStep { Type = MacroStepType.Delay, DelayMilliseconds = 250 });
+        macro.MacroSteps.Add(new MacroStep { Type = MacroStepType.Text, Value = "hello" });
+        settings.Actions = [macro];
+
+        var json = settings.SerializeToJson();
+        var loaded = Settings.DeserializeFromJson(json);
+
+        var loadedMacro = Assert.Single(loaded.Actions);
+        Assert.Equal(ActionType.Macro, loadedMacro.Type);
+        Assert.Equal(3, loadedMacro.MacroSteps.Count);
+        Assert.Equal(MacroStepType.Shortcut, loadedMacro.MacroSteps[0].Type);
+        Assert.Equal("Ctrl+C", loadedMacro.MacroSteps[0].Value);
+        Assert.Equal(MacroStepType.Delay, loadedMacro.MacroSteps[1].Type);
+        Assert.Equal(250, loadedMacro.MacroSteps[1].DelayMilliseconds);
+        Assert.Equal(MacroStepType.Text, loadedMacro.MacroSteps[2].Type);
+        Assert.Equal("hello", loadedMacro.MacroSteps[2].Value);
+    }
+
+    [Fact]
+    public void DeserializeFromJson_NormalizesInvalidMacroSteps()
+    {
+        const string json = """
+        {
+          "Actions": [
+            {
+              "Name": "Macro",
+              "Type": 3,
+              "MacroSteps": [
+                null,
+                {
+                  "Type": 999,
+                  "Value": null,
+                  "DelayMilliseconds": -1
+                }
+              ]
+            },
+            {
+              "Name": "Old Action",
+              "Type": 1,
+              "Parameter": "Mute",
+              "MacroSteps": null
+            }
+          ]
+        }
+        """;
+
+        var settings = Settings.DeserializeFromJson(json);
+
+        Assert.Equal(2, settings.Actions.Count);
+
+        var macroStep = Assert.Single(settings.Actions[0].MacroSteps);
+        Assert.Equal(MacroStepType.Shortcut, macroStep.Type);
+        Assert.Equal(string.Empty, macroStep.Value);
+        Assert.Equal(MacroStep.DefaultDelayMilliseconds, macroStep.DelayMilliseconds);
+
+        Assert.NotNull(settings.Actions[1].MacroSteps);
+        Assert.Empty(settings.Actions[1].MacroSteps);
+    }
+
+    [Fact]
     public void DeserializeFromJson_MissingIsEnabled_DefaultsToTrue()
     {
         const string json = """
