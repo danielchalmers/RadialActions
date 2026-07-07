@@ -96,24 +96,10 @@
                                  Margin="0,4,0,0">
                         <StackPanel Style="{StaticResource ProjectTileStackPanel}">
                             <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
-                                <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp">Good Diary</Hyperlink>
-                            </TextBlock>
-                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
-                                       Text="Track your daily activities and moods on Android." />
-                        </StackPanel>
-                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
-                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
                                 <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock">DesktopClock</Hyperlink>
                             </TextBlock>
                             <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
                                        Text="A digital clock for your desktop." />
-                        </StackPanel>
-                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
-                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
-                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay">Sentry Replay</Hyperlink>
-                            </TextBlock>
-                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
-                                       Text="Review Tesla dashcam clips on Windows." />
                         </StackPanel>
                         <StackPanel Style="{StaticResource ProjectTileStackPanel}">
                             <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
@@ -131,10 +117,38 @@
                         </StackPanel>
                         <StackPanel Style="{StaticResource ProjectTileStackPanel}">
                             <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp">Good Diary</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Track your daily activities and moods on Android." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay">Sentry Replay</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Review Tesla dashcam clips on Windows." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
                                 <Hyperlink NavigateUri="https://github.com/danielchalmers/Teichos">Teichos</Hyperlink>
                             </TextBlock>
                             <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
                                        Text="Stay focused with URL blocking and schedules." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Dayboard">Dayboard</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Put widgets on your browser's new tab page." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/NullTab">NullTab</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Replace your new tab page with a blank one." />
                         </StackPanel>
                     </UniformGrid>
                     <TextBlock Margin="0,0,0,8">
