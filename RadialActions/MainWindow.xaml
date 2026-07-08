@@ -74,6 +74,14 @@
                 </MenuItem.Icon>
             </MenuItem>
 
+            <MenuItem Header="_Feedback"
+                      Click="OnTrayFeedbackMenuItemClick">
+                <MenuItem.Icon>
+                    <TextBlock Text="&#xED15;"
+                               FontFamily="Segoe MDL2 Assets" />
+                </MenuItem.Icon>
+            </MenuItem>
+
             <Separator />
 
             <MenuItem Header="E_xit"

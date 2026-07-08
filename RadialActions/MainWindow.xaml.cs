@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -15,6 +16,7 @@ namespace RadialActions;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private const string FeedbackUrl = "https://github.com/danielchalmers/RadialActions/issues";
     private readonly TrayService _trayService;
     private readonly HotkeyService _hotkeyService = new();
     private readonly MenuService _menuService;
@@ -174,6 +176,25 @@ public partial class MainWindow : Window
             : 0;
 
         OpenSettingsWindow(tabIndex);
+    }
+
+    private void OnTrayFeedbackMenuItemClick(object sender, RoutedEventArgs e)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.InvokeAsync(() => OnTrayFeedbackMenuItemClick(sender, e), DispatcherPriority.Normal);
+            return;
+        }
+
+        Log.Debug("Tray feedback menu item clicked");
+        try
+        {
+            Process.Start(new ProcessStartInfo(FeedbackUrl) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to open feedback page");
+        }
     }
 
     private void OnTrayExitMenuItemClick(object sender, RoutedEventArgs e)
