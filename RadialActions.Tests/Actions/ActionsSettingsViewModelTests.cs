@@ -68,6 +68,55 @@ public sealed class ActionsSettingsViewModelTests
     }
 
     [Fact]
+    public void AddDroppedTargets_InsertsAfterSelectionAndSelectsLast()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var third = PieAction.CreateKeyAction("VolumeDown");
+        var viewModel = CreateViewModel(first, second, third);
+        viewModel.SelectAction(second);
+
+        viewModel.AddDroppedTargets(["https://a.com", "https://b.com"]);
+
+        var addedA = viewModel.Actions[2];
+        var addedB = viewModel.Actions[3];
+        Assert.Equal([first, second, addedA, addedB, third], viewModel.Actions);
+        Assert.Equal(ActionType.Shell, addedA.Type);
+        Assert.Equal("https://a.com", addedA.Parameter);
+        Assert.Equal("https://b.com", addedB.Parameter);
+        Assert.Same(addedB, viewModel.SelectedAction);
+        Assert.Equal(3, viewModel.SelectedActionIndex);
+        Assert.Same(addedB, viewModel.Editor.SelectedAction);
+    }
+
+    [Fact]
+    public void AddDroppedTargets_WithoutSelection_AppendsAtEnd()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.AddDroppedTargets(["https://a.com"]);
+
+        var added = Assert.Single(viewModel.Actions);
+        Assert.Equal("https://a.com", added.Parameter);
+        Assert.Same(added, viewModel.SelectedAction);
+        Assert.Equal(0, viewModel.SelectedActionIndex);
+    }
+
+    [Fact]
+    public void AddDroppedTargets_EmptyOrNull_DoesNothing()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var viewModel = CreateViewModel(first);
+
+        viewModel.AddDroppedTargets([]);
+        viewModel.AddDroppedTargets(null);
+
+        Assert.Equal([first], viewModel.Actions);
+        Assert.Same(first, viewModel.SelectedAction);
+        Assert.Equal(0, viewModel.SelectedActionIndex);
+    }
+
+    [Fact]
     public void ActionEditorViewModel_ActionTypes_HidesNoneType()
     {
         var viewModel = new ActionEditorViewModel(new ActionDefaultsService(), []);
