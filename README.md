@@ -28,11 +28,3 @@ Radial Actions is a free Windows app that opens with a global hotkey. It gives y
 1. Clone the repository.
 2. Open `RadialActions.sln` in Visual Studio 2022 or later.
 3. Build and run.
-
-## Other Projects
-
-😊 [Good Diary](https://play.google.com/store/apps/details?id=com.danielchalmers.journalapp) - Stay on top of your well-being (Android)  
-🕒 [DesktopClock](https://github.com/danielchalmers/DesktopClock) - A digital clock for your desktop! (Windows)  
-🔄 [Network Monitor](https://github.com/danielchalmers/Network-Monitor) - See latency and bandwidth usage (Windows)  
-🚗 [Sentry Replay](https://github.com/danielchalmers/SentryReplay) - Watch your Tesla dashcam clips (Windows)  
-🛡️ [Teichos](https://github.com/danielchalmers/Teichos) - Website blocker with scheduled rules (Browser)
