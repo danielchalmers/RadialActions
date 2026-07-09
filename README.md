@@ -3,9 +3,24 @@
 [![Release](https://img.shields.io/github/release/danielchalmers/RadialActions?include_prereleases)](https://github.com/danielchalmers/RadialActions/releases)
 [![License](https://img.shields.io/github/license/danielchalmers/RadialActions)](LICENSE)
 
-Radial Actions is a free Windows app that opens with a global hotkey. It gives you a fast pie menu for launching apps, opening files and folders, controlling media, changing volume, and running custom keyboard shortcuts.
+Radial Actions is a free Windows app that opens with a global hotkey. It gives you a fast pie menu for launching apps, opening files and folders, controlling media, changing volume, and running custom keyboard shortcuts. Everything is one hotkey and one click away.
 
 <img width="600" height="600" alt="Radial Actions pie menu on Windows" src="https://github.com/user-attachments/assets/60363788-2fb3-4638-8c64-d4e8e2c2a5f1" />
+
+## Features
+
+- **Instant access:** summon the menu anywhere with a global hotkey (`Ctrl+Alt+Space` by default, fully customizable). It opens at your cursor, or in the center of the screen if you prefer.
+- **Launch anything:** apps, files, folders, and websites, with optional arguments and working directory.
+- **Media & volume controls:** play/pause, next/previous track, mute, and volume up/down from any app.
+- **Custom keyboard shortcuts:** assign any key combo to a slice and trigger it with a click.
+- **Make it yours:** name each slice, pick an emoji icon, resize the menu, and drag slices to reorder them.
+- **Stays out of the way:** lives in the tray, starts with Windows if you want, and checks for updates on its own.
+
+## Getting started
+
+1. [Install Radial Actions](#installation) and press `Ctrl+Alt+Space` to open the menu.
+2. Right-click the tray icon and choose **Settings** to add and edit your actions.
+3. Press the hotkey and click a slice. That's it.
 
 ## Installation
 
