@@ -56,6 +56,30 @@ public partial class ActionsSettingsViewModel : ObservableObject
         Log.Debug("Added new action");
     }
 
+    /// <summary>
+    /// Creates a prefilled shell action for each dropped target, inserting them after the current selection and selecting the last one.
+    /// </summary>
+    public void AddDroppedTargets(IReadOnlyList<string> targets)
+    {
+        if (targets == null || targets.Count == 0)
+            return;
+
+        var selectedIndex = SelectedAction == null ? -1 : Actions.IndexOf(SelectedAction);
+        var insertionIndex = selectedIndex >= 0 ? selectedIndex + 1 : Actions.Count;
+
+        var added = 0;
+        foreach (var target in targets)
+        {
+            Actions.Insert(insertionIndex, ActionDropFactory.CreateAction(target));
+            insertionIndex++;
+            added++;
+        }
+
+        SelectedActionIndex = insertionIndex - 1;
+        SelectedAction = Actions[SelectedActionIndex];
+        Log.Debug("Added {Count} action(s) from drop", added);
+    }
+
     [RelayCommand]
     private void RemoveAction()
     {
