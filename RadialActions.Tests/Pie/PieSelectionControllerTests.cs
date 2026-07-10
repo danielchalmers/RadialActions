@@ -1,4 +1,4 @@
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
 namespace RadialActions.Tests;
 
@@ -62,6 +62,46 @@ public class PieSelectionControllerTests
         controller.HandleArrowKey(key, items);
 
         Assert.Equal(0, controller.SelectedIndex);
+    }
+
+    [Theory]
+    [InlineData(1, 0)]
+    [InlineData(2, 2)]
+    [InlineData(3, 5)]
+    public void TrySelectDigit_SelectsItemAtClockwisePosition(int digit, int expectedIndex)
+    {
+        var controller = new PieSelectionController();
+        PieSelectionController.Item[] items =
+        [
+            new(0, -60),
+            new(2, 60),
+            new(5, 180),
+        ];
+
+        var selected = controller.TrySelectDigit(digit, items);
+
+        Assert.True(selected);
+        Assert.Equal(expectedIndex, controller.SelectedIndex);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(4)]
+    [InlineData(9)]
+    public void TrySelectDigit_ReturnsFalseWhenDigitHasNoSlice(int digit)
+    {
+        var controller = new PieSelectionController();
+        PieSelectionController.Item[] items =
+        [
+            new(0, -60),
+            new(1, 60),
+            new(2, 180),
+        ];
+
+        var selected = controller.TrySelectDigit(digit, items);
+
+        Assert.False(selected);
+        Assert.Equal(PieSelectionController.NoSelection, controller.SelectedIndex);
     }
 
     [Fact]
