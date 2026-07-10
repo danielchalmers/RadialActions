@@ -7,9 +7,9 @@ using RadialActions.Properties;
 
 namespace RadialActions;
 
-public partial class AdvancedSettingsViewModel : ObservableObject
+public partial class AboutSettingsViewModel : ObservableObject
 {
-    public AdvancedSettingsViewModel(Settings settings)
+    public AboutSettingsViewModel(Settings settings)
     {
         Settings = settings;
     }
@@ -49,20 +49,20 @@ public partial class AdvancedSettingsViewModel : ObservableObject
             return;
         }
 
-       try
-       {
-           Process.Start("notepad", RadialActions.Properties.Settings.FilePath);
-       }
-       catch (Exception ex)
-       {
-           Log.Error(ex, "Couldn't open notepad");
-           MessageBox.Show(
-               "Couldn't open settings file.\n\n" +
-               "This app may have been reuploaded without permission. If you paid for it, ask for a refund and download it for free from the original source: https://github.com/danielchalmers/RadialActions.\n\n" +
-               $"If it still doesn't work, create a new Issue at that link with details on what happened and include this error: \"{ex.Message}\"",
-               "Settings",
-               MessageBoxButton.OK,
-               MessageBoxImage.Error);
+        try
+        {
+            Process.Start("notepad", RadialActions.Properties.Settings.FilePath);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Couldn't open notepad");
+            MessageBox.Show(
+                "Couldn't open settings file.\n\n" +
+                "This app may have been reuploaded without permission. If you paid for it, ask for a refund and download it for free from the original source: https://github.com/danielchalmers/RadialActions.\n\n" +
+                $"If it still doesn't work, create a new Issue at that link with details on what happened and include this error: \"{ex.Message}\"",
+                "Settings",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
     }
 }

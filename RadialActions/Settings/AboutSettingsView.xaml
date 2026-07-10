@@ -1,0 +1,226 @@
+﻿<UserControl x:Class="RadialActions.AboutSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:RadialActions"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=local:AboutSettingsViewModel}"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/RadialActions;component/Settings/SettingsViewResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="820"
+                    Margin="24,16,24,24">
+            <TextBlock Style="{StaticResource PageTitleTextBlock}"
+                       Text="About" />
+
+            <!-- App identity -->
+            <Border Style="{StaticResource ContentCardBorder}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Image Grid.Column="0"
+                           Width="40"
+                           Height="40"
+                           Margin="0,0,14,0"
+                           VerticalAlignment="Center"
+                           Source="/RadialActions;component/RadialActions.ico" />
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Text="Radial Actions" />
+                        <TextBlock Margin="0,2,0,0"
+                                   FontSize="12"
+                                   Opacity="0.72">
+                            <Run Text="Version" />
+                            <Run Text="{Binding FileVersion, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Margin="0,4,0,0"
+                                   FontSize="12"
+                                   Text="Build your own shortcut wheel for the apps and actions you use most."
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TextBlock Style="{StaticResource SectionHeaderTextBlock}"
+                       Text="How to use" />
+            <Border Style="{StaticResource ContentCardBorder}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource QuickStartStepTextBlock}">
+                        <Run FontWeight="SemiBold">1.</Run>
+                        Press
+                        <Run FontWeight="SemiBold"
+                             Text="{Binding Settings.ActivationHotkey, Mode=OneWay}" />
+                        to open the radial menu.</TextBlock>
+                    <TextBlock Style="{StaticResource QuickStartStepTextBlock}">
+                        <Run FontWeight="SemiBold">2.</Run>
+                        Pick a slice with the mouse, the arrow keys, or the number keys, then click or press Enter to run it.</TextBlock>
+                    <TextBlock Style="{StaticResource QuickStartStepTextBlock}">
+                        <Run FontWeight="SemiBold">3.</Run>
+                        Add and edit slices on the Actions page, or drag files, apps, and links straight onto the list.</TextBlock>
+                    <TextBlock Margin="0,0,0,0"
+                               Style="{StaticResource QuickStartStepTextBlock}">
+                        <Run FontWeight="SemiBold">4.</Run>
+                        Right-click the menu or press Shift+F10 for more options.</TextBlock>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource SectionHeaderTextBlock}"
+                       Text="Resources" />
+            <Border Style="{StaticResource ContentCardBorder}">
+                <StackPanel>
+                    <TextBlock Margin="0,0,0,8">
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions">📦 View on GitHub</Hyperlink>
+                    </TextBlock>
+                    <TextBlock Margin="0,0,0,8">
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues">🐛 Report a bug or request a feature</Hyperlink>
+                    </TextBlock>
+                    <TextBlock Margin="0,0,0,8">
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases">🚀 Release notes</Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="radialactions://licenses">📜 Third-party licenses</Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource SectionHeaderTextBlock}"
+                       Text="Diagnostics" />
+            <Border Style="{StaticResource ContentCardBorder}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Style="{StaticResource InfoLabelTextBlock}"
+                                   Text="Architecture" />
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Style="{StaticResource InfoValueTextBlock}"
+                                   Text="{Binding Architecture, Mode=OneWay}" />
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Style="{StaticResource InfoLabelTextBlock}"
+                                   Text="Runtime" />
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Style="{StaticResource InfoValueTextBlock}"
+                                   Text="{Binding RuntimeDescription, Mode=OneWay}" />
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Style="{StaticResource InfoLabelTextBlock}"
+                                   Text="OS" />
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="1"
+                                   Style="{StaticResource InfoValueTextBlock}"
+                                   Text="{Binding OsDescription, Mode=OneWay}" />
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="0"
+                                   Style="{StaticResource InfoLabelTextBlock}"
+                                   Text="Executable" />
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="1"
+                                   Style="{StaticResource InfoValueTextBlock}"
+                                   Text="{Binding ExecutablePath, Mode=OneWay}" />
+                    </Grid>
+                    <StackPanel Margin="0,8,0,0"
+                                Orientation="Horizontal">
+                        <Button Command="{Binding OpenExeFolderCommand}"
+                                Content="Open app folder"
+                                Margin="0,0,8,0" />
+                        <Button Command="{Binding OpenSettingsFileCommand}"
+                                Content="Open settings file" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource SectionHeaderTextBlock}"
+                       Text="More from the author" />
+            <Border Style="{StaticResource ContentCardBorder}">
+                <StackPanel>
+                    <UniformGrid Columns="2">
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock">DesktopClock</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="A digital clock for your desktop." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SteamAccountSwitcher">SteamAccountSwitcher</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Swap Steam accounts from the system tray." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Network-Monitor">Network Monitor</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Live latency and bandwidth in a desktop widget." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp">Good Diary</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Track your daily activities and moods on Android." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay">Sentry Replay</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Review Tesla dashcam clips on Windows." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Teichos">Teichos</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Stay focused with URL blocking and schedules." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Dayboard">Dayboard</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Put widgets on your browser's new tab page." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/NullTab">NullTab</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Replace your new tab page with a blank one." />
+                        </StackPanel>
+                    </UniformGrid>
+                    <TextBlock Margin="0,4,0,0"
+                               FontSize="12">
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers">View all projects on GitHub</Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

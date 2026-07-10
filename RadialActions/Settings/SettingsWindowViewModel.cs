@@ -9,15 +9,13 @@ public sealed class SettingsWindowViewModel
         Settings = settings;
         General = new GeneralSettingsViewModel(settings);
         Actions = new ActionsSettingsViewModel(settings);
-        Advanced = new AdvancedSettingsViewModel(settings);
-        Help = new HelpSettingsViewModel(settings);
+        About = new AboutSettingsViewModel(settings);
     }
 
     public Settings Settings { get; }
     public GeneralSettingsViewModel General { get; }
     public ActionsSettingsViewModel Actions { get; }
-    public AdvancedSettingsViewModel Advanced { get; }
-    public HelpSettingsViewModel Help { get; }
+    public AboutSettingsViewModel About { get; }
 
     public void SelectAction(PieAction action)
     {

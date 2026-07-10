@@ -4,8 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:RadialActions"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        Title="Settings"
-        Width="1200" Height="800"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+        Title="Radial Actions"
+        Width="980" Height="700"
+        MinWidth="760" MinHeight="540"
         d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
@@ -14,63 +16,147 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/RadialActions;component/Settings/SettingsViewResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <sys:Int32 x:Key="GeneralPageIndex">0</sys:Int32>
+            <sys:Int32 x:Key="ActionsPageIndex">1</sys:Int32>
+            <sys:Int32 x:Key="AboutPageIndex">2</sys:Int32>
+
+            <Style x:Key="NavItemGlyphTextBlock"
+                   TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="Margin" Value="4,0,12,0" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="NavItemTextBlock"
+                   TargetType="TextBlock">
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="NavListBoxItem"
+                   TargetType="ListBoxItem"
+                   BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                <Setter Property="Padding" Value="10,9" />
+                <Setter Property="Margin" Value="0,0,0,2" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-        <Border Grid.Row="0"
-                Padding="12"
-                Visibility="{Binding IsUpdateAvailable, Source={x:Static local:App.CurrentApp}, Converter={local:BooleanToVisibilityConverter}}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="12" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0"
-                           FontFamily="Segoe MDL2 Assets"
-                           FontSize="18"
+        <!-- Navigation rail -->
+        <Grid Grid.Column="0"
+              Width="212"
+              Margin="12,12,4,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0"
+                        Margin="10,4,0,16"
+                        Orientation="Horizontal">
+                <Image Width="24"
+                       Height="24"
+                       Source="/RadialActions;component/RadialActions.ico" />
+                <TextBlock Margin="10,0,0,0"
                            VerticalAlignment="Center"
-                           Text="&#xE896;" />
-                <StackPanel Grid.Column="2">
-                    <TextBlock FontWeight="SemiBold"
-                               FontSize="13"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Text="Radial Actions" />
+            </StackPanel>
+
+            <ListBox Grid.Row="1"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ItemContainerStyle="{StaticResource NavListBoxItem}"
+                     SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
+                <ListBoxItem>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource NavItemGlyphTextBlock}"
+                                   Text="&#xE713;" />
+                        <TextBlock Style="{StaticResource NavItemTextBlock}"
+                                   Text="General" />
+                    </StackPanel>
+                </ListBoxItem>
+                <ListBoxItem>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource NavItemGlyphTextBlock}"
+                                   Text="&#xE71D;" />
+                        <TextBlock Style="{StaticResource NavItemTextBlock}"
+                                   Text="Actions" />
+                    </StackPanel>
+                </ListBoxItem>
+                <ListBoxItem>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource NavItemGlyphTextBlock}"
+                                   Text="&#xE946;" />
+                        <TextBlock Style="{StaticResource NavItemTextBlock}"
+                                   Text="About" />
+                    </StackPanel>
+                </ListBoxItem>
+            </ListBox>
+        </Grid>
+
+        <!-- Page content -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Margin="24,16,24,0"
+                    Padding="12,10"
+                    Background="{DynamicResource AccentFillColorDefaultBrush}"
+                    CornerRadius="6"
+                    Visibility="{Binding IsUpdateAvailable, Source={x:Static local:App.CurrentApp}, Converter={local:BooleanToVisibilityConverter}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0,0,12,0"
+                               VerticalAlignment="Center"
+                               FontFamily="Segoe MDL2 Assets"
+                               FontSize="16"
+                               Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}"
+                               Text="&#xE896;" />
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}"
                                TextWrapping="Wrap">
                         <Run Text="Update available: " />
-                        <Run Text="{Binding LatestVersion, Source={x:Static local:App.CurrentApp}}" />
+                        <Run FontWeight="SemiBold"
+                             Text="{Binding LatestVersion, Source={x:Static local:App.CurrentApp}}" />
                     </TextBlock>
-                    <TextBlock Margin="0,2,0,0"
-                               TextWrapping="Wrap">
-                        A new version of Radial Actions is available!
-                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases/latest">Learn more</Hyperlink>
+                    <TextBlock Grid.Column="2"
+                               VerticalAlignment="Center">
+                        <Hyperlink Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}"
+                                   NavigateUri="https://github.com/danielchalmers/RadialActions/releases/latest">
+                            <Run FontWeight="SemiBold"
+                                 Text="Download" />
+                        </Hyperlink>
                     </TextBlock>
-                </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1">
+                <local:GeneralSettingsView DataContext="{Binding General}"
+                                           Visibility="{Binding DataContext.Settings.SettingsTabIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={local:MatchToVisibilityConverter}, ConverterParameter={StaticResource GeneralPageIndex}}" />
+                <local:ActionsSettingsView DataContext="{Binding Actions}"
+                                           Visibility="{Binding DataContext.Settings.SettingsTabIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={local:MatchToVisibilityConverter}, ConverterParameter={StaticResource ActionsPageIndex}}" />
+                <local:AboutSettingsView DataContext="{Binding About}"
+                                         Visibility="{Binding DataContext.Settings.SettingsTabIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={local:MatchToVisibilityConverter}, ConverterParameter={StaticResource AboutPageIndex}}" />
             </Grid>
-        </Border>
-
-        <TabControl Grid.Row="1"
-                    Margin="12,0,12,0"
-                    Padding="0,12,0,0"
-                    SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
-            <TabItem Header="_General">
-                <local:GeneralSettingsView DataContext="{Binding General}" />
-            </TabItem>
-
-            <TabItem Header="_Actions">
-                <local:ActionsSettingsView DataContext="{Binding Actions}" />
-            </TabItem>
-
-            <TabItem Header="Ad_vanced">
-                <local:AdvancedSettingsView DataContext="{Binding Advanced}" />
-            </TabItem>
-
-            <TabItem Header="_Help">
-                <local:HelpSettingsView DataContext="{Binding Help}" />
-            </TabItem>
-        </TabControl>
+        </Grid>
     </Grid>
 </Window>

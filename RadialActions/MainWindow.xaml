@@ -38,6 +38,15 @@
         </Storyboard>
 
         <ContextMenu x:Key="MainContextMenu" x:Shared="False">
+            <MenuItem Header="Edit _Actions"
+                      Click="OnTraySettingsMenuItemClick"
+                      Tag="1">
+                <MenuItem.Icon>
+                    <TextBlock Text="&#xE70F;"
+                               FontFamily="Segoe MDL2 Assets" />
+                </MenuItem.Icon>
+            </MenuItem>
+
             <MenuItem Header="_Settings"
                       Click="OnTraySettingsMenuItemClick"
                       Tag="0">
@@ -47,37 +56,11 @@
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Header="_Actions"
-                      Click="OnTraySettingsMenuItemClick"
-                      Tag="1">
-                <MenuItem.Icon>
-                    <TextBlock Text="&#xE71D;"
-                               FontFamily="Segoe MDL2 Assets" />
-                </MenuItem.Icon>
-            </MenuItem>
-
-            <MenuItem Header="Ad_vanced"
+            <MenuItem Header="A_bout"
                       Click="OnTraySettingsMenuItemClick"
                       Tag="2">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE90F;"
-                               FontFamily="Segoe MDL2 Assets" />
-                </MenuItem.Icon>
-            </MenuItem>
-
-            <MenuItem Header="_Help"
-                      Click="OnTraySettingsMenuItemClick"
-                      Tag="3">
-                <MenuItem.Icon>
-                    <TextBlock Text="&#xE897;"
-                               FontFamily="Segoe MDL2 Assets" />
-                </MenuItem.Icon>
-            </MenuItem>
-
-            <MenuItem Header="_Feedback"
-                      Click="OnTrayFeedbackMenuItemClick">
-                <MenuItem.Icon>
-                    <TextBlock Text="&#xED15;"
+                    <TextBlock Text="&#xE946;"
                                FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>
@@ -94,7 +77,7 @@
         </ContextMenu>
 
         <tb:TaskbarIcon x:Key="TrayIcon" x:Shared="False"
-                        ToolTipText="Radial Actions"
+                        ToolTipText="Radial Actions (left-click to open the menu)"
                         IconSource="RadialActions.ico" MenuActivation="RightClick"
                         TrayBalloonTipClicked="OnTrayBalloonTipClicked"
                         TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick"

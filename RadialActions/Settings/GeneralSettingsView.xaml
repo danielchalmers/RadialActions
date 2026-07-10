@@ -13,81 +13,62 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="0"
-              MinHeight="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportHeight}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="12" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="12" />
-            </Grid.RowDefinitions>
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="820"
+                    Margin="24,16,24,24">
+            <TextBlock Style="{StaticResource PageTitleTextBlock}"
+                       Text="General" />
 
-            <GroupBox Grid.Row="0"
-                      Grid.Column="0"
-                      Header="Activation"
-                      Margin="0"
-                      Style="{StaticResource SettingsCardGroupBox}">
-                <StackPanel>
-                    <TextBlock Text="Hotkey:"
-                               Style="{StaticResource LabelTextBlock}" />
-                    <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             Tag="HotkeyInput" />
-                    <TextBlock Text="Press a key combination, such as Ctrl+Alt+Space."
-                               Style="{StaticResource DescriptionTextBlock}" />
-                </StackPanel>
-            </GroupBox>
+            <TextBlock Margin="1,0,0,8"
+                       Style="{StaticResource SectionHeaderTextBlock}"
+                       Text="Menu" />
 
-            <GroupBox Grid.Row="0"
-                      Grid.Column="2"
-                      Header="Appearance"
-                      Margin="0"
-                      Style="{StaticResource SettingsCardGroupBox}">
-                <StackPanel>
-                    <TextBlock Text="Menu Size (pixels):"
-                               Style="{StaticResource LabelTextBlock}" />
-                    <TextBox Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Text="Recommended range: 300-500 pixels."
-                               Style="{StaticResource DescriptionTextBlock}" />
-                </StackPanel>
-            </GroupBox>
+            <local:SettingsCard Glyph="&#xE765;"
+                                Header="Activation hotkey"
+                                Description="Click the box, then press a key combination such as Ctrl+Alt+Space.">
+                <TextBox Width="180"
+                         Tag="HotkeyInput"
+                         Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </local:SettingsCard>
 
-            <GroupBox Grid.Row="2"
-                      Grid.Column="0"
-                      Header="Behavior"
-                      Margin="0"
-                      Style="{StaticResource SettingsCardGroupBox}">
-                <StackPanel>
-                    <CheckBox Content="Keep menu open after clicking a slice"
-                              IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
-                    <TextBlock Text="Keeps the menu open until Escape or focus changes."
-                               Style="{StaticResource DescriptionTextBlock}" />
-                    <CheckBox Margin="0,8,0,0"
-                              Content="Always open menu in screen center"
-                              IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}" />
-                    <TextBlock Text="Opens at screen center instead of the pointer."
-                               Style="{StaticResource DescriptionTextBlock}" />
-                </StackPanel>
-            </GroupBox>
+            <local:SettingsCard Glyph="&#xE740;"
+                                Header="Menu size"
+                                Description="Diameter in pixels. 300 to 500 works well on most screens.">
+                <TextBox Width="100"
+                         Text="{Binding Settings.Size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </local:SettingsCard>
 
-            <GroupBox Grid.Row="2"
-                      Grid.Column="2"
-                      Header="Startup"
-                      Margin="0"
-                      Style="{StaticResource SettingsCardGroupBox}">
-                <StackPanel>
-                    <CheckBox Content="Run on Windows startup"
-                              IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
-                    <TextBlock Text="Starts Radial Actions minimized to the tray after sign-in."
-                               Style="{StaticResource DescriptionTextBlock}" />
-                </StackPanel>
-            </GroupBox>
-        </Grid>
+            <local:SettingsCard Glyph="&#xE81D;"
+                                Header="Open at screen center"
+                                Description="Open at the center of the screen instead of at the pointer.">
+                <CheckBox AutomationProperties.Name="Open at screen center"
+                          IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}" />
+            </local:SettingsCard>
+
+            <local:SettingsCard Glyph="&#xE840;"
+                                Header="Keep menu open after running an action"
+                                Description="The menu stays open until you press Escape or click away.">
+                <CheckBox AutomationProperties.Name="Keep menu open after running an action"
+                          IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}" />
+            </local:SettingsCard>
+
+            <TextBlock Style="{StaticResource SectionHeaderTextBlock}"
+                       Text="System" />
+
+            <local:SettingsCard Glyph="&#xE7E8;"
+                                Header="Run at Windows startup"
+                                Description="Start in the background when you sign in.">
+                <CheckBox AutomationProperties.Name="Run at Windows startup"
+                          IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}" />
+            </local:SettingsCard>
+
+            <local:SettingsCard Glyph="&#xE895;"
+                                Header="Check for updates automatically"
+                                Description="Look for new versions on GitHub when the app starts.">
+                <CheckBox AutomationProperties.Name="Check for updates automatically"
+                          IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}" />
+            </local:SettingsCard>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

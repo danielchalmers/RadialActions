@@ -11,135 +11,217 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/RadialActions;component/Settings/SettingsViewResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="ListToolbarButton"
+                   TargetType="Button"
+                   BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="Padding" Value="10,5" />
+                <Setter Property="Margin" Value="0,0,4,0" />
+            </Style>
+
+            <Style x:Key="ListToolbarGlyphTextBlock"
+                   TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Margin="0">
+    <Grid Margin="24,16,24,24">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="12" />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="8" />
-            <ColumnDefinition Width="1.2*" />
-        </Grid.ColumnDefinitions>
 
-        <GroupBox Grid.Row="0"
-                  Grid.Column="0"
-                  Margin="0"
-                  VerticalContentAlignment="Stretch"
-                  Style="{StaticResource SettingsCardGroupBox}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0"
+                   Style="{StaticResource PageTitleTextBlock}"
+                   Margin="0,0,0,4"
+                   Text="Actions" />
 
-                <ListBox Grid.Row="0"
-                         AllowDrop="True"
-                         DragOver="ActionsList_DragOver"
-                         Drop="ActionsList_Drop"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         ItemsSource="{Binding Actions}"
-                         SelectedIndex="{Binding SelectedActionIndex}"
-                         SelectedItem="{Binding SelectedAction}">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="Padding" Value="4,2" />
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
+        <TextBlock Grid.Row="1"
+                   Margin="0,0,0,16"
+                   FontSize="12"
+                   Opacity="0.72"
+                   Text="Each action becomes a slice in the radial menu. Drag files, apps, folders, or links onto the list to add them."
+                   TextWrapping="Wrap" />
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"
+                                  MinWidth="240" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Action list -->
+            <Border Grid.Column="0"
+                    Style="{StaticResource ContentCardBorder}"
+                    Margin="0"
+                    Padding="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <ListBox Grid.Row="0"
+                             AllowDrop="True"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             DragOver="ActionsList_DragOver"
+                             Drop="ActionsList_Drop"
+                             ItemsSource="{Binding Actions}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             SelectedIndex="{Binding SelectedActionIndex}"
+                             SelectedItem="{Binding SelectedAction}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem"
+                                   BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="Padding" Value="8,6" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsEnabled}"
+                                                             Value="False">
+                                                    <Setter Property="Opacity" Value="0.45" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               Width="24"
+                                               FontSize="14"
+                                               Text="{Binding Icon}" />
+                                    <TextBlock Grid.Column="1"
+                                               Margin="4,0,8,0"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding Name}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="2"
+                                               VerticalAlignment="Center"
+                                               FontSize="10"
+                                               Opacity="0.6"
+                                               Text="{Binding Type}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <TextBlock Grid.Row="0"
+                               Margin="16"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               IsHitTestVisible="False"
+                               Opacity="0.6"
+                               Text="Drag files, apps, folders, or links here to add them as actions."
+                               TextAlignment="Center"
+                               TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Actions.Count}"
+                                                 Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <Grid Grid.Row="1"
+                          Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
+                                Command="{Binding AddActionCommand}"
+                                Style="{StaticResource ListToolbarButton}"
+                                ToolTip="Add a new action">
                             <StackPanel Orientation="Horizontal">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsEnabled}"
-                                                         Value="False">
-                                                <Setter Property="Opacity" Value="0.45" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-                                <TextBlock Text="{Binding Icon}"
-                                           Width="22"
-                                           FontSize="14" />
-                                <TextBlock Text="{Binding Name}"
-                                           Margin="4,0,6,0"
-                                           VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding Type}"
+                                <TextBlock Style="{StaticResource ListToolbarGlyphTextBlock}"
+                                           Text="&#xE710;" />
+                                <TextBlock Margin="6,0,0,0"
                                            VerticalAlignment="Center"
-                                           FontSize="10"
-                                           Foreground="Gray" />
+                                           Text="Add" />
                             </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-
-                <TextBlock Grid.Row="0"
-                           Margin="16"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           TextAlignment="Center"
-                           TextWrapping="Wrap"
-                           Foreground="Gray"
-                           IsHitTestVisible="False"
-                           Text="Drag files, apps, folders, or links here to add them as actions.">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Actions.Count}"
-                                             Value="0">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
-                <Grid Grid.Row="1"
-                      Margin="0,12,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="4" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="4" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="4" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0"
-                            Content="Add"
-                            Command="{Binding AddActionCommand}"
-                            HorizontalAlignment="Stretch" />
-                    <Button Grid.Column="2"
-                            Content="Remove"
-                            Command="{Binding RemoveActionCommand}"
-                            HorizontalAlignment="Stretch" />
-                    <Button Grid.Column="4"
-                            Content="Up"
-                            Command="{Binding MoveUpCommand}"
-                            HorizontalAlignment="Stretch" />
-                    <Button Grid.Column="6"
-                            Content="Down"
-                            Command="{Binding MoveDownCommand}"
-                            HorizontalAlignment="Stretch" />
+                        </Button>
+                        <Button Grid.Column="1"
+                                Command="{Binding RemoveActionCommand}"
+                                Style="{StaticResource ListToolbarButton}"
+                                ToolTip="Remove the selected action">
+                            <TextBlock Style="{StaticResource ListToolbarGlyphTextBlock}"
+                                       Text="&#xE74D;" />
+                        </Button>
+                        <Button Grid.Column="3"
+                                Command="{Binding MoveUpCommand}"
+                                Style="{StaticResource ListToolbarButton}"
+                                ToolTip="Move up">
+                            <TextBlock Style="{StaticResource ListToolbarGlyphTextBlock}"
+                                       Text="&#xE74A;" />
+                        </Button>
+                        <Button Grid.Column="4"
+                                Command="{Binding MoveDownCommand}"
+                                Style="{StaticResource ListToolbarButton}"
+                                Margin="0"
+                                ToolTip="Move down">
+                            <TextBlock Style="{StaticResource ListToolbarGlyphTextBlock}"
+                                       Text="&#xE74B;" />
+                        </Button>
+                    </Grid>
                 </Grid>
-            </Grid>
-        </GroupBox>
+            </Border>
 
-        <GroupBox Grid.Row="0"
-                  Grid.Column="2"
-                  Margin="0"
-                  VerticalContentAlignment="Stretch"
-                  Style="{StaticResource SettingsCardGroupBox}"
-                  IsEnabled="{Binding Editor.HasSelectedAction}">
-            <ScrollViewer VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled">
-                <local:ActionEditorView DataContext="{Binding Editor}" />
-            </ScrollViewer>
-        </GroupBox>
+            <!-- Editor -->
+            <Border Grid.Column="2"
+                    Style="{StaticResource ContentCardBorder}"
+                    Margin="0">
+                <Grid>
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Visibility="{Binding Editor.HasSelectedAction, Converter={local:BooleanToVisibilityConverter}}">
+                        <local:ActionEditorView MaxWidth="560"
+                                                HorizontalAlignment="Left"
+                                                DataContext="{Binding Editor}" />
+                    </ScrollViewer>
+
+                    <TextBlock HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               IsHitTestVisible="False"
+                               Opacity="0.6"
+                               Text="Select an action to edit it."
+                               TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Editor.HasSelectedAction}"
+                                                 Value="False">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
