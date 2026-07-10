@@ -125,9 +125,9 @@ public static class PieVisualBuilder
             Style = labelTextStyle,
             Text = digit.ToString(),
             Foreground = new SolidColorBrush(labelTextColor),
-            FontSize = 10,
-            FontWeight = FontWeights.SemiBold,
-            Opacity = isHighContrast ? 1 : 0.55,
+            FontSize = 9,
+            FontWeight = FontWeights.Normal,
+            Opacity = isHighContrast ? 1 : 0.3,
             IsHitTestVisible = false,
             SnapsToDevicePixels = true,
         };
