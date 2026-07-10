@@ -23,6 +23,11 @@ public enum ActionType
     /// Launch an app, open a file, or open a URL using shell execution.
     /// </summary>
     Shell = 2,
+
+    /// <summary>
+    /// Run a built-in system command like locking the workstation.
+    /// </summary>
+    System = 3,
 }
 
 /// <summary>
@@ -42,6 +47,25 @@ public sealed class KeyActionDefinition
     public string Name { get; }
     public string Icon { get; }
     public byte VirtualKey { get; }
+}
+
+/// <summary>
+/// Defines a selectable system action.
+/// </summary>
+public sealed class SystemActionDefinition
+{
+    public SystemActionDefinition(string id, string name, string icon, Action execute)
+    {
+        Id = id;
+        Name = name;
+        Icon = icon;
+        Execute = execute;
+    }
+
+    public string Id { get; }
+    public string Name { get; }
+    public string Icon { get; }
+    public Action Execute { get; }
 }
 
 /// <summary>
@@ -68,10 +92,31 @@ public partial class PieAction : ObservableObject
 
     public static IReadOnlyList<KeyActionDefinition> KeyActions => _keyActions;
 
+    private static readonly IReadOnlyList<SystemActionDefinition> _systemActions =
+    [
+        new("LockWorkstation", "Lock", "🔒", SystemActionUtil.LockWorkstation),
+        new("Sleep", "Sleep", "🌙", SystemActionUtil.Sleep),
+        new("ShowDesktop", "Show Desktop", "🖥️", SystemActionUtil.ShowDesktop),
+        new("Screenshot", "Screenshot", "📸", SystemActionUtil.Screenshot),
+        new("EmptyRecycleBin", "Empty Recycle Bin", "🗑️", SystemActionUtil.EmptyRecycleBin),
+        new("ToggleDarkMode", "Toggle Dark Mode", "🌓", SystemActionUtil.ToggleDarkMode),
+    ];
+
+    private static readonly IReadOnlyDictionary<string, SystemActionDefinition> _systemActionsById =
+        _systemActions.ToDictionary(action => action.Id, StringComparer.OrdinalIgnoreCase);
+
+    public static IReadOnlyList<SystemActionDefinition> SystemActions => _systemActions;
+
     public static bool TryGetKeyAction(string id, out KeyActionDefinition definition)
     {
         definition = null;
         return !string.IsNullOrWhiteSpace(id) && _keyActionsById.TryGetValue(id, out definition);
+    }
+
+    public static bool TryGetSystemAction(string id, out SystemActionDefinition definition)
+    {
+        definition = null;
+        return !string.IsNullOrWhiteSpace(id) && _systemActionsById.TryGetValue(id, out definition);
     }
 
     /// <summary>
@@ -148,6 +193,23 @@ public partial class PieAction : ObservableObject
     }
 
     /// <summary>
+    /// Creates a system action.
+    /// </summary>
+    public static PieAction CreateSystemAction(string systemActionId)
+    {
+        if (!TryGetSystemAction(systemActionId, out var definition))
+        {
+            definition = _systemActions[0];
+        }
+
+        return new PieAction(definition.Name, definition.Icon)
+        {
+            Type = ActionType.System,
+            Parameter = definition.Id,
+        };
+    }
+
+    /// <summary>
     /// Creates a shell action.
     /// </summary>
     public static PieAction CreateShellAction(string name, string target, string icon = "📁", string arguments = "", string workingDirectory = "")
@@ -176,6 +238,9 @@ public partial class PieAction : ObservableObject
             case ActionType.Shell:
                 ExecuteShell();
                 return;
+            case ActionType.System:
+                ExecuteSystem();
+                return;
             default:
                 throw new NotSupportedException("Action type is not supported");
         }
@@ -196,6 +261,17 @@ public partial class PieAction : ObservableObject
             throw new InvalidOperationException("Shortcut is invalid");
 
         ActionUtil.SimulateKeyboardShortcut(Parameter);
+    }
+
+    private void ExecuteSystem()
+    {
+        if (string.IsNullOrWhiteSpace(Parameter))
+            throw new InvalidOperationException("System action not configured");
+
+        if (!TryGetSystemAction(Parameter, out var definition))
+            throw new InvalidOperationException("System action is unknown");
+
+        definition.Execute();
     }
 
     private void ExecuteShell()

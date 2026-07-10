@@ -51,7 +51,7 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock Text="Use Key for shortcuts and media controls; Shell for apps, files, folders, URLs, or commands."
+        <TextBlock Text="Use Key for shortcuts and media controls; Shell for apps, files, folders, URLs, or commands; System for built-in Windows commands."
                    Style="{StaticResource DescriptionTextBlock}" />
 
         <StackPanel Margin="0,0,0,4"
@@ -86,6 +86,31 @@
             <TextBlock Text="Enter a shortcut, such as Ctrl+Shift+M."
                        Style="{StaticResource DescriptionTextBlock}"
                        Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
+        </StackPanel>
+
+        <StackPanel Margin="0,0,0,4"
+              Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.System}}">
+            <TextBlock Text="System Action:"
+                       Style="{StaticResource ActionEditorLabelTextBlock}" />
+            <ComboBox SelectedValue="{Binding SelectedSystemActionId, Mode=TwoWay}"
+                      SelectedValuePath="Id"
+                      IsTextSearchEnabled="True"
+                      ItemsSource="{Binding SystemActionOptions}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Icon}"
+                                       Width="20"
+                                       FontSize="14" />
+                            <TextBlock Text="{Binding Name}"
+                                       Margin="4,0,0,0"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Text="Choose a built-in command. It runs immediately when the slice is clicked."
+                       Style="{StaticResource DescriptionTextBlock}" />
         </StackPanel>
 
         <StackPanel

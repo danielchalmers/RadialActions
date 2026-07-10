@@ -39,6 +39,44 @@ public class PieActionTests
     }
 
     [Fact]
+    public void CreateSystemAction_UnknownId_UsesFirstKnownAction()
+    {
+        var action = PieAction.CreateSystemAction("not-a-real-id");
+
+        Assert.Equal(ActionType.System, action.Type);
+        Assert.True(action.IsEnabled);
+        Assert.Equal(PieAction.SystemActions[0].Id, action.Parameter);
+        Assert.Equal(PieAction.SystemActions[0].Name, action.Name);
+        Assert.Equal(PieAction.SystemActions[0].Icon, action.Icon);
+    }
+
+    [Fact]
+    public void TryGetSystemAction_KnownId_ReturnsDefinition()
+    {
+        var ok = PieAction.TryGetSystemAction("LockWorkstation", out var definition);
+
+        Assert.True(ok);
+        Assert.NotNull(definition);
+        Assert.Equal("LockWorkstation", definition.Id);
+    }
+
+    [Fact]
+    public void SystemActions_AreConfiguredCorrectly()
+    {
+        Assert.NotEmpty(PieAction.SystemActions);
+
+        var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var definition in PieAction.SystemActions)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(definition.Id));
+            Assert.False(string.IsNullOrWhiteSpace(definition.Name));
+            Assert.False(string.IsNullOrWhiteSpace(definition.Icon));
+            Assert.NotNull(definition.Execute);
+            Assert.True(ids.Add(definition.Id), $"Duplicate system action id: {definition.Id}");
+        }
+    }
+
+    [Fact]
     public void Execute_NoneAction_ThrowsInvalidOperationException()
     {
         var action = new PieAction();
@@ -56,6 +94,30 @@ public class PieActionTests
         var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
         Assert.Equal("Launch target not configured", ex.Message);
+    }
+
+    [Fact]
+    public void Execute_SystemActionWithoutParameter_ThrowsInvalidOperationException()
+    {
+        var action = new PieAction("System") { Type = ActionType.System };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
+
+        Assert.Equal("System action not configured", ex.Message);
+    }
+
+    [Fact]
+    public void Execute_SystemActionWithUnknownId_ThrowsInvalidOperationException()
+    {
+        var action = new PieAction("System")
+        {
+            Type = ActionType.System,
+            Parameter = "not-a-real-id"
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
+
+        Assert.Equal("System action is unknown", ex.Message);
     }
 
     [Fact]

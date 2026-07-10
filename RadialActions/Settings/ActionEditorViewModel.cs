@@ -18,6 +18,7 @@ public partial class ActionEditorViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasSelectedAction))]
     [NotifyPropertyChangedFor(nameof(SelectedActionType))]
     [NotifyPropertyChangedFor(nameof(SelectedKeyActionId))]
+    [NotifyPropertyChangedFor(nameof(SelectedSystemActionId))]
     private PieAction _selectedAction;
 
     public ActionEditorViewModel(ActionDefaultsService actionDefaultsService, IEnumerable<PieAction> actions)
@@ -30,10 +31,13 @@ public partial class ActionEditorViewModel : ObservableObject
     [
         new(ActionType.Key, "Key", "⌨️"),
         new(ActionType.Shell, "Shell", "🚀"),
+        new(ActionType.System, "System", "⚙️"),
     ];
 
     public IReadOnlyList<KeyActionDefinition> KeyActionOptions { get; } =
         [.. PieAction.KeyActions, CustomKeyActionOption];
+
+    public IReadOnlyList<SystemActionDefinition> SystemActionOptions { get; } = PieAction.SystemActions;
     public bool HasSelectedAction => SelectedAction != null;
 
     public ActionType SelectedActionType
@@ -59,6 +63,10 @@ public partial class ActionEditorViewModel : ObservableObject
             else if (value == ActionType.Shell)
             {
                 SelectedAction.Parameter = string.Empty;
+            }
+            else if (value == ActionType.System)
+            {
+                _actionDefaultsService.EnsureSystemDefaults(SelectedAction);
             }
 
             OnPropertyChanged();
@@ -98,6 +106,24 @@ public partial class ActionEditorViewModel : ObservableObject
                 {
                     _actionDefaultsService.ApplyKeyDefaults(SelectedAction, definition);
                 }
+            }
+
+            OnPropertyChanged();
+        }
+    }
+
+    public string SelectedSystemActionId
+    {
+        get => SelectedAction?.Parameter ?? string.Empty;
+        set
+        {
+            if (SelectedAction == null || string.IsNullOrEmpty(value) || SelectedAction.Parameter == value)
+                return;
+
+            SelectedAction.Parameter = value;
+            if (PieAction.TryGetSystemAction(SelectedAction.Parameter, out var definition))
+            {
+                _actionDefaultsService.ApplySystemDefaults(SelectedAction, definition);
             }
 
             OnPropertyChanged();
@@ -166,10 +192,12 @@ public partial class ActionEditorViewModel : ObservableObject
         {
             newValue.PropertyChanged += SelectedActionPropertyChanged;
             _actionDefaultsService.EnsureKeyDefaults(newValue);
+            _actionDefaultsService.EnsureSystemDefaults(newValue);
         }
 
         OnPropertyChanged(nameof(SelectedActionType));
         OnPropertyChanged(nameof(SelectedKeyActionId));
+        OnPropertyChanged(nameof(SelectedSystemActionId));
     }
 
     private void SelectedActionPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -178,12 +206,14 @@ public partial class ActionEditorViewModel : ObservableObject
         {
             OnPropertyChanged(nameof(SelectedActionType));
             OnPropertyChanged(nameof(SelectedKeyActionId));
+            OnPropertyChanged(nameof(SelectedSystemActionId));
         }
 
         if (e.PropertyName != nameof(PieAction.Parameter))
             return;
 
         OnPropertyChanged(nameof(SelectedKeyActionId));
+        OnPropertyChanged(nameof(SelectedSystemActionId));
 
         if (SelectedAction == null)
             return;
@@ -196,6 +226,11 @@ public partial class ActionEditorViewModel : ObservableObject
                  PieAction.TryGetKeyAction(SelectedAction.Parameter, out var definition))
         {
             _actionDefaultsService.ApplyKeyDefaults(SelectedAction, definition);
+        }
+        else if (SelectedActionType == ActionType.System &&
+                 PieAction.TryGetSystemAction(SelectedAction.Parameter, out var systemDefinition))
+        {
+            _actionDefaultsService.ApplySystemDefaults(SelectedAction, systemDefinition);
         }
     }
 }

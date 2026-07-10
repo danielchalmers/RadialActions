@@ -69,7 +69,8 @@ public class SettingsSerializationTests
         settings.Actions = new System.Collections.ObjectModel.ObservableCollection<PieAction>
         {
             PieAction.CreateKeyAction("Mute"),
-            PieAction.CreateShellAction("Explorer", "explorer.exe")
+            PieAction.CreateShellAction("Explorer", "explorer.exe"),
+            PieAction.CreateSystemAction("LockWorkstation")
         };
         settings.Actions[1].IsEnabled = false;
 
@@ -79,13 +80,16 @@ public class SettingsSerializationTests
         Assert.Equal("Ctrl+Shift+R", loaded.ActivationHotkey);
         Assert.Equal(512, loaded.Size);
         Assert.True(loaded.OpenMenuInScreenCenter);
-        Assert.Equal(2, loaded.Actions.Count);
+        Assert.Equal(3, loaded.Actions.Count);
         Assert.Equal(ActionType.Key, loaded.Actions[0].Type);
         Assert.Equal("Mute", loaded.Actions[0].Parameter);
         Assert.True(loaded.Actions[0].IsEnabled);
         Assert.Equal(ActionType.Shell, loaded.Actions[1].Type);
         Assert.Equal("explorer.exe", loaded.Actions[1].Parameter);
         Assert.False(loaded.Actions[1].IsEnabled);
+        Assert.Equal(ActionType.System, loaded.Actions[2].Type);
+        Assert.Equal("LockWorkstation", loaded.Actions[2].Parameter);
+        Assert.True(loaded.Actions[2].IsEnabled);
     }
 
     [Fact]

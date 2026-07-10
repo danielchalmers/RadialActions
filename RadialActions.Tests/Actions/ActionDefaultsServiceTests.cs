@@ -1,4 +1,4 @@
-namespace RadialActions.Tests;
+﻿namespace RadialActions.Tests;
 
 public sealed class ActionDefaultsServiceTests : IDisposable
 {
@@ -28,6 +28,43 @@ public sealed class ActionDefaultsServiceTests : IDisposable
         autoAction.Icon = mute.Icon;
         service.ApplyKeyDefaults(autoAction, volumeUp);
         Assert.Equal(volumeUp.Icon, autoAction.Icon);
+    }
+
+    [Fact]
+    public void ApplySystemDefaults_UpdatesNameAndIconOnlyForBlankDefaultOrPreviousAutoValue()
+    {
+        var service = new ActionDefaultsService();
+        var defaultAction = new PieAction { Type = ActionType.System, Parameter = "LockWorkstation" };
+        var manualAction = new PieAction("My Lock") { Type = ActionType.System, Parameter = "LockWorkstation", Icon = "\U0001F3B5" };
+        var autoAction = new PieAction { Type = ActionType.System, Parameter = "LockWorkstation" };
+        var lockAction = FindSystemAction("LockWorkstation");
+        var sleepAction = FindSystemAction("Sleep");
+
+        service.ApplySystemDefaults(defaultAction, lockAction);
+        Assert.Equal(lockAction.Name, defaultAction.Name);
+        Assert.Equal(lockAction.Icon, defaultAction.Icon);
+
+        service.ApplySystemDefaults(manualAction, lockAction);
+        Assert.Equal("My Lock", manualAction.Name);
+        Assert.Equal("\U0001F3B5", manualAction.Icon);
+
+        service.ApplySystemDefaults(autoAction, lockAction);
+        service.ApplySystemDefaults(autoAction, sleepAction);
+        Assert.Equal(sleepAction.Name, autoAction.Name);
+        Assert.Equal(sleepAction.Icon, autoAction.Icon);
+    }
+
+    [Fact]
+    public void EnsureSystemDefaults_UnknownParameter_ResetsToFirstKnownAction()
+    {
+        var service = new ActionDefaultsService();
+        var action = new PieAction { Type = ActionType.System, Parameter = "not-a-real-id" };
+
+        service.EnsureSystemDefaults(action);
+
+        Assert.Equal(PieAction.SystemActions[0].Id, action.Parameter);
+        Assert.Equal(PieAction.SystemActions[0].Name, action.Name);
+        Assert.Equal(PieAction.SystemActions[0].Icon, action.Icon);
     }
 
     [Fact]
@@ -78,6 +115,12 @@ public sealed class ActionDefaultsServiceTests : IDisposable
     private static KeyActionDefinition FindKeyAction(string id)
     {
         Assert.True(PieAction.TryGetKeyAction(id, out var definition));
+        return definition;
+    }
+
+    private static SystemActionDefinition FindSystemAction(string id)
+    {
+        Assert.True(PieAction.TryGetSystemAction(id, out var definition));
         return definition;
     }
 }

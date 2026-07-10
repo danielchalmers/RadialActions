@@ -1,10 +1,11 @@
-namespace RadialActions;
+﻿namespace RadialActions;
 
 public sealed class ActionDefaultsService
 {
     public const string LegacyDefaultIcon = "\u2B50";
 
     private readonly Dictionary<PieAction, KeyActionDefinition> _autoKeyDefaults = [];
+    private readonly Dictionary<PieAction, SystemActionDefinition> _autoSystemDefaults = [];
     private readonly Dictionary<PieAction, ShellActionDefaults> _autoShellDefaults = [];
 
     public ShellActionDefaults? GetShellDefaults(string target) => ShellActionDefaults.FromTarget(target);
@@ -12,12 +13,14 @@ public sealed class ActionDefaultsService
     public void Forget(PieAction action)
     {
         _autoKeyDefaults.Remove(action);
+        _autoSystemDefaults.Remove(action);
         _autoShellDefaults.Remove(action);
     }
 
     public void TrackExistingDefaults(IEnumerable<PieAction> actions)
     {
         _autoKeyDefaults.Clear();
+        _autoSystemDefaults.Clear();
         _autoShellDefaults.Clear();
 
         foreach (var action in actions)
@@ -27,6 +30,13 @@ public sealed class ActionDefaultsService
                 if (PieAction.TryGetKeyAction(action.Parameter, out var definition))
                 {
                     _autoKeyDefaults[action] = definition;
+                }
+            }
+            else if (action.Type == ActionType.System)
+            {
+                if (PieAction.TryGetSystemAction(action.Parameter, out var definition))
+                {
+                    _autoSystemDefaults[action] = definition;
                 }
             }
             else if (action.Type == ActionType.Shell)
@@ -67,6 +77,38 @@ public sealed class ActionDefaultsService
         }
 
         _autoKeyDefaults[action] = definition;
+    }
+
+    public void EnsureSystemDefaults(PieAction action)
+    {
+        if (action.Type != ActionType.System)
+            return;
+
+        if (!PieAction.TryGetSystemAction(action.Parameter, out var definition))
+        {
+            definition = PieAction.SystemActions[0];
+            action.Parameter = definition.Id;
+        }
+
+        ApplySystemDefaults(action, definition);
+    }
+
+    public void ApplySystemDefaults(PieAction action, SystemActionDefinition definition)
+    {
+        _autoSystemDefaults.TryGetValue(action, out var previous);
+
+        if (ShouldApplyDefault(action.Name, PieAction.DefaultName, previous?.Name ?? string.Empty))
+        {
+            action.Name = definition.Name;
+        }
+
+        if (ShouldApplyDefault(action.Icon, PieAction.DefaultIcon, previous?.Icon ?? string.Empty) ||
+            action.Icon == LegacyDefaultIcon)
+        {
+            action.Icon = definition.Icon;
+        }
+
+        _autoSystemDefaults[action] = definition;
     }
 
     public void ApplyShellDefaults(PieAction action, string target)
