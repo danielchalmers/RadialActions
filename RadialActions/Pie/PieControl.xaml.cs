@@ -137,9 +137,29 @@ public partial class PieControl : UserControl
                 return OpenSelectedSliceContextMenu();
             case Key.F10 when modifiers.HasFlag(ModifierKeys.Shift):
                 return OpenSelectedSliceContextMenu();
+            case >= Key.D1 and <= Key.D9:
+                return HandleDigitKey(key - Key.D1 + 1);
+            case >= Key.NumPad1 and <= Key.NumPad9:
+                return HandleDigitKey(key - Key.NumPad1 + 1);
             default:
                 return false;
         }
+    }
+
+    private bool HandleDigitKey(int digit)
+    {
+        if (!_selectionController.TrySelectDigit(digit, GetSelectionItems()))
+        {
+            return false;
+        }
+
+        Log.Debug("Digit key {Digit} pressed; activating selected slice", digit);
+        _interactionMode = InteractionMode.Keyboard;
+        _keyboardModeMousePosition = Mouse.GetPosition(PieCanvas);
+        _hasKeyboardModeMousePosition = true;
+        RefreshVisualState(animate: false);
+        ActivateSelectedSlice();
+        return true;
     }
 
     private void OnPieCanvasMouseMove(object sender, MouseEventArgs e)

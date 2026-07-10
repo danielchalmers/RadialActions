@@ -1,4 +1,4 @@
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
 namespace RadialActions;
 
@@ -26,6 +26,19 @@ internal sealed class PieSelectionController
         {
             SelectedIndex = NoSelection;
         }
+    }
+
+    public bool TrySelectDigit(int digit, IReadOnlyList<Item> items)
+    {
+        // Digits count clockwise from the top; items are provided in that visual order.
+        var position = digit - 1;
+        if (position < 0 || position >= items.Count)
+        {
+            return false;
+        }
+
+        SelectedIndex = items[position].Index;
+        return true;
     }
 
     public void HandleArrowKey(Key key, IReadOnlyList<Item> items)
