@@ -30,17 +30,19 @@ public enum ActionType
 /// </summary>
 public sealed class KeyActionDefinition
 {
-    public KeyActionDefinition(string id, string name, string icon, byte virtualKey)
+    public KeyActionDefinition(string id, string name, string icon, string category, byte virtualKey)
     {
         Id = id;
         Name = name;
         Icon = icon;
+        Category = category;
         VirtualKey = virtualKey;
     }
 
     public string Id { get; }
     public string Name { get; }
     public string Icon { get; }
+    public string Category { get; }
     public byte VirtualKey { get; }
 }
 
@@ -52,15 +54,22 @@ public partial class PieAction : ObservableObject
     public const string DefaultName = "New Action";
     public const string DefaultIcon = "⚡";
 
+    public const string MediaCategory = "Media";
+    public const string VolumeCategory = "Volume";
+    public const string SystemCategory = "System";
+
     private static readonly IReadOnlyList<KeyActionDefinition> _keyActions =
     [
-        new("PlayPause", "Play/Pause", "⏯️", ActionUtil.VK_MEDIA_PLAY_PAUSE),
-        new("PreviousTrack", "Previous", "⏮️", ActionUtil.VK_MEDIA_PREV_TRACK),
-        new("NextTrack", "Next", "⏭️", ActionUtil.VK_MEDIA_NEXT_TRACK),
-        new("Stop", "Stop", "⏹️", ActionUtil.VK_MEDIA_STOP),
-        new("Mute", "Mute", "🔇", ActionUtil.VK_VOLUME_MUTE),
-        new("VolumeDown", "Volume Down", "🔉", ActionUtil.VK_VOLUME_DOWN),
-        new("VolumeUp", "Volume Up", "🔊", ActionUtil.VK_VOLUME_UP),
+        new("PlayPause", "Play/Pause", "⏯️", MediaCategory, ActionUtil.VK_MEDIA_PLAY_PAUSE),
+        new("PreviousTrack", "Previous Track", "⏮️", MediaCategory, ActionUtil.VK_MEDIA_PREV_TRACK),
+        new("NextTrack", "Next Track", "⏭️", MediaCategory, ActionUtil.VK_MEDIA_NEXT_TRACK),
+        new("Stop", "Stop", "⏹️", MediaCategory, ActionUtil.VK_MEDIA_STOP),
+
+        new("Mute", "Mute", "🔇", VolumeCategory, ActionUtil.VK_VOLUME_MUTE),
+        new("VolumeDown", "Volume Down", "🔉", VolumeCategory, ActionUtil.VK_VOLUME_DOWN),
+        new("VolumeUp", "Volume Up", "🔊", VolumeCategory, ActionUtil.VK_VOLUME_UP),
+
+        new("PrintScreen", "Print Screen", "🖼️", SystemCategory, ActionUtil.VK_SNAPSHOT),
     ];
 
     private static readonly IReadOnlyDictionary<string, KeyActionDefinition> _keyActionsById =

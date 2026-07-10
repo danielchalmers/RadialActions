@@ -21,6 +21,9 @@ public static class ActionUtil
     public const byte VK_VOLUME_DOWN = 0xAE;
     public const byte VK_VOLUME_UP = 0xAF;
 
+    // System Keys
+    public const byte VK_SNAPSHOT = 0x2C; // Print Screen
+
     // Modifier Keys
     public const byte VK_CONTROL = 0x11;
     public const byte VK_MENU = 0x12; // Alt
@@ -140,7 +143,8 @@ public static class ActionUtil
             or VK_MEDIA_STOP
             or VK_VOLUME_MUTE
             or VK_VOLUME_DOWN
-            or VK_VOLUME_UP;
+            or VK_VOLUME_UP
+            or VK_SNAPSHOT;
     }
 
     private static bool TrySendMediaAppCommand(byte vk)
