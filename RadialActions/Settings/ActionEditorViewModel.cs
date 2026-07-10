@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
@@ -10,7 +11,7 @@ public partial class ActionEditorViewModel : ObservableObject
     public const string CustomKeyActionId = "__custom__";
 
     private static readonly KeyActionDefinition CustomKeyActionOption =
-        new(CustomKeyActionId, "Custom Shortcut...", "⌨️", 0);
+        new(CustomKeyActionId, "Custom Shortcut...", "⌨️", "Custom", 0);
 
     private readonly ActionDefaultsService _actionDefaultsService;
 
@@ -24,6 +25,10 @@ public partial class ActionEditorViewModel : ObservableObject
     {
         _actionDefaultsService = actionDefaultsService;
         _actionDefaultsService.TrackExistingDefaults(actions);
+
+        var view = new ListCollectionView((System.Collections.IList)KeyActionOptions);
+        view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(KeyActionDefinition.Category)));
+        KeyActionOptionsView = view;
     }
 
     public IReadOnlyList<ActionTypeOption> ActionTypes { get; } =
@@ -34,6 +39,12 @@ public partial class ActionEditorViewModel : ObservableObject
 
     public IReadOnlyList<KeyActionDefinition> KeyActionOptions { get; } =
         [.. PieAction.KeyActions, CustomKeyActionOption];
+
+    /// <summary>
+    /// Key action options grouped by category for display in the editor.
+    /// </summary>
+    public ICollectionView KeyActionOptionsView { get; }
+
     public bool HasSelectedAction => SelectedAction != null;
 
     public ActionType SelectedActionType

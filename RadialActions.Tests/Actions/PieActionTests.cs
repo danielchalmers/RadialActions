@@ -39,6 +39,16 @@ public class PieActionTests
     }
 
     [Fact]
+    public void KeyActions_AllHaveCategoryAndVirtualKey()
+    {
+        foreach (var definition in PieAction.KeyActions)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(definition.Category));
+            Assert.NotEqual(0, definition.VirtualKey);
+        }
+    }
+
+    [Fact]
     public void Execute_NoneAction_ThrowsInvalidOperationException()
     {
         var action = new PieAction();

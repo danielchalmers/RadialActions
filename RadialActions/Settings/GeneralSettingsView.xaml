@@ -38,7 +38,7 @@
                     <TextBlock Text="Hotkey:"
                                Style="{StaticResource LabelTextBlock}" />
                     <TextBox Text="{Binding Settings.ActivationHotkey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             Tag="ActivationHotkeyInput" />
+                             Tag="HotkeyInput" />
                     <TextBlock Text="Press a key combination, such as Ctrl+Alt+Space."
                                Style="{StaticResource DescriptionTextBlock}" />
                 </StackPanel>
