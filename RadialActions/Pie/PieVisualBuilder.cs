@@ -114,6 +114,25 @@ public static class PieVisualBuilder
         return new CenterElements(centerCloseTarget, centerFillBrush, centerStrokeBrush, centerCloseIcon);
     }
 
+    public static TextBlock CreateSliceDigitHint(
+        int digit,
+        Style labelTextStyle,
+        Color labelTextColor,
+        bool isHighContrast)
+    {
+        return new TextBlock
+        {
+            Style = labelTextStyle,
+            Text = digit.ToString(),
+            Foreground = new SolidColorBrush(labelTextColor),
+            FontSize = 10,
+            FontWeight = FontWeights.SemiBold,
+            Opacity = isHighContrast ? 1 : 0.55,
+            IsHitTestVisible = false,
+            SnapsToDevicePixels = true,
+        };
+    }
+
     public static StackPanel CreateSliceContentPanel(
         PieAction sliceAction,
         Style iconTextStyle,

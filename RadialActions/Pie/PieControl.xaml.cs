@@ -26,6 +26,17 @@ public partial class PieControl : UserControl
     private const double MouseMoveThreshold = 0.25;
 
     /// <summary>
+    /// The number keys 1-9 trigger slices, so hints are only shown for the first nine.
+    /// </summary>
+    private const int MaxDigitHints = 9;
+
+    /// <summary>
+    /// How far from the center the digit hints sit, as a fraction of the outer radius.
+    /// Keeps them near the rim, clear of the icon and label at the slice midpoint.
+    /// </summary>
+    private const double DigitHintRadiusRatio = 0.9;
+
+    /// <summary>
     /// How far the pointer must travel with the button held before a press becomes a drag.
     /// Deliberately much larger than the system drag threshold so held-but-jittering clicks
     /// during normal use never start reordering.
@@ -597,6 +608,21 @@ public partial class PieControl : UserControl
             };
             Panel.SetZIndex(slice, SliceZIndex);
             PieCanvas.Children.Add(slice);
+
+            if (i < MaxDigitHints)
+            {
+                var digitHint = PieVisualBuilder.CreateSliceDigitHint(
+                    i + 1,
+                    theme.LabelTextStyle,
+                    theme.LabelTextColor,
+                    theme.IsHighContrast);
+                digitHint.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                var hintPosition = PieLayoutCalculator.GetTextPosition(center, outerRadius * DigitHintRadiusRatio, startAngle, endAngle, SnapPoint);
+                Canvas.SetLeft(digitHint, SnapToDevicePixel(hintPosition.X - (digitHint.DesiredSize.Width / 2), isXAxis: true));
+                Canvas.SetTop(digitHint, SnapToDevicePixel(hintPosition.Y - (digitHint.DesiredSize.Height / 2), isXAxis: false));
+                Panel.SetZIndex(digitHint, SliceContentZIndex);
+                PieCanvas.Children.Add(digitHint);
+            }
 
             var textRadius = innerRadius > 0 ? (outerRadius + innerRadius) / 2 : outerRadius * 0.6;
             var textPosition = PieLayoutCalculator.GetTextPosition(center, textRadius, startAngle, endAngle, SnapPoint);
