@@ -14,65 +14,64 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <StackPanel>
-        <TextBlock Text="Enabled:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <CheckBox Content="Show this action in the menu"
-                  IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}" />
-        <TextBlock Text="Hide this action without removing its configuration."
-                   Style="{StaticResource DescriptionTextBlock}" />
+        <local:SettingsCard Margin="0,0,0,12"
+                            Header="Show this action in the menu"
+                            Description="Hide the action without removing its configuration.">
+            <CheckBox AutomationProperties.Name="Show this action in the menu"
+                      IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}" />
+        </local:SettingsCard>
 
-        <TextBlock Text="Name:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
+        <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                   Text="Name" />
         <TextBox Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Text="Shown next to the icon in the radial menu."
-                   Style="{StaticResource DescriptionTextBlock}" />
+        <TextBlock Style="{StaticResource DescriptionTextBlock}"
+                   Text="Shown next to the icon in the radial menu." />
 
-        <TextBlock Text="Icon:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
+        <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                   Text="Icon" />
         <TextBox Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Text="Use a short symbol or emoji that fits in a slice."
-                   Style="{StaticResource DescriptionTextBlock}" />
+        <TextBlock Style="{StaticResource DescriptionTextBlock}"
+                   Text="A short symbol or emoji that fits in a slice." />
 
-        <TextBlock Text="Type:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
+        <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                   Text="Type" />
         <ComboBox ItemsSource="{Binding ActionTypes}"
                   SelectedValue="{Binding SelectedActionType, Mode=TwoWay}"
                   SelectedValuePath="Type">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Icon}"
-                                   Width="20"
-                                   FontSize="14" />
-                        <TextBlock Text="{Binding Name}"
-                                   Margin="4,0,0,0"
-                                   VerticalAlignment="Center" />
+                        <TextBlock Width="20"
+                                   FontSize="14"
+                                   Text="{Binding Icon}" />
+                        <TextBlock Margin="4,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding Name}" />
                     </StackPanel>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock Text="Use Key for shortcuts and media controls; Shell for apps, files, folders, URLs, or commands."
-                   Style="{StaticResource DescriptionTextBlock}" />
+        <TextBlock Style="{StaticResource DescriptionTextBlock}"
+                   Text="Key runs shortcuts and media controls. Shell opens apps, files, folders, URLs, or commands." />
 
-        <StackPanel Margin="0,0,0,4"
-              Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
-            <TextBlock Text="Key Action:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <ComboBox SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
-                      SelectedValuePath="Id"
-                      IsTextSearchEnabled="True"
-                      TextSearch.TextPath="Name"
+        <StackPanel Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
+            <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                       Text="Key action" />
+            <ComboBox IsTextSearchEnabled="True"
+                      ItemsSource="{Binding KeyActionOptionsView}"
                       MaxDropDownHeight="420"
-                      ItemsSource="{Binding KeyActionOptionsView}">
+                      SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
+                      SelectedValuePath="Id"
+                      TextSearch.TextPath="Name">
                 <ComboBox.GroupStyle>
                     <GroupStyle>
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Name}"
+                                <TextBlock Margin="6,6,0,2"
                                            FontSize="11"
                                            FontWeight="SemiBold"
                                            Opacity="0.6"
-                                           Margin="6,6,0,2" />
+                                           Text="{Binding Name}" />
                             </DataTemplate>
                         </GroupStyle.HeaderTemplate>
                     </GroupStyle>
@@ -80,34 +79,32 @@
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Icon}"
-                                       Width="20"
-                                       FontSize="14" />
-                            <TextBlock Text="{Binding Name}"
-                                       Margin="4,0,0,0"
-                                       VerticalAlignment="Center" />
+                            <TextBlock Width="20"
+                                       FontSize="14"
+                                       Text="{Binding Icon}" />
+                            <TextBlock Margin="4,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding Name}" />
                         </StackPanel>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <TextBlock Text="Pick a media, volume, or system command, or record your own shortcut with Custom Shortcut."
-                       Style="{StaticResource DescriptionTextBlock}" />
+            <TextBlock Style="{StaticResource DescriptionTextBlock}"
+                       Text="Pick a media, volume, or system command, or record your own with Custom Shortcut." />
 
-            <TextBlock Text="Shortcut:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}"
-                       Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
-            <TextBox Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Tag="HotkeyInput"
-                     Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
-            <TextBlock Text="Click the box, then press the key combination to record it, such as Ctrl+Shift+M. Press Backspace to clear."
-                       Style="{StaticResource DescriptionTextBlock}"
-                       Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
+            <StackPanel Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}">
+                <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                           Text="Shortcut" />
+                <TextBox Tag="HotkeyInput"
+                         Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Style="{StaticResource DescriptionTextBlock}"
+                           Text="Click the box, then press the key combination such as Ctrl+Shift+M. Press Backspace to clear." />
+            </StackPanel>
         </StackPanel>
 
-        <StackPanel
-              Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Shell}}">
-            <TextBlock Text="Target:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
+        <StackPanel Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Shell}}">
+            <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                       Text="Target" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -117,21 +114,21 @@
                 <TextBox Grid.Column="0"
                          Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Button Grid.Column="2"
-                        Content="Browse..."
+                        Padding="8,2"
                         Command="{Binding BrowseShellTargetCommand}"
-                        Padding="8,2" />
+                        Content="Browse..." />
             </Grid>
-            <TextBlock Text="Choose the app, file, folder, URL, or command to open."
-                       Style="{StaticResource DescriptionTextBlock}" />
+            <TextBlock Style="{StaticResource DescriptionTextBlock}"
+                       Text="The app, file, folder, URL, or command to open." />
 
-            <TextBlock Text="Arguments:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
+            <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                       Text="Arguments" />
             <TextBox Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="Optional command-line arguments for the target."
-                       Style="{StaticResource DescriptionTextBlock}" />
+            <TextBlock Style="{StaticResource DescriptionTextBlock}"
+                       Text="Optional command-line arguments for the target." />
 
-            <TextBlock Text="Working Directory:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
+            <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                       Text="Working directory" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -141,12 +138,12 @@
                 <TextBox Grid.Column="0"
                          Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Button Grid.Column="2"
-                        Content="Browse..."
+                        Padding="8,2"
                         Command="{Binding BrowseWorkingDirectoryCommand}"
-                        Padding="8,2" />
+                        Content="Browse..." />
             </Grid>
-            <TextBlock Text="Optional folder to use as the target's start location."
-                       Style="{StaticResource DescriptionTextBlock}" />
+            <TextBlock Style="{StaticResource DescriptionTextBlock}"
+                       Text="Optional folder to use as the target's start location." />
         </StackPanel>
     </StackPanel>
 </UserControl>
