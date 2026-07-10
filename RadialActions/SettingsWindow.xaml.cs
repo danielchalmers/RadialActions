@@ -23,7 +23,7 @@ public partial class SettingsWindow : Window
         DataContext = _viewModel;
         Closed += OnClosed;
         AddHandler(Hyperlink.RequestNavigateEvent, new RequestNavigateEventHandler(Hyperlink_RequestNavigate));
-        AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(ActivationHotkey_PreviewKeyDown), handledEventsToo: true);
+        AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(HotkeyInput_PreviewKeyDown), handledEventsToo: true);
     }
 
     public void SelectAction(PieAction action)
@@ -75,9 +75,9 @@ public partial class SettingsWindow : Window
         }
     }
 
-    private void ActivationHotkey_PreviewKeyDown(object sender, KeyEventArgs e)
+    private void HotkeyInput_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.OriginalSource is not TextBox { Tag: "ActivationHotkeyInput" } textBox)
+        if (e.OriginalSource is not TextBox { Tag: "HotkeyInput" } textBox)
             return;
 
         var key = e.Key == Key.System ? e.SystemKey : e.Key;

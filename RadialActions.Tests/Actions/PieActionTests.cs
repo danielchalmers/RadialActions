@@ -39,6 +39,16 @@ public class PieActionTests
     }
 
     [Fact]
+    public void KeyActions_AllHaveCategoryAndVirtualKey()
+    {
+        foreach (var definition in PieAction.KeyActions)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(definition.Category));
+            Assert.NotEqual(0, definition.VirtualKey);
+        }
+    }
+
+    [Fact]
     public void CreateSystemAction_UnknownId_UsesFirstKnownAction()
     {
         var action = PieAction.CreateSystemAction("not-a-real-id");

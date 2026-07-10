@@ -61,7 +61,22 @@
             <ComboBox SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
                       SelectedValuePath="Id"
                       IsTextSearchEnabled="True"
-                      ItemsSource="{Binding KeyActionOptions}">
+                      TextSearch.TextPath="Name"
+                      MaxDropDownHeight="420"
+                      ItemsSource="{Binding KeyActionOptionsView}">
+                <ComboBox.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Opacity="0.6"
+                                           Margin="6,6,0,2" />
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </ComboBox.GroupStyle>
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -75,15 +90,16 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <TextBlock Text="Choose a built-in command or Custom Shortcut."
+            <TextBlock Text="Pick a media, volume, or system command, or record your own shortcut with Custom Shortcut."
                        Style="{StaticResource DescriptionTextBlock}" />
 
             <TextBlock Text="Shortcut:"
                        Style="{StaticResource ActionEditorLabelTextBlock}"
                        Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
             <TextBox Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Tag="HotkeyInput"
                      Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
-            <TextBlock Text="Enter a shortcut, such as Ctrl+Shift+M."
+            <TextBlock Text="Click the box, then press the key combination to record it, such as Ctrl+Shift+M. Press Backspace to clear."
                        Style="{StaticResource DescriptionTextBlock}"
                        Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
         </StackPanel>
