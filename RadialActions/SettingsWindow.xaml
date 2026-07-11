@@ -64,12 +64,8 @@
                 <local:ActionsSettingsView DataContext="{Binding Actions}" />
             </TabItem>
 
-            <TabItem Header="Ad_vanced">
-                <local:AdvancedSettingsView DataContext="{Binding Advanced}" />
-            </TabItem>
-
-            <TabItem Header="_Help">
-                <local:HelpSettingsView DataContext="{Binding Help}" />
+            <TabItem Header="Ab_out">
+                <local:AboutSettingsView DataContext="{Binding About}" />
             </TabItem>
         </TabControl>
     </Grid>

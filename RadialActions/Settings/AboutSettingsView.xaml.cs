@@ -1,8 +1,8 @@
 ﻿namespace RadialActions;
 
-public partial class AdvancedSettingsView
+public partial class AboutSettingsView
 {
-    public AdvancedSettingsView()
+    public AboutSettingsView()
     {
         InitializeComponent();
     }
