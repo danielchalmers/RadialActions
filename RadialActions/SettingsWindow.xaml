@@ -6,8 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
         Title="Radial Actions"
-        Width="1080" Height="760"
-        MinWidth="960" MinHeight="660"
+        Width="1000" Height="720"
+        MinWidth="880" MinHeight="620"
         d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
@@ -24,95 +24,72 @@
             <Style x:Key="NavItemGlyphTextBlock"
                    TargetType="TextBlock">
                 <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
-                <Setter Property="FontSize" Value="16" />
-                <Setter Property="Margin" Value="4,0,12,0" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="Margin" Value="0,0,8,0" />
                 <Setter Property="VerticalAlignment" Value="Center" />
             </Style>
 
             <Style x:Key="NavItemTextBlock"
                    TargetType="TextBlock">
-                <Setter Property="FontSize" Value="13" />
+                <Setter Property="FontSize" Value="14" />
                 <Setter Property="VerticalAlignment" Value="Center" />
             </Style>
 
             <Style x:Key="NavListBoxItem"
                    TargetType="ListBoxItem"
                    BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                <Setter Property="Padding" Value="10,9" />
-                <Setter Property="Margin" Value="0,0,0,2" />
-                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Padding" Value="14,7" />
+                <Setter Property="Margin" Value="0,0,4,0" />
             </Style>
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <!-- Navigation rail -->
-        <Grid Grid.Column="0"
-              Width="156"
-              Margin="12,12,4,12">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+        <!-- Page pivot -->
+        <ListBox Grid.Row="0"
+                 Margin="20,12,24,0"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 ItemContainerStyle="{StaticResource NavListBoxItem}"
+                 SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBoxItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource NavItemGlyphTextBlock}"
+                               Text="&#xE713;" />
+                    <TextBlock Style="{StaticResource NavItemTextBlock}"
+                               Text="General" />
+                </StackPanel>
+            </ListBoxItem>
+            <ListBoxItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource NavItemGlyphTextBlock}"
+                               Text="&#xE71D;" />
+                    <TextBlock Style="{StaticResource NavItemTextBlock}"
+                               Text="Actions" />
+                </StackPanel>
+            </ListBoxItem>
+            <ListBoxItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource NavItemGlyphTextBlock}"
+                               Text="&#xE946;" />
+                    <TextBlock Style="{StaticResource NavItemTextBlock}"
+                               Text="About" />
+                </StackPanel>
+            </ListBoxItem>
+        </ListBox>
 
-            <StackPanel Grid.Row="0"
-                        Margin="10,4,0,16"
-                        Orientation="Horizontal">
-                <Image Width="24"
-                       Height="24"
-                       Source="/RadialActions;component/RadialActions.ico" />
-                <TextBlock Margin="10,0,0,0"
-                           VerticalAlignment="Center"
-                           FontSize="14"
-                           FontWeight="SemiBold"
-                           Text="Radial Actions" />
-            </StackPanel>
-
-            <ListBox Grid.Row="1"
-                     Background="Transparent"
-                     BorderThickness="0"
-                     ItemContainerStyle="{StaticResource NavListBoxItem}"
-                     SelectedIndex="{Binding Settings.SettingsTabIndex, Mode=TwoWay}">
-                <ListBoxItem>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Style="{StaticResource NavItemGlyphTextBlock}"
-                                   Text="&#xE713;" />
-                        <TextBlock Style="{StaticResource NavItemTextBlock}"
-                                   Text="General" />
-                    </StackPanel>
-                </ListBoxItem>
-                <ListBoxItem>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Style="{StaticResource NavItemGlyphTextBlock}"
-                                   Text="&#xE71D;" />
-                        <TextBlock Style="{StaticResource NavItemTextBlock}"
-                                   Text="Actions" />
-                    </StackPanel>
-                </ListBoxItem>
-                <ListBoxItem>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Style="{StaticResource NavItemGlyphTextBlock}"
-                                   Text="&#xE946;" />
-                        <TextBlock Style="{StaticResource NavItemTextBlock}"
-                                   Text="About" />
-                    </StackPanel>
-                </ListBoxItem>
-            </ListBox>
-        </Grid>
-
-        <!-- Page content -->
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <Border Grid.Row="0"
-                    Margin="24,16,24,0"
+        <Border Grid.Row="1"
+                Margin="24,10,24,0"
                     Padding="12,10"
                     Background="{DynamicResource AccentFillColorDefaultBrush}"
                     CornerRadius="6"
@@ -149,14 +126,13 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Row="1">
-                <local:GeneralSettingsView DataContext="{Binding General}"
-                                           Visibility="{Binding DataContext.Settings.SettingsTabIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={local:MatchToVisibilityConverter}, ConverterParameter={StaticResource GeneralPageIndex}}" />
-                <local:ActionsSettingsView DataContext="{Binding Actions}"
-                                           Visibility="{Binding DataContext.Settings.SettingsTabIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={local:MatchToVisibilityConverter}, ConverterParameter={StaticResource ActionsPageIndex}}" />
-                <local:AboutSettingsView DataContext="{Binding About}"
-                                         Visibility="{Binding DataContext.Settings.SettingsTabIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={local:MatchToVisibilityConverter}, ConverterParameter={StaticResource AboutPageIndex}}" />
-            </Grid>
+        <Grid Grid.Row="2">
+            <local:GeneralSettingsView DataContext="{Binding General}"
+                                       Visibility="{Binding DataContext.Settings.SettingsTabIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={local:MatchToVisibilityConverter}, ConverterParameter={StaticResource GeneralPageIndex}}" />
+            <local:ActionsSettingsView DataContext="{Binding Actions}"
+                                       Visibility="{Binding DataContext.Settings.SettingsTabIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={local:MatchToVisibilityConverter}, ConverterParameter={StaticResource ActionsPageIndex}}" />
+            <local:AboutSettingsView DataContext="{Binding About}"
+                                     Visibility="{Binding DataContext.Settings.SettingsTabIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={local:MatchToVisibilityConverter}, ConverterParameter={StaticResource AboutPageIndex}}" />
         </Grid>
     </Grid>
 </Window>

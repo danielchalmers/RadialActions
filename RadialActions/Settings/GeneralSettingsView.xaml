@@ -16,10 +16,7 @@
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto">
         <StackPanel MaxWidth="820"
-                    Margin="24,16,24,24">
-            <TextBlock Style="{StaticResource PageTitleTextBlock}"
-                       Text="General" />
-
+                    Margin="24,12,24,24">
             <TextBlock Margin="1,0,0,8"
                        Style="{StaticResource SectionHeaderTextBlock}"
                        Text="Menu" />

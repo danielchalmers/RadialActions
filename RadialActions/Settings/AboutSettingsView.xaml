@@ -16,10 +16,7 @@
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto">
         <StackPanel MaxWidth="820"
-                    Margin="24,16,24,24">
-            <TextBlock Style="{StaticResource PageTitleTextBlock}"
-                       Text="About" />
-
+                    Margin="24,12,24,24">
             <!-- App identity -->
             <Border Style="{StaticResource ContentCardBorder}">
                 <Grid>

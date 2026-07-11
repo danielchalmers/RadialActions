@@ -76,15 +76,6 @@
         <Setter Property="Margin" Value="0,0,0,4" />
     </Style>
 
-    <!-- Large title at the top of each settings page. -->
-    <Style x:Key="PageTitleTextBlock"
-           TargetType="TextBlock"
-           BasedOn="{StaticResource {x:Type TextBlock}}">
-        <Setter Property="FontSize" Value="24" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Margin" Value="0,0,0,16" />
-    </Style>
-
     <!-- Small heading above a group of cards. -->
     <Style x:Key="SectionHeaderTextBlock"
            TargetType="TextBlock"
