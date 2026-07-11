@@ -6,8 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
         Title="Radial Actions"
-        Width="980" Height="700"
-        MinWidth="760" MinHeight="540"
+        Width="1080" Height="760"
+        MinWidth="960" MinHeight="660"
         d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">

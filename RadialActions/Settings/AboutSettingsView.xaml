@@ -35,19 +35,39 @@
                            Source="/RadialActions;component/RadialActions.ico" />
                     <StackPanel Grid.Column="1"
                                 VerticalAlignment="Center">
-                        <TextBlock FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Text="Radial Actions" />
-                        <TextBlock Margin="0,2,0,0"
-                                   FontSize="12"
-                                   Opacity="0.72">
-                            <Run Text="Version" />
-                            <Run Text="{Binding FileVersion, Mode=OneWay}" />
-                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Text="Radial Actions" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Bottom"
+                                       FontSize="12"
+                                       Opacity="0.72">
+                                <Run Text="Version" />
+                                <Run Text="{Binding FileVersion, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
                         <TextBlock Margin="0,4,0,0"
                                    FontSize="12"
                                    Text="Build your own shortcut wheel for the apps and actions you use most."
                                    TextWrapping="Wrap" />
+                        <WrapPanel Margin="0,8,0,0">
+                            <TextBlock Margin="0,0,16,0"
+                                       FontSize="12">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions">📦 View on GitHub</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Margin="0,0,16,0"
+                                       FontSize="12">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues">🐛 Report a bug or request a feature</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Margin="0,0,16,0"
+                                       FontSize="12">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases">🚀 Release notes</Hyperlink>
+                            </TextBlock>
+                            <TextBlock FontSize="12">
+                                <Hyperlink NavigateUri="radialactions://licenses">📜 Third-party licenses</Hyperlink>
+                            </TextBlock>
+                        </WrapPanel>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -72,25 +92,6 @@
                                Style="{StaticResource QuickStartStepTextBlock}">
                         <Run FontWeight="SemiBold">4.</Run>
                         Right-click the menu or press Shift+F10 for more options.</TextBlock>
-                </StackPanel>
-            </Border>
-
-            <TextBlock Style="{StaticResource SectionHeaderTextBlock}"
-                       Text="Resources" />
-            <Border Style="{StaticResource ContentCardBorder}">
-                <StackPanel>
-                    <TextBlock Margin="0,0,0,8">
-                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions">📦 View on GitHub</Hyperlink>
-                    </TextBlock>
-                    <TextBlock Margin="0,0,0,8">
-                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues">🐛 Report a bug or request a feature</Hyperlink>
-                    </TextBlock>
-                    <TextBlock Margin="0,0,0,8">
-                        <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases">🚀 Release notes</Hyperlink>
-                    </TextBlock>
-                    <TextBlock>
-                        <Hyperlink NavigateUri="radialactions://licenses">📜 Third-party licenses</Hyperlink>
-                    </TextBlock>
                 </StackPanel>
             </Border>
 

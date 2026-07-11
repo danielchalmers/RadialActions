@@ -14,24 +14,29 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <StackPanel>
-        <local:SettingsCard Margin="0,0,0,12"
-                            Header="Show this action in the menu"
-                            Description="Hide the action without removing its configuration.">
-            <CheckBox AutomationProperties.Name="Show this action in the menu"
-                      IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}" />
-        </local:SettingsCard>
-
-        <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
-                   Text="Name" />
-        <TextBox Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <!-- Identity: the icon and name form one visual unit, like the slice they produce. -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                           Text="Icon" />
+                <TextBox Width="72"
+                         FontSize="18"
+                         TextAlignment="Center"
+                         Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+                <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
+                           Text="Name" />
+                <TextBox Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </Grid>
         <TextBlock Style="{StaticResource DescriptionTextBlock}"
-                   Text="Shown next to the icon in the radial menu." />
-
-        <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
-                   Text="Icon" />
-        <TextBox Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Style="{StaticResource DescriptionTextBlock}"
-                   Text="A short symbol or emoji that fits in a slice." />
+                   Text="Shown together in the slice. Emoji work well as icons." />
 
         <TextBlock Style="{StaticResource ActionEditorLabelTextBlock}"
                    Text="Type" />
@@ -145,5 +150,11 @@
             <TextBlock Style="{StaticResource DescriptionTextBlock}"
                        Text="Optional folder to use as the target's start location." />
         </StackPanel>
+
+        <Separator Margin="0,4,0,10"
+                   Opacity="0.35" />
+        <CheckBox Content="Show this action in the menu"
+                  IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}"
+                  ToolTip="Hide the action without removing its configuration." />
     </StackPanel>
 </UserControl>
