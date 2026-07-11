@@ -1,0 +1,381 @@
+﻿<UserControl x:Class="RadialActions.AboutSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:RadialActions"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=local:AboutSettingsViewModel}"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/RadialActions;component/Settings/SettingsViewResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="AboutCardBorder"
+                   TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="10" />
+            </Style>
+
+            <Style x:Key="InfoChipBorder"
+                   TargetType="Border">
+                <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="Padding" Value="10,4" />
+                <Setter Property="Margin" Value="0,0,8,0" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="InfoChipTextBlock"
+                   TargetType="TextBlock"
+                   BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Opacity" Value="0.85" />
+            </Style>
+
+            <Style x:Key="HeroLinkTextBlock"
+                   TargetType="TextBlock"
+                   BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="Margin" Value="0,0,0,8" />
+            </Style>
+
+            <Style x:Key="StepNumberBorder"
+                   TargetType="Border">
+                <Setter Property="Width" Value="20" />
+                <Setter Property="Height" Value="20" />
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Margin" Value="0,1,0,0" />
+            </Style>
+
+            <Style x:Key="StepNumberTextBlock"
+                   TargetType="TextBlock"
+                   BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="SystemLabelTextBlock"
+                   TargetType="TextBlock"
+                   BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Opacity" Value="0.72" />
+                <Setter Property="Margin" Value="0,0,12,8" />
+            </Style>
+
+            <Style x:Key="SystemValueTextBlock"
+                   TargetType="TextBlock"
+                   BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Margin" Value="0,0,0,8" />
+            </Style>
+
+            <Style x:Key="ProjectTileStackPanel"
+                   TargetType="StackPanel">
+                <Setter Property="Margin" Value="0,0,16,10" />
+            </Style>
+
+            <Style x:Key="ProjectTitleTextBlock"
+                   TargetType="TextBlock"
+                   BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+
+            <Style x:Key="ProjectDescriptionTextBlock"
+                   TargetType="TextBlock"
+                   BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Opacity" Value="0.72" />
+                <Setter Property="Margin" Value="0,2,0,0" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="0"
+              MinHeight="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportHeight}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="12" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Style="{StaticResource AboutCardBorder}"
+                    Padding="20,18">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="18" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="18" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Image Grid.Column="0"
+                           Width="64"
+                           Height="64"
+                           VerticalAlignment="Center"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           Source="/RadialActions;component/RadialActions.ico" />
+
+                    <StackPanel Grid.Column="2"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Radial Actions"
+                                   FontSize="26"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Margin="0,2,0,12"
+                                   Opacity="0.72"
+                                   Text="Build your own shortcut wheel for the apps and actions you use most."
+                                   TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal">
+                            <Border Style="{StaticResource InfoChipBorder}">
+                                <TextBlock Style="{StaticResource InfoChipTextBlock}"
+                                           Text="{Binding FileVersion, StringFormat='Version {0}'}" />
+                            </Border>
+                            <Border Style="{StaticResource InfoChipBorder}">
+                                <TextBlock Style="{StaticResource InfoChipTextBlock}"
+                                           Text="{Binding Architecture}" />
+                            </Border>
+                            <Border Style="{StaticResource InfoChipBorder}">
+                                <TextBlock Style="{StaticResource InfoChipTextBlock}"
+                                           Text="{Binding RuntimeDescription}" />
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4"
+                                VerticalAlignment="Center">
+                        <TextBlock Style="{StaticResource HeroLinkTextBlock}">
+                            <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions">📦 View on GitHub</Hyperlink>
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource HeroLinkTextBlock}">
+                            <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases">🚀 Release Notes</Hyperlink>
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource HeroLinkTextBlock}">
+                            <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues">🐛 Report a Bug</Hyperlink>
+                        </TextBlock>
+                        <TextBlock Margin="0">
+                            <Hyperlink NavigateUri="radialactions://licenses">📜 Third-Party Licenses</Hyperlink>
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <GroupBox Grid.Column="0"
+                          Header="Getting Started"
+                          Margin="0"
+                          VerticalContentAlignment="Top"
+                          Style="{StaticResource SettingsCardGroupBox}">
+                    <StackPanel>
+                        <TextBlock Margin="0,0,0,12"
+                                   Opacity="0.72"
+                                   Text="Use the Actions tab to add slices for apps, files, folders, scripts, and key commands."
+                                   TextWrapping="Wrap" />
+
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource StepNumberBorder}">
+                                <TextBlock Style="{StaticResource StepNumberTextBlock}"
+                                           Text="1" />
+                            </Border>
+                            <TextBlock Grid.Column="2"
+                                       TextWrapping="Wrap">
+                                Press
+                                <Run Text="{Binding Settings.ActivationHotkey, Mode=OneWay}"
+                                     FontWeight="SemiBold" />
+                                to open the radial menu</TextBlock>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource StepNumberBorder}">
+                                <TextBlock Style="{StaticResource StepNumberTextBlock}"
+                                           Text="2" />
+                            </Border>
+                            <TextBlock Grid.Column="2"
+                                       TextWrapping="Wrap">
+                                Use the mouse or the arrow keys to select a slice, then click or press Enter to run it</TextBlock>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource StepNumberBorder}">
+                                <TextBlock Style="{StaticResource StepNumberTextBlock}"
+                                           Text="3" />
+                            </Border>
+                            <TextBlock Grid.Column="2"
+                                       TextWrapping="Wrap">
+                                Access more options with right click or Shift+F10</TextBlock>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Grid.Column="2"
+                          Header="System"
+                          Margin="0"
+                          VerticalContentAlignment="Stretch"
+                          Style="{StaticResource SettingsCardGroupBox}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0"
+                              VerticalAlignment="Top">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       Style="{StaticResource SystemLabelTextBlock}"
+                                       Text="Operating System" />
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="1"
+                                       Style="{StaticResource SystemValueTextBlock}"
+                                       Text="{Binding OsDescription}" />
+
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="0"
+                                       Style="{StaticResource SystemLabelTextBlock}"
+                                       Text="Executable" />
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="1"
+                                       Style="{StaticResource SystemValueTextBlock}"
+                                       Text="{Binding ExecutablePath}" />
+
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="0"
+                                       Style="{StaticResource SystemLabelTextBlock}"
+                                       Text="Settings File" />
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="1"
+                                       Style="{StaticResource SystemValueTextBlock}"
+                                       Text="{Binding SettingsFilePath}" />
+                        </Grid>
+
+                        <StackPanel Grid.Row="1"
+                                    Margin="0,8,0,0"
+                                    Orientation="Horizontal">
+                            <Button Content="Open App Folder"
+                                    Command="{Binding OpenExeFolderCommand}" />
+                            <Button Content="Open Settings File"
+                                    Margin="8,0,0,0"
+                                    Command="{Binding OpenSettingsFileCommand}" />
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+
+            <GroupBox Grid.Row="4"
+                      Header="More from the Author"
+                      Margin="0"
+                      Style="{StaticResource SettingsCardGroupBox}">
+                <StackPanel>
+                    <UniformGrid Columns="4">
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock">DesktopClock</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="A digital clock for your desktop." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SteamAccountSwitcher">SteamAccountSwitcher</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Swap Steam accounts from the system tray." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Network-Monitor">Network Monitor</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Live latency and bandwidth in a desktop widget." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp">Good Diary</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Track your daily activities and moods on Android." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay">Sentry Replay</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Review Tesla dashcam clips on Windows." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Teichos">Teichos</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Stay focused with URL blocking and schedules." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Dayboard">Dayboard</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Put widgets on your browser's new tab page." />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStackPanel}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextBlock}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/NullTab">NullTab</Hyperlink>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource ProjectDescriptionTextBlock}"
+                                       Text="Replace your new tab page with a blank one." />
+                        </StackPanel>
+                    </UniformGrid>
+                    <TextBlock Margin="0,6,0,0">
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers">View all projects on GitHub</Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </GroupBox>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

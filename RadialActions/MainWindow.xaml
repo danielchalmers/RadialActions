@@ -56,20 +56,11 @@
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Header="Ad_vanced"
+            <MenuItem Header="Ab_out"
                       Click="OnTraySettingsMenuItemClick"
                       Tag="2">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE90F;"
-                               FontFamily="Segoe MDL2 Assets" />
-                </MenuItem.Icon>
-            </MenuItem>
-
-            <MenuItem Header="_Help"
-                      Click="OnTraySettingsMenuItemClick"
-                      Tag="3">
-                <MenuItem.Icon>
-                    <TextBlock Text="&#xE897;"
+                    <TextBlock Text="&#xE946;"
                                FontFamily="Segoe MDL2 Assets" />
                 </MenuItem.Icon>
             </MenuItem>
