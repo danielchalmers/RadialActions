@@ -52,7 +52,7 @@
 
         <!-- Navigation rail -->
         <Grid Grid.Column="0"
-              Width="212"
+              Width="156"
               Margin="12,12,4,12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
