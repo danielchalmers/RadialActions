@@ -215,6 +215,15 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnSlicesChanged(object sender, EventArgs e)
+    {
+        Log.Debug("Slices changed from a slice context menu");
+        if (Settings.CanBeSaved)
+        {
+            Settings.Default.Save();
+        }
+    }
+
     private void OnCenterClicked(object sender, EventArgs e)
     {
         Log.Debug("Center close target clicked");

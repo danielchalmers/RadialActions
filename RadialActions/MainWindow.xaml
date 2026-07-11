@@ -92,6 +92,7 @@
                       CenterContextMenuRequested="OnCenterContextMenuRequested"
                       SliceClicked="OnSliceClicked"
                       SliceEditRequested="OnSliceEditRequested"
+                      SlicesChanged="OnSlicesChanged"
                       SlicesReordered="OnSlicesReordered"
                       Slices="{Binding Actions, Source={x:Static p:Settings.Default}}" />
 </Window>

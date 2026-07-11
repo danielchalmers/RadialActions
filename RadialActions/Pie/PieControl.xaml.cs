@@ -900,10 +900,52 @@ public partial class PieControl : UserControl
     private ContextMenu CreateSliceContextMenu(PieAction sliceAction)
     {
         var contextMenu = new ContextMenu();
-        var editMenuItem = new MenuItem { Header = "Edit..." };
+
+        // Disabled title so the menu says which slice it belongs to before offering Remove.
+        contextMenu.Items.Add(new MenuItem
+        {
+            Header = sliceAction.Name,
+            Icon = new TextBlock { Text = sliceAction.Icon },
+            IsEnabled = false,
+        });
+        contextMenu.Items.Add(new Separator());
+
+        var runMenuItem = new MenuItem { Header = "_Run", Icon = CreateMenuGlyph("\uE768") };
+        runMenuItem.Click += (_, _) => SliceClicked?.Invoke(this, new SliceClickEventArgs(sliceAction));
+        contextMenu.Items.Add(runMenuItem);
+
+        var editMenuItem = new MenuItem { Header = "_Edit", Icon = CreateMenuGlyph("\uE70F") };
         editMenuItem.Click += (_, _) => SliceEditRequested?.Invoke(this, new SliceClickEventArgs(sliceAction));
         contextMenu.Items.Add(editMenuItem);
+
+        var hideMenuItem = new MenuItem { Header = "_Hide from menu", Icon = CreateMenuGlyph("\uED1A") };
+        hideMenuItem.Click += (_, _) =>
+        {
+            sliceAction.IsEnabled = false;
+            SlicesChanged?.Invoke(this, EventArgs.Empty);
+        };
+        contextMenu.Items.Add(hideMenuItem);
+
+        contextMenu.Items.Add(new Separator());
+
+        var removeMenuItem = new MenuItem { Header = "Re_move", Icon = CreateMenuGlyph("\uE74D") };
+        removeMenuItem.Click += (_, _) =>
+        {
+            Slices?.Remove(sliceAction);
+            SlicesChanged?.Invoke(this, EventArgs.Empty);
+        };
+        contextMenu.Items.Add(removeMenuItem);
+
         return contextMenu;
+    }
+
+    private static TextBlock CreateMenuGlyph(string glyph)
+    {
+        return new TextBlock
+        {
+            Text = glyph,
+            FontFamily = new FontFamily("Segoe MDL2 Assets"),
+        };
     }
 
     private void RefreshVisualState(bool animate)
@@ -1087,6 +1129,11 @@ public partial class PieControl : UserControl
     /// Occurs after the <see cref="Slices"/> collection is reordered by dragging a slice.
     /// </summary>
     public event EventHandler SlicesReordered;
+
+    /// <summary>
+    /// Occurs after a slice is hidden or removed from its context menu.
+    /// </summary>
+    public event EventHandler SlicesChanged;
 
     /// <summary>
     /// Occurs when the center close target is clicked.
