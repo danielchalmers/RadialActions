@@ -157,9 +157,9 @@ public sealed class ActionDropFactoryTests : IDisposable
     {
         var action = ActionDropFactory.CreateAction(string.Empty);
 
-        Assert.Equal(ActionType.Shell, action.Type);
+        Assert.Equal(ActionType.Open, action.Type);
         Assert.Equal(PieAction.DefaultName, action.Name);
-        Assert.Equal(ShellActionDefaults.FileIcon, action.Icon);
+        Assert.Equal(OpenActionDefaults.FileIcon, action.Icon);
     }
 
     [Fact]
@@ -167,10 +167,10 @@ public sealed class ActionDropFactoryTests : IDisposable
     {
         var action = ActionDropFactory.CreateAction("https://example.com/path");
 
-        Assert.Equal(ActionType.Shell, action.Type);
+        Assert.Equal(ActionType.Open, action.Type);
         Assert.Equal("https://example.com/path", action.Parameter);
         Assert.Equal("example.com", action.Name);
-        Assert.Equal(ShellActionDefaults.WebIcon, action.Icon);
+        Assert.Equal(OpenActionDefaults.WebIcon, action.Icon);
         Assert.Equal(string.Empty, action.WorkingDirectory);
     }
 
@@ -183,10 +183,10 @@ public sealed class ActionDropFactoryTests : IDisposable
 
         var action = ActionDropFactory.CreateAction(folder);
 
-        Assert.Equal(ActionType.Shell, action.Type);
+        Assert.Equal(ActionType.Open, action.Type);
         Assert.Equal(folder, action.Parameter);
         Assert.Equal("Games", action.Name);
-        Assert.Equal(ShellActionDefaults.FolderIcon, action.Icon);
+        Assert.Equal(OpenActionDefaults.FolderIcon, action.Icon);
         Assert.Equal(folder, action.WorkingDirectory);
     }
 
@@ -199,10 +199,10 @@ public sealed class ActionDropFactoryTests : IDisposable
 
         var action = ActionDropFactory.CreateAction(file);
 
-        Assert.Equal(ActionType.Shell, action.Type);
+        Assert.Equal(ActionType.Open, action.Type);
         Assert.Equal(file, action.Parameter);
         Assert.Equal("Notes", action.Name);
-        Assert.Equal(ShellActionDefaults.FileIcon, action.Icon);
+        Assert.Equal(OpenActionDefaults.FileIcon, action.Icon);
         Assert.Equal(_tempRoot, action.WorkingDirectory);
     }
 

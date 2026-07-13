@@ -5,20 +5,20 @@ public sealed class ActionDefaultsService
     public const string LegacyDefaultIcon = "\u2B50";
 
     private readonly Dictionary<PieAction, KeyActionDefinition> _autoKeyDefaults = [];
-    private readonly Dictionary<PieAction, ShellActionDefaults> _autoShellDefaults = [];
+    private readonly Dictionary<PieAction, OpenActionDefaults> _autoOpenDefaults = [];
 
-    public ShellActionDefaults? GetShellDefaults(string target) => ShellActionDefaults.FromTarget(target);
+    public OpenActionDefaults? GetOpenDefaults(string target) => OpenActionDefaults.FromTarget(target);
 
     public void Forget(PieAction action)
     {
         _autoKeyDefaults.Remove(action);
-        _autoShellDefaults.Remove(action);
+        _autoOpenDefaults.Remove(action);
     }
 
     public void TrackExistingDefaults(IEnumerable<PieAction> actions)
     {
         _autoKeyDefaults.Clear();
-        _autoShellDefaults.Clear();
+        _autoOpenDefaults.Clear();
 
         foreach (var action in actions)
         {
@@ -29,12 +29,12 @@ public sealed class ActionDefaultsService
                     _autoKeyDefaults[action] = definition;
                 }
             }
-            else if (action.Type == ActionType.Shell)
+            else if (action.Type == ActionType.Open)
             {
-                var defaults = GetShellDefaults(action.Parameter);
+                var defaults = GetOpenDefaults(action.Parameter);
                 if (defaults.HasValue)
                 {
-                    _autoShellDefaults[action] = defaults.Value;
+                    _autoOpenDefaults[action] = defaults.Value;
                 }
             }
         }
@@ -69,16 +69,16 @@ public sealed class ActionDefaultsService
         _autoKeyDefaults[action] = definition;
     }
 
-    public void ApplyShellDefaults(PieAction action, string target)
+    public void ApplyOpenDefaults(PieAction action, string target)
     {
-        if (action.Type != ActionType.Shell)
+        if (action.Type != ActionType.Open)
             return;
 
-        var defaults = GetShellDefaults(target);
+        var defaults = GetOpenDefaults(target);
         if (!defaults.HasValue)
             return;
 
-        _autoShellDefaults.TryGetValue(action, out var previous);
+        _autoOpenDefaults.TryGetValue(action, out var previous);
         var next = defaults.Value;
 
         if (ShouldApplyDefault(action.Name, PieAction.DefaultName, previous.Name ?? string.Empty))
@@ -98,7 +98,7 @@ public sealed class ActionDefaultsService
             action.WorkingDirectory = next.WorkingDirectory;
         }
 
-        _autoShellDefaults[action] = next;
+        _autoOpenDefaults[action] = next;
     }
 
     private static bool ShouldApplyDefault(string currentValue, string defaultValue, string previousValue)

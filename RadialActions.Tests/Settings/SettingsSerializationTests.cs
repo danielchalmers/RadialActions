@@ -69,7 +69,7 @@ public class SettingsSerializationTests
         settings.Actions = new System.Collections.ObjectModel.ObservableCollection<PieAction>
         {
             PieAction.CreateKeyAction("Mute"),
-            PieAction.CreateShellAction("Explorer", "explorer.exe")
+            PieAction.CreateOpenAction("Explorer", "explorer.exe")
         };
         settings.Actions[1].IsEnabled = false;
 
@@ -83,7 +83,7 @@ public class SettingsSerializationTests
         Assert.Equal(ActionType.Key, loaded.Actions[0].Type);
         Assert.Equal("Mute", loaded.Actions[0].Parameter);
         Assert.True(loaded.Actions[0].IsEnabled);
-        Assert.Equal(ActionType.Shell, loaded.Actions[1].Type);
+        Assert.Equal(ActionType.Open, loaded.Actions[1].Type);
         Assert.Equal("explorer.exe", loaded.Actions[1].Parameter);
         Assert.False(loaded.Actions[1].IsEnabled);
     }

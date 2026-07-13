@@ -2,13 +2,13 @@ using System.IO;
 
 namespace RadialActions;
 
-public readonly record struct ShellActionDefaults(string Name, string Icon, string WorkingDirectory)
+public readonly record struct OpenActionDefaults(string Name, string Icon, string WorkingDirectory)
 {
     public const string WebIcon = "\U0001F310";
     public const string FolderIcon = "\U0001F4C2";
     public const string FileIcon = "\U0001F4C1";
 
-    public static ShellActionDefaults? FromTarget(string target)
+    public static OpenActionDefaults? FromTarget(string target)
     {
         if (string.IsNullOrWhiteSpace(target))
             return null;
@@ -21,13 +21,13 @@ public readonly record struct ShellActionDefaults(string Name, string Icon, stri
             }
 
             var name = string.IsNullOrWhiteSpace(uri.Host) ? uri.AbsoluteUri : uri.Host;
-            return new ShellActionDefaults(name, WebIcon, string.Empty);
+            return new OpenActionDefaults(name, WebIcon, string.Empty);
         }
 
         return FromPath(target);
     }
 
-    private static ShellActionDefaults FromPath(string path)
+    private static OpenActionDefaults FromPath(string path)
     {
         var isDirectory = Directory.Exists(path);
         var name = Path.GetFileNameWithoutExtension(path);
@@ -44,6 +44,6 @@ public readonly record struct ShellActionDefaults(string Name, string Icon, stri
         var icon = isDirectory ? FolderIcon : FileIcon;
         var workingDirectory = isDirectory ? path : Path.GetDirectoryName(path) ?? string.Empty;
 
-        return new ShellActionDefaults(name, icon, workingDirectory);
+        return new OpenActionDefaults(name, icon, workingDirectory);
     }
 }

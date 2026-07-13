@@ -20,9 +20,9 @@ public enum ActionType
     Key = 1,
 
     /// <summary>
-    /// Launch an app, open a file, or open a URL using shell execution.
+    /// Open an app, file, folder, or URL using shell execution.
     /// </summary>
-    Shell = 2,
+    Open = 2,
 }
 
 /// <summary>
@@ -114,13 +114,13 @@ public partial class PieAction : ObservableObject
     private string _parameter = string.Empty;
 
     /// <summary>
-    /// Additional arguments for shell actions.
+    /// Additional arguments for Open actions.
     /// </summary>
     [ObservableProperty]
     private string _arguments = string.Empty;
 
     /// <summary>
-    /// Optional working directory for shell actions.
+    /// Optional working directory for Open actions.
     /// </summary>
     [ObservableProperty]
     private string _workingDirectory = string.Empty;
@@ -157,12 +157,12 @@ public partial class PieAction : ObservableObject
     }
 
     /// <summary>
-    /// Creates a shell action.
+    /// Creates an Open action.
     /// </summary>
-    public static PieAction CreateShellAction(string name, string target, string icon = "📁", string arguments = "", string workingDirectory = "")
+    public static PieAction CreateOpenAction(string name, string target, string icon = "📁", string arguments = "", string workingDirectory = "")
         => new(name, icon)
         {
-            Type = ActionType.Shell,
+            Type = ActionType.Open,
             Parameter = target,
             Arguments = arguments,
             WorkingDirectory = workingDirectory
@@ -182,8 +182,8 @@ public partial class PieAction : ObservableObject
             case ActionType.Key:
                 ExecuteKey();
                 return;
-            case ActionType.Shell:
-                ExecuteShell();
+            case ActionType.Open:
+                ExecuteOpen();
                 return;
             default:
                 throw new NotSupportedException("Action type is not supported");
@@ -207,7 +207,7 @@ public partial class PieAction : ObservableObject
         ActionUtil.SimulateKeyboardShortcut(Parameter);
     }
 
-    private void ExecuteShell()
+    private void ExecuteOpen()
     {
         if (string.IsNullOrWhiteSpace(Parameter))
             throw new InvalidOperationException("Launch target not configured");

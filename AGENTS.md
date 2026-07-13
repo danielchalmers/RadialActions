@@ -59,7 +59,7 @@ For documentation-only changes, explain why build or test commands were skipped.
 - Radial Actions is a lightweight Windows utility opened by a global hotkey. Startup, hotkey registration, tray behavior, and menu display should stay fast and predictable.
 - User-configured actions must not execute during tests, settings load, preview rendering, or validation.
 - Invalid or stale settings should normalize to safe defaults instead of crashing on startup.
-- Shell actions must preserve explicit target, arguments, and working directory behavior.
+- Open actions (formerly Shell) must preserve explicit target, arguments, and working directory behavior.
 - Key actions must accept known media/volume actions and validated custom shortcuts; invalid shortcuts should fail clearly.
 - Update checks must remain controlled by settings and should not introduce surprise network work in deterministic tests.
 

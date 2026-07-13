@@ -31,7 +31,7 @@ public sealed class ActionDefaultsServiceTests : IDisposable
     }
 
     [Fact]
-    public void ApplyShellDefaults_PreservesManualNameIconAndWorkingDirectory()
+    public void ApplyOpenDefaults_PreservesManualNameIconAndWorkingDirectory()
     {
         Directory.CreateDirectory(_tempRoot);
         var firstRoot = Path.Combine(_tempRoot, "First");
@@ -42,12 +42,12 @@ public sealed class ActionDefaultsServiceTests : IDisposable
         var secondPath = Path.Combine(secondRoot, "Second.exe");
 
         var service = new ActionDefaultsService();
-        var action = PieAction.CreateShellAction("Manual Name", firstPath, "\U0001F6E0\uFE0F", workingDirectory: _tempRoot);
+        var action = PieAction.CreateOpenAction("Manual Name", firstPath, "\U0001F6E0\uFE0F", workingDirectory: _tempRoot);
 
         service.TrackExistingDefaults([action]);
 
         action.Parameter = secondPath;
-        service.ApplyShellDefaults(action, action.Parameter);
+        service.ApplyOpenDefaults(action, action.Parameter);
 
         Assert.Equal("Manual Name", action.Name);
         Assert.Equal("\U0001F6E0\uFE0F", action.Icon);
@@ -55,16 +55,16 @@ public sealed class ActionDefaultsServiceTests : IDisposable
     }
 
     [Fact]
-    public void ApplyShellDefaults_LegacyStarIcon_UpgradesToSelectedDefaultIcon()
+    public void ApplyOpenDefaults_LegacyStarIcon_UpgradesToSelectedDefaultIcon()
     {
         Directory.CreateDirectory(_tempRoot);
         var targetPath = Path.Combine(_tempRoot, "First.exe");
         var service = new ActionDefaultsService();
-        var action = PieAction.CreateShellAction(PieAction.DefaultName, targetPath, ActionDefaultsService.LegacyDefaultIcon);
+        var action = PieAction.CreateOpenAction(PieAction.DefaultName, targetPath, ActionDefaultsService.LegacyDefaultIcon);
 
-        service.ApplyShellDefaults(action, action.Parameter);
+        service.ApplyOpenDefaults(action, action.Parameter);
 
-        Assert.Equal(ShellActionDefaults.FileIcon, action.Icon);
+        Assert.Equal(OpenActionDefaults.FileIcon, action.Icon);
     }
 
     public void Dispose()
