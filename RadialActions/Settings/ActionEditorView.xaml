@@ -51,7 +51,7 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock Text="Use Key for shortcuts and media controls; Shell for apps, files, folders, URLs, or commands."
+        <TextBlock Text="Use Key for shortcuts and media controls; Open for apps, files, folders, URLs, or commands."
                    Style="{StaticResource DescriptionTextBlock}" />
 
         <StackPanel Margin="0,0,0,4"
@@ -105,7 +105,7 @@
         </StackPanel>
 
         <StackPanel
-              Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Shell}}">
+              Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Open}}">
             <TextBlock Text="Target:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
             <Grid>
@@ -118,7 +118,7 @@
                          Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Button Grid.Column="2"
                         Content="Browse..."
-                        Command="{Binding BrowseShellTargetCommand}"
+                        Command="{Binding BrowseOpenTargetCommand}"
                         Padding="8,2" />
             </Grid>
             <TextBlock Text="Choose the app, file, folder, URL, or command to open."

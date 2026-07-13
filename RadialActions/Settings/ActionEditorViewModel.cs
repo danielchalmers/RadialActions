@@ -34,7 +34,7 @@ public partial class ActionEditorViewModel : ObservableObject
     public IReadOnlyList<ActionTypeOption> ActionTypes { get; } =
     [
         new(ActionType.Key, "Key", "⌨️"),
-        new(ActionType.Shell, "Shell", "🚀"),
+        new(ActionType.Open, "Open", "🚀"),
     ];
 
     public IReadOnlyList<KeyActionDefinition> KeyActionOptions { get; } =
@@ -67,7 +67,7 @@ public partial class ActionEditorViewModel : ObservableObject
             {
                 _actionDefaultsService.EnsureKeyDefaults(SelectedAction);
             }
-            else if (value == ActionType.Shell)
+            else if (value == ActionType.Open)
             {
                 SelectedAction.Parameter = string.Empty;
             }
@@ -121,7 +121,7 @@ public partial class ActionEditorViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void BrowseShellTarget()
+    private void BrowseOpenTarget()
     {
         if (SelectedAction == null)
             return;
@@ -150,7 +150,7 @@ public partial class ActionEditorViewModel : ObservableObject
             Title = "Select a working directory"
         };
 
-        var suggested = _actionDefaultsService.GetShellDefaults(SelectedAction.Parameter)?.WorkingDirectory;
+        var suggested = _actionDefaultsService.GetOpenDefaults(SelectedAction.Parameter)?.WorkingDirectory;
         if (!string.IsNullOrWhiteSpace(SelectedAction.WorkingDirectory))
         {
             dialog.InitialDirectory = SelectedAction.WorkingDirectory;
@@ -199,9 +199,9 @@ public partial class ActionEditorViewModel : ObservableObject
         if (SelectedAction == null)
             return;
 
-        if (SelectedActionType == ActionType.Shell)
+        if (SelectedActionType == ActionType.Open)
         {
-            _actionDefaultsService.ApplyShellDefaults(SelectedAction, SelectedAction.Parameter);
+            _actionDefaultsService.ApplyOpenDefaults(SelectedAction, SelectedAction.Parameter);
         }
         else if (SelectedActionType == ActionType.Key &&
                  PieAction.TryGetKeyAction(SelectedAction.Parameter, out var definition))

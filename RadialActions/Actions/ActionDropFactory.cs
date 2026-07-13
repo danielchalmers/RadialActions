@@ -5,7 +5,7 @@ using System.Windows;
 namespace RadialActions;
 
 /// <summary>
-/// Turns data dropped onto the actions list (files, folders, apps, or links) into prefilled shell actions.
+/// Turns data dropped onto the actions list (files, folders, apps, or links) into prefilled Open actions.
 /// </summary>
 public static class ActionDropFactory
 {
@@ -57,14 +57,14 @@ public static class ActionDropFactory
     }
 
     /// <summary>
-    /// Builds a shell action for a single dropped target, prefilling its name, icon, and working directory from <see cref="ShellActionDefaults"/>.
+    /// Builds an Open action for a single dropped target, prefilling its name, icon, and working directory from <see cref="OpenActionDefaults"/>.
     /// </summary>
     public static PieAction CreateAction(string target)
     {
-        var defaults = ShellActionDefaults.FromTarget(target)
-            ?? new ShellActionDefaults(PieAction.DefaultName, ShellActionDefaults.FileIcon, string.Empty);
+        var defaults = OpenActionDefaults.FromTarget(target)
+            ?? new OpenActionDefaults(PieAction.DefaultName, OpenActionDefaults.FileIcon, string.Empty);
 
-        return PieAction.CreateShellAction(defaults.Name, target, defaults.Icon, workingDirectory: defaults.WorkingDirectory);
+        return PieAction.CreateOpenAction(defaults.Name, target, defaults.Icon, workingDirectory: defaults.WorkingDirectory);
     }
 
     // Reads the most specific link text the drop advertises, preferring the dedicated URL formats over plain text.

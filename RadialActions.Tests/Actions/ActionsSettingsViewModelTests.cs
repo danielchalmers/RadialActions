@@ -81,7 +81,7 @@ public sealed class ActionsSettingsViewModelTests
         var addedA = viewModel.Actions[2];
         var addedB = viewModel.Actions[3];
         Assert.Equal([first, second, addedA, addedB, third], viewModel.Actions);
-        Assert.Equal(ActionType.Shell, addedA.Type);
+        Assert.Equal(ActionType.Open, addedA.Type);
         Assert.Equal("https://a.com", addedA.Parameter);
         Assert.Equal("https://b.com", addedB.Parameter);
         Assert.Same(addedB, viewModel.SelectedAction);
@@ -121,7 +121,7 @@ public sealed class ActionsSettingsViewModelTests
     {
         var viewModel = new ActionEditorViewModel(new ActionDefaultsService(), []);
 
-        Assert.Equal([ActionType.Key, ActionType.Shell], viewModel.ActionTypes.Select(option => option.Type));
+        Assert.Equal([ActionType.Key, ActionType.Open], viewModel.ActionTypes.Select(option => option.Type));
     }
 
     [Fact]

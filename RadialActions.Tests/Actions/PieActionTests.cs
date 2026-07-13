@@ -15,11 +15,11 @@ public class PieActionTests
     }
 
     [Fact]
-    public void CreateShellAction_SetsExpectedFields()
+    public void CreateOpenAction_SetsExpectedFields()
     {
-        var action = PieAction.CreateShellAction("Docs", "https://example.com", "*", "--foo", "C:\\");
+        var action = PieAction.CreateOpenAction("Docs", "https://example.com", "*", "--foo", "C:\\");
 
-        Assert.Equal(ActionType.Shell, action.Type);
+        Assert.Equal(ActionType.Open, action.Type);
         Assert.True(action.IsEnabled);
         Assert.Equal("Docs", action.Name);
         Assert.Equal("*", action.Icon);
@@ -59,9 +59,9 @@ public class PieActionTests
     }
 
     [Fact]
-    public void Execute_ShellActionWithoutTarget_ThrowsInvalidOperationException()
+    public void Execute_OpenActionWithoutTarget_ThrowsInvalidOperationException()
     {
-        var action = PieAction.CreateShellAction("Docs", string.Empty);
+        var action = PieAction.CreateOpenAction("Docs", string.Empty);
 
         var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
