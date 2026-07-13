@@ -51,7 +51,7 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock Text="Use Key for shortcuts and media controls; Open for apps, files, folders, URLs, or commands."
+        <TextBlock Text="Use Key for shortcuts and media controls, Open for apps, files, folders, or URLs, and Script to run PowerShell."
                    Style="{StaticResource DescriptionTextBlock}" />
 
         <StackPanel Margin="0,0,0,4"
@@ -146,6 +146,54 @@
                         Padding="8,2" />
             </Grid>
             <TextBlock Text="Optional folder to use as the target's start location."
+                       Style="{StaticResource DescriptionTextBlock}" />
+        </StackPanel>
+
+        <StackPanel
+              Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Script}}">
+            <TextBlock Text="Script:"
+                       Style="{StaticResource ActionEditorLabelTextBlock}" />
+            <TextBox Text="{Binding SelectedAction.Script, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     AcceptsReturn="True"
+                     AcceptsTab="True"
+                     TextWrapping="NoWrap"
+                     FontFamily="Consolas, Cascadia Mono, Courier New, monospace"
+                     MinHeight="150"
+                     MaxHeight="320"
+                     VerticalContentAlignment="Top"
+                     VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Auto" />
+            <TextBlock Text="Runs when the slice is clicked. No separate file needed, for example: Get-Date | Out-File $env:TEMP\now.txt"
+                       Style="{StaticResource DescriptionTextBlock}" />
+
+            <TextBlock Text="Run With:"
+                       Style="{StaticResource ActionEditorLabelTextBlock}" />
+            <TextBox Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="The PowerShell to run the script with: powershell.exe (default), or pwsh.exe for PowerShell 7."
+                       Style="{StaticResource DescriptionTextBlock}" />
+
+            <TextBlock Text="Working Directory:"
+                       Style="{StaticResource ActionEditorLabelTextBlock}" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="6" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0"
+                         Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Column="2"
+                        Content="Browse..."
+                        Command="{Binding BrowseWorkingDirectoryCommand}"
+                        Padding="8,2" />
+            </Grid>
+            <TextBlock Text="Optional folder to run the script in."
+                       Style="{StaticResource DescriptionTextBlock}" />
+
+            <CheckBox Content="Run hidden"
+                      Margin="0,8,0,0"
+                      IsChecked="{Binding SelectedAction.RunHidden, Mode=TwoWay}" />
+            <TextBlock Text="Run without showing a console window."
                        Style="{StaticResource DescriptionTextBlock}" />
         </StackPanel>
     </StackPanel>

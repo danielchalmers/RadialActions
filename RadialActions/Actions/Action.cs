@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace RadialActions;
@@ -23,6 +24,11 @@ public enum ActionType
     /// Open an app, file, folder, or URL using shell execution.
     /// </summary>
     Open = 2,
+
+    /// <summary>
+    /// Run an inline PowerShell script, optionally without a console window.
+    /// </summary>
+    Script = 3,
 }
 
 /// <summary>
@@ -53,6 +59,7 @@ public partial class PieAction : ObservableObject
 {
     public const string DefaultName = "New Action";
     public const string DefaultIcon = "⚡";
+    public const string DefaultScriptInterpreter = "powershell.exe";
 
     public const string MediaCategory = "Media";
     public const string VolumeCategory = "Volume";
@@ -126,6 +133,18 @@ public partial class PieAction : ObservableObject
     private string _workingDirectory = string.Empty;
 
     /// <summary>
+    /// The inline script body for Script actions.
+    /// </summary>
+    [ObservableProperty]
+    private string _script = string.Empty;
+
+    /// <summary>
+    /// For Script actions, runs the interpreter without showing a console window.
+    /// </summary>
+    [ObservableProperty]
+    private bool _runHidden;
+
+    /// <summary>
     /// Creates a new empty action.
     /// </summary>
     public PieAction() { }
@@ -169,6 +188,19 @@ public partial class PieAction : ObservableObject
         };
 
     /// <summary>
+    /// Creates a script action.
+    /// </summary>
+    public static PieAction CreateScriptAction(string name, string script, string icon = DefaultIcon, string interpreter = "", string workingDirectory = "", bool runHidden = false)
+        => new(name, icon)
+        {
+            Type = ActionType.Script,
+            Parameter = interpreter,
+            Script = script,
+            WorkingDirectory = workingDirectory,
+            RunHidden = runHidden
+        };
+
+    /// <summary>
     /// Executes the action.
     /// </summary>
     public void Execute()
@@ -184,6 +216,9 @@ public partial class PieAction : ObservableObject
                 return;
             case ActionType.Open:
                 ExecuteOpen();
+                return;
+            case ActionType.Script:
+                ExecuteScript();
                 return;
             default:
                 throw new NotSupportedException("Action type is not supported");
@@ -225,6 +260,39 @@ public partial class PieAction : ObservableObject
 
         Process.Start(psi);
     }
+
+    private void ExecuteScript()
+    {
+        if (string.IsNullOrWhiteSpace(Script))
+            throw new InvalidOperationException("Script is empty");
+
+        var interpreter = string.IsNullOrWhiteSpace(Parameter) ? DefaultScriptInterpreter : Parameter;
+        var arguments = $"-NoProfile -ExecutionPolicy Bypass -EncodedCommand {EncodePowerShellCommand(Script)}";
+
+        // The whole command line must fit CreateProcess's 32,767 character limit; fail with a clear message instead of an opaque OS error.
+        if (interpreter.Length + 1 + arguments.Length >= 32000)
+            throw new InvalidOperationException("Script is too long to run");
+
+        // UseShellExecute must be false so CreateNoWindow can suppress the console window for hidden scripts.
+        // The body is passed as a Base64-encoded command so multiline scripts, quotes, and newlines need no escaping and no temp file.
+        var psi = new ProcessStartInfo(interpreter)
+        {
+            UseShellExecute = false,
+            CreateNoWindow = RunHidden,
+            Arguments = arguments
+        };
+
+        if (!string.IsNullOrWhiteSpace(WorkingDirectory))
+        {
+            psi.WorkingDirectory = WorkingDirectory;
+        }
+
+        using var process = Process.Start(psi);
+    }
+
+    // PowerShell -EncodedCommand expects Base64 of the UTF-16LE bytes of the script.
+    internal static string EncodePowerShellCommand(string script)
+        => Convert.ToBase64String(Encoding.Unicode.GetBytes(script ?? string.Empty));
 
     public override string ToString() => Name;
 }

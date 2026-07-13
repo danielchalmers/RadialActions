@@ -102,6 +102,7 @@ public sealed partial class Settings
             action.Parameter ??= string.Empty;
             action.Arguments ??= string.Empty;
             action.WorkingDirectory ??= string.Empty;
+            action.Script ??= string.Empty;
 
             if (!Enum.IsDefined(typeof(ActionType), action.Type))
             {
