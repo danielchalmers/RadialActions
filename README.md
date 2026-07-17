@@ -11,6 +11,7 @@ Radial Actions is a free Windows app that opens with a global hotkey. It gives y
 
 - **Instant access:** summon the menu anywhere with a global hotkey (`Ctrl+Alt+Space` by default, fully customizable). It opens at your cursor, or in the center of the screen if you prefer.
 - **Launch anything:** apps, files, folders, and websites, with optional arguments and working directory.
+- **Run PowerShell scripts:** write a script right in the action and run it on click, optionally hidden with no console window.
 - **Media & volume controls:** play/pause, next/previous track, mute, and volume up/down from any app.
 - **Custom keyboard shortcuts:** assign any key combo to a slice and trigger it with a click.
 - **Make it yours:** name each slice, pick an emoji icon, resize the menu, and drag slices to reorder them.

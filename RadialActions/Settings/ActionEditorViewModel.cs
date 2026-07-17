@@ -35,6 +35,7 @@ public partial class ActionEditorViewModel : ObservableObject
     [
         new(ActionType.Key, "Key", "⌨️"),
         new(ActionType.Open, "Open", "🚀"),
+        new(ActionType.Script, "Script", "📜"),
     ];
 
     public IReadOnlyList<KeyActionDefinition> KeyActionOptions { get; } =
@@ -62,6 +63,8 @@ public partial class ActionEditorViewModel : ObservableObject
                 SelectedAction.Parameter = string.Empty;
                 SelectedAction.Arguments = string.Empty;
                 SelectedAction.WorkingDirectory = string.Empty;
+                SelectedAction.Script = string.Empty;
+                SelectedAction.RunHidden = false;
             }
             else if (value == ActionType.Key)
             {
@@ -70,6 +73,16 @@ public partial class ActionEditorViewModel : ObservableObject
             else if (value == ActionType.Open)
             {
                 SelectedAction.Parameter = string.Empty;
+            }
+            else if (value == ActionType.Script)
+            {
+                SelectedAction.Parameter = PieAction.DefaultScriptInterpreter;
+
+                // Default a fresh Script action to hidden, but keep the user's choice when returning to an already-written script.
+                if (string.IsNullOrEmpty(SelectedAction.Script))
+                {
+                    SelectedAction.RunHidden = true;
+                }
             }
 
             OnPropertyChanged();

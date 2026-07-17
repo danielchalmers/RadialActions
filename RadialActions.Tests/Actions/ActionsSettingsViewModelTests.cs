@@ -121,7 +121,40 @@ public sealed class ActionsSettingsViewModelTests
     {
         var viewModel = new ActionEditorViewModel(new ActionDefaultsService(), []);
 
-        Assert.Equal([ActionType.Key, ActionType.Open], viewModel.ActionTypes.Select(option => option.Type));
+        Assert.Equal([ActionType.Key, ActionType.Open, ActionType.Script], viewModel.ActionTypes.Select(option => option.Type));
+    }
+
+    [Fact]
+    public void SelectedActionType_SwitchingToScript_DefaultsInterpreterAndRunHidden()
+    {
+        var action = PieAction.CreateOpenAction("Explorer", "explorer.exe");
+        var viewModel = new ActionEditorViewModel(new ActionDefaultsService(), [action])
+        {
+            SelectedAction = action
+        };
+
+        viewModel.SelectedActionType = ActionType.Script;
+
+        Assert.Equal(ActionType.Script, action.Type);
+        Assert.Equal(PieAction.DefaultScriptInterpreter, action.Parameter);
+        Assert.True(action.RunHidden);
+    }
+
+    [Fact]
+    public void SelectedActionType_ReturningToScript_PreservesRunHiddenChoice()
+    {
+        var action = PieAction.CreateScriptAction("Backup", "Get-Date", runHidden: true);
+        var viewModel = new ActionEditorViewModel(new ActionDefaultsService(), [action])
+        {
+            SelectedAction = action
+        };
+        action.RunHidden = false; // user unchecks Run hidden
+
+        viewModel.SelectedActionType = ActionType.Open;
+        viewModel.SelectedActionType = ActionType.Script;
+
+        Assert.Equal(ActionType.Script, action.Type);
+        Assert.False(action.RunHidden); // choice preserved, not re-defaulted to hidden
     }
 
     [Fact]

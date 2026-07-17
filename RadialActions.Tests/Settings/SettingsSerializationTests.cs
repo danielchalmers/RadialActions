@@ -89,6 +89,50 @@ public class SettingsSerializationTests
     }
 
     [Fact]
+    public void SerializeToJson_RoundTripsScriptAction()
+    {
+        var settings = Settings.DeserializeFromJson("{}");
+        settings.Actions = new System.Collections.ObjectModel.ObservableCollection<PieAction>
+        {
+            PieAction.CreateScriptAction("Backup", "Get-Date | Out-File $env:TEMP\\now.txt", "📜", "pwsh.exe", "C:\\Scripts", runHidden: true)
+        };
+
+        var json = settings.SerializeToJson();
+        var loaded = Settings.DeserializeFromJson(json);
+
+        Assert.Single(loaded.Actions);
+        Assert.Equal(ActionType.Script, loaded.Actions[0].Type);
+        Assert.Equal("pwsh.exe", loaded.Actions[0].Parameter);
+        Assert.Equal("Get-Date | Out-File $env:TEMP\\now.txt", loaded.Actions[0].Script);
+        Assert.Equal("C:\\Scripts", loaded.Actions[0].WorkingDirectory);
+        Assert.True(loaded.Actions[0].RunHidden);
+    }
+
+    [Fact]
+    public void DeserializeFromJson_ScriptActionMissingRunHidden_DefaultsToFalse()
+    {
+        const string json = """
+        {
+          "Actions": [
+            {
+              "Name": "Backup",
+              "Icon": "*",
+              "Type": 3,
+              "Script": "Get-Date"
+            }
+          ]
+        }
+        """;
+
+        var settings = Settings.DeserializeFromJson(json);
+
+        Assert.Single(settings.Actions);
+        Assert.Equal(ActionType.Script, settings.Actions[0].Type);
+        Assert.Equal("Get-Date", settings.Actions[0].Script);
+        Assert.False(settings.Actions[0].RunHidden);
+    }
+
+    [Fact]
     public void DeserializeFromJson_MissingIsEnabled_DefaultsToTrue()
     {
         const string json = """
