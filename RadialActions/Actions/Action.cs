@@ -201,6 +201,22 @@ public partial class PieAction : ObservableObject
         };
 
     /// <summary>
+    /// Creates a copy of this action with the same configuration.
+    /// </summary>
+    public PieAction Clone() => new()
+    {
+        Name = Name,
+        Icon = Icon,
+        Type = Type,
+        IsEnabled = IsEnabled,
+        Parameter = Parameter,
+        Arguments = Arguments,
+        WorkingDirectory = WorkingDirectory,
+        Script = Script,
+        RunHidden = RunHidden,
+    };
+
+    /// <summary>
     /// Executes the action.
     /// </summary>
     public void Execute()

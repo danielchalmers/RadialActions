@@ -18,7 +18,6 @@ public sealed class ActionsSettingsViewModelTests
 
         Assert.Equal(1, settings.SettingsTabIndex);
         Assert.Same(second, viewModel.Actions.SelectedAction);
-        Assert.Equal(1, viewModel.Actions.SelectedActionIndex);
     }
 
     [Fact]
@@ -29,7 +28,6 @@ public sealed class ActionsSettingsViewModelTests
         var viewModel = CreateViewModel(first, second);
 
         Assert.Same(first, viewModel.SelectedAction);
-        Assert.Equal(0, viewModel.SelectedActionIndex);
         Assert.Same(first, viewModel.Editor.SelectedAction);
     }
 
@@ -43,28 +41,53 @@ public sealed class ActionsSettingsViewModelTests
         viewModel.SelectAction(second);
 
         Assert.Same(second, viewModel.SelectedAction);
-        Assert.Equal(1, viewModel.SelectedActionIndex);
         Assert.Same(second, viewModel.Editor.SelectedAction);
     }
 
     [Fact]
-    public void AddAction_InsertsBlankActionAfterSelectedActionAndSelectsIt()
+    public void AddAction_AppendsNewActionAtEndAndSelectsIt()
     {
         var first = PieAction.CreateKeyAction("Mute");
         var second = PieAction.CreateKeyAction("VolumeUp");
-        var third = PieAction.CreateKeyAction("VolumeDown");
-        var viewModel = CreateViewModel(first, second, third);
-        viewModel.SelectAction(second);
+        var viewModel = CreateViewModel(first, second);
+        viewModel.SelectAction(first);
 
         viewModel.AddActionCommand.Execute(null);
 
         var added = viewModel.Actions[2];
-        Assert.Equal([first, second, added, third], viewModel.Actions);
-        Assert.Equal("Blank action", added.Name);
+        Assert.Equal([first, second, added], viewModel.Actions);
+        Assert.Equal(PieAction.DefaultName, added.Name);
         Assert.Equal(ActionType.None, added.Type);
         Assert.Same(added, viewModel.SelectedAction);
-        Assert.Equal(2, viewModel.SelectedActionIndex);
         Assert.Same(added, viewModel.Editor.SelectedAction);
+    }
+
+    [Fact]
+    public void DuplicateAction_InsertsCopyAfterSourceAndSelectsIt()
+    {
+        var first = PieAction.CreateScriptAction("Backup", "Get-Date", icon: "🧹", interpreter: "pwsh.exe", workingDirectory: @"C:\", runHidden: true);
+        first.IsEnabled = false;
+        first.Arguments = "/select";
+        var second = PieAction.CreateKeyAction("Mute");
+        var viewModel = CreateViewModel(first, second);
+        viewModel.SelectAction(first);
+
+        viewModel.DuplicateActionCommand.Execute(null);
+
+        var copy = viewModel.Actions[1];
+        Assert.Equal([first, copy, second], viewModel.Actions);
+        Assert.NotSame(first, copy);
+        Assert.Equal(first.Name, copy.Name);
+        Assert.Equal(first.Icon, copy.Icon);
+        Assert.Equal(first.Type, copy.Type);
+        Assert.Equal(first.IsEnabled, copy.IsEnabled);
+        Assert.Equal(first.Parameter, copy.Parameter);
+        Assert.Equal(first.Arguments, copy.Arguments);
+        Assert.Equal(first.WorkingDirectory, copy.WorkingDirectory);
+        Assert.Equal(first.Script, copy.Script);
+        Assert.Equal(first.RunHidden, copy.RunHidden);
+        Assert.Same(copy, viewModel.SelectedAction);
+        Assert.Same(copy, viewModel.Editor.SelectedAction);
     }
 
     [Fact]
@@ -85,7 +108,6 @@ public sealed class ActionsSettingsViewModelTests
         Assert.Equal("https://a.com", addedA.Parameter);
         Assert.Equal("https://b.com", addedB.Parameter);
         Assert.Same(addedB, viewModel.SelectedAction);
-        Assert.Equal(3, viewModel.SelectedActionIndex);
         Assert.Same(addedB, viewModel.Editor.SelectedAction);
     }
 
@@ -99,7 +121,6 @@ public sealed class ActionsSettingsViewModelTests
         var added = Assert.Single(viewModel.Actions);
         Assert.Equal("https://a.com", added.Parameter);
         Assert.Same(added, viewModel.SelectedAction);
-        Assert.Equal(0, viewModel.SelectedActionIndex);
     }
 
     [Fact]
@@ -113,7 +134,6 @@ public sealed class ActionsSettingsViewModelTests
 
         Assert.Equal([first], viewModel.Actions);
         Assert.Same(first, viewModel.SelectedAction);
-        Assert.Equal(0, viewModel.SelectedActionIndex);
     }
 
     [Fact]
@@ -170,7 +190,6 @@ public sealed class ActionsSettingsViewModelTests
 
         Assert.Equal([first, third], viewModel.Actions);
         Assert.Same(third, viewModel.SelectedAction);
-        Assert.Equal(1, viewModel.SelectedActionIndex);
         Assert.Same(third, viewModel.Editor.SelectedAction);
     }
 
@@ -184,40 +203,7 @@ public sealed class ActionsSettingsViewModelTests
 
         Assert.Empty(viewModel.Actions);
         Assert.Null(viewModel.SelectedAction);
-        Assert.Equal(-1, viewModel.SelectedActionIndex);
         Assert.Null(viewModel.Editor.SelectedAction);
-    }
-
-    [Fact]
-    public void MoveUp_MovesSelectedActionAndKeepsSelection()
-    {
-        var first = PieAction.CreateKeyAction("Mute");
-        var second = PieAction.CreateKeyAction("VolumeUp");
-        var third = PieAction.CreateKeyAction("VolumeDown");
-        var viewModel = CreateViewModel(first, second, third);
-        viewModel.SelectAction(second);
-
-        viewModel.MoveUpCommand.Execute(null);
-
-        Assert.Equal([second, first, third], viewModel.Actions);
-        Assert.Same(second, viewModel.SelectedAction);
-        Assert.Equal(0, viewModel.SelectedActionIndex);
-    }
-
-    [Fact]
-    public void MoveDown_MovesSelectedActionAndKeepsSelection()
-    {
-        var first = PieAction.CreateKeyAction("Mute");
-        var second = PieAction.CreateKeyAction("VolumeUp");
-        var third = PieAction.CreateKeyAction("VolumeDown");
-        var viewModel = CreateViewModel(first, second, third);
-        viewModel.SelectAction(second);
-
-        viewModel.MoveDownCommand.Execute(null);
-
-        Assert.Equal([first, third, second], viewModel.Actions);
-        Assert.Same(second, viewModel.SelectedAction);
-        Assert.Equal(2, viewModel.SelectedActionIndex);
     }
 
     private static ActionsSettingsViewModel CreateViewModel(params PieAction[] actions)

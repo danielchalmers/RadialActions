@@ -14,23 +14,48 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <StackPanel>
-        <TextBlock Text="Enabled:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Text="Icon:"
+                       Style="{StaticResource ActionEditorLabelTextBlock}" />
+            <TextBox Grid.Row="1"
+                     Grid.Column="0"
+                     Width="56"
+                     Height="56"
+                     FontSize="20"
+                     TextAlignment="Center"
+                     VerticalContentAlignment="Center"
+                     MaxLength="8"
+                     ToolTip="A short symbol or emoji that fits in a slice"
+                     Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Grid.Row="0"
+                       Grid.Column="2"
+                       Text="Name:"
+                       Style="{StaticResource ActionEditorLabelTextBlock}" />
+            <TextBox Grid.Row="1"
+                     Grid.Column="2"
+                     VerticalAlignment="Stretch"
+                     VerticalContentAlignment="Center"
+                     Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
+        <TextBlock Text="Shown on the slice as you type. Changes are saved automatically."
+                   Style="{StaticResource DescriptionTextBlock}" />
+
         <CheckBox Content="Show this action in the menu"
                   IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}" />
-        <TextBlock Text="Hide this action without removing its configuration."
-                   Style="{StaticResource DescriptionTextBlock}" />
-
-        <TextBlock Text="Name:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <TextBox Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Text="Shown next to the icon in the radial menu."
-                   Style="{StaticResource DescriptionTextBlock}" />
-
-        <TextBlock Text="Icon:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <TextBox Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Text="Use a short symbol or emoji that fits in a slice."
+        <TextBlock Text="Hidden actions stay dimmed in the editor without losing their configuration."
                    Style="{StaticResource DescriptionTextBlock}" />
 
         <TextBlock Text="Type:"

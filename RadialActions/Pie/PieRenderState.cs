@@ -18,6 +18,9 @@ internal sealed class PieRenderState
     public Color HubHoverColor { get; private set; } = SystemColors.ControlLightColor;
     public Color HubBorderColor { get; private set; } = SystemColors.ControlDarkColor;
     public Color CenterHoverBorderColor { get; private set; } = SystemColors.ControlDarkColor;
+    public Color AccentColor { get; private set; } = SystemColors.HighlightColor;
+    public Color SelectedFillColor { get; private set; } = SystemColors.ControlLightColor;
+    public double SliceStrokeThickness { get; private set; } = 1.5;
 
     public void ApplyTheme(PieThemeSnapshot theme)
     {
@@ -32,5 +35,8 @@ internal sealed class PieRenderState
         HubHoverColor = theme.HubHoverColor;
         HubBorderColor = theme.HubBorderColor;
         CenterHoverBorderColor = theme.CenterHoverBorderColor;
+        AccentColor = theme.AccentColor;
+        SelectedFillColor = theme.SelectedFillColor;
+        SliceStrokeThickness = theme.SliceStrokeThickness;
     }
 }

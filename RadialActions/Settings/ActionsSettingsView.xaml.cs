@@ -15,13 +15,18 @@ public partial class ActionsSettingsView
 
     private ActionsSettingsViewModel ViewModel => DataContext as ActionsSettingsViewModel;
 
-    private void ActionsList_DragOver(object sender, DragEventArgs e)
+    private void EditorPie_AddSliceRequested(object sender, EventArgs e)
+    {
+        ViewModel?.AddActionCommand.Execute(null);
+    }
+
+    private void PieStage_DragOver(object sender, DragEventArgs e)
     {
         e.Effects = GetDropTargets(e.Data).Count > 0 ? DragDropEffects.Copy : DragDropEffects.None;
         e.Handled = true;
     }
 
-    private void ActionsList_Drop(object sender, DragEventArgs e)
+    private void PieStage_Drop(object sender, DragEventArgs e)
     {
         var targets = GetDropTargets(e.Data);
         ResetDragCache();

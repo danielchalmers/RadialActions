@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 
 namespace RadialActions.Tests;
 
@@ -33,6 +33,20 @@ public class PieReorderCalculatorTests
         const int sliceCount = 5;
 
         var slot = PieReorderCalculator.GetTargetSlot(originalIndex, rotationOffset, angleStep, sliceCount);
+
+        Assert.Equal(expectedSlot, slot);
+    }
+
+    [Theory]
+    [InlineData(0, 360, 0)]  // a full lap over the six-slot editor ring (five slices plus the ghost) lands home
+    [InlineData(4, 60, 5)]   // the last slice dragged one slot clockwise lands in the ghost slot, which the control clamps to the last real slot
+    [InlineData(0, -60, 5)]  // the first slice dragged counterclockwise wraps into the ghost slot the same way
+    public void GetTargetSlot_WithEditModeGhostSlot_WrapsOverTheFullSlotRing(int originalIndex, double rotationOffset, int expectedSlot)
+    {
+        const double angleStep = 60;
+        const int slotCount = 6;
+
+        var slot = PieReorderCalculator.GetTargetSlot(originalIndex, rotationOffset, angleStep, slotCount);
 
         Assert.Equal(expectedSlot, slot);
     }

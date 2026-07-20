@@ -36,6 +36,8 @@ internal sealed class PieThemeSnapshot
     public required Color CenterHoverBorderColor { get; init; }
     public required Color IconTextColor { get; init; }
     public required Color LabelTextColor { get; init; }
+    public required Color AccentColor { get; init; }
+    public required Color SelectedFillColor { get; init; }
 
     public static PieThemeSnapshot Capture(
         Func<string, object> tryFindResource,
@@ -161,6 +163,8 @@ internal sealed class PieThemeSnapshot
             labelTextColor = GetAccessibleAccentColor(labelTextColor, sliceColor);
         }
 
+        var selectedFillColor = BlendColor(sliceColor, accentColor, isHighContrast ? 0.5 : 0.18);
+
         return new PieThemeSnapshot
         {
             IsHighContrast = isHighContrast,
@@ -191,6 +195,8 @@ internal sealed class PieThemeSnapshot
             CenterHoverBorderColor = BlendColor(hubBorderColor, accentColor, 0.45),
             IconTextColor = iconTextColor,
             LabelTextColor = labelTextColor,
+            AccentColor = accentColor,
+            SelectedFillColor = selectedFillColor,
         };
     }
 

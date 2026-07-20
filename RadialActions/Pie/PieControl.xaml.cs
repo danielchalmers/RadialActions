@@ -19,6 +19,7 @@ public partial class PieControl : UserControl
 {
     private const double DefaultCenterHoleRatio = 0.25;
     private const int SliceZIndex = 10;
+    private const int SelectedSliceZIndex = 12;
     private const int HoveredSliceZIndex = 14;
     private const int SliceContentZIndex = 15;
     private const int DraggedSliceZIndex = 16;
@@ -63,6 +64,8 @@ public partial class PieControl : UserControl
     private bool _hasKeyboardModeMousePosition;
     private Point _layoutCenter;
     private double _layoutAngleStep;
+    private int _layoutSlotCount;
+    private bool _slicesHandlersAttached;
     private PieSliceVisual _dragCandidate;
     private Point _dragPressPosition;
     private DragReorderState _drag;
@@ -95,6 +98,7 @@ public partial class PieControl : UserControl
     {
         SystemParameters.StaticPropertyChanged += OnSystemParametersChanged;
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
+        AttachSlicesHandlers();
         RequestRenderRefresh();
     }
 
@@ -102,6 +106,9 @@ public partial class PieControl : UserControl
     {
         SystemParameters.StaticPropertyChanged -= OnSystemParametersChanged;
         SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
+
+        // Detach so a closed or hidden host (like the settings window) doesn't stay alive through handlers on the app-lifetime actions collection.
+        DetachSlicesHandlers(Slices);
     }
 
     private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -238,7 +245,7 @@ public partial class PieControl : UserControl
     private bool OpenSelectedSliceContextMenu()
     {
         var selectedSlice = GetSelectedSliceVisual();
-        if (selectedSlice == null)
+        if (selectedSlice?.ContextMenu == null)
         {
             return false;
         }
@@ -267,6 +274,54 @@ public partial class PieControl : UserControl
         set => SetValue(SlicesProperty, value);
     }
 
+    public static readonly DependencyProperty IsEditModeProperty =
+        DependencyProperty.Register(
+            nameof(IsEditMode),
+            typeof(bool),
+            typeof(PieControl),
+            new PropertyMetadata(false, OnIsEditModePropertyChanged));
+
+    /// <summary>
+    /// When true the pie renders as a live editor surface: every action is shown (disabled ones dimmed), a ghost slice at the end adds new actions, clicking selects instead of executing, and the selected slice is highlighted with the accent color.
+    /// </summary>
+    public bool IsEditMode
+    {
+        get => (bool)GetValue(IsEditModeProperty);
+        set => SetValue(IsEditModeProperty, value);
+    }
+
+    private static void OnIsEditModePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is PieControl control)
+        {
+            control.RequestRenderRefresh();
+        }
+    }
+
+    public static readonly DependencyProperty SelectedSliceProperty =
+        DependencyProperty.Register(
+            nameof(SelectedSlice),
+            typeof(PieAction),
+            typeof(PieControl),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedSlicePropertyChanged));
+
+    /// <summary>
+    /// The action highlighted as selected while <see cref="IsEditMode"/> is on.
+    /// </summary>
+    public PieAction SelectedSlice
+    {
+        get => (PieAction)GetValue(SelectedSliceProperty);
+        set => SetValue(SelectedSliceProperty, value);
+    }
+
+    private static void OnSelectedSlicePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is PieControl control)
+        {
+            control.RefreshVisualState(animate: true);
+        }
+    }
+
     private static void OnSlicesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not PieControl control)
@@ -274,25 +329,47 @@ public partial class PieControl : UserControl
             return;
         }
 
-        if (e.OldValue is ObservableCollection<PieAction> oldCollection)
-        {
-            oldCollection.CollectionChanged -= control.OnSlicesCollectionChanged;
-            foreach (var item in oldCollection)
-            {
-                item.PropertyChanged -= control.OnSlicePropertyChanged;
-            }
-        }
+        control.DetachSlicesHandlers(e.OldValue as ObservableCollection<PieAction>);
 
-        if (e.NewValue is ObservableCollection<PieAction> newCollection)
+        // Wait for Loaded when the binding resolves before the control enters the tree, so unloaded controls never hold handlers on a long-lived collection.
+        if (control.IsLoaded)
         {
-            newCollection.CollectionChanged += control.OnSlicesCollectionChanged;
-            foreach (var item in newCollection)
-            {
-                item.PropertyChanged += control.OnSlicePropertyChanged;
-            }
+            control.AttachSlicesHandlers();
         }
 
         control.RequestRenderRefresh();
+    }
+
+    private void AttachSlicesHandlers()
+    {
+        if (_slicesHandlersAttached || Slices is not ObservableCollection<PieAction> collection)
+        {
+            return;
+        }
+
+        collection.CollectionChanged += OnSlicesCollectionChanged;
+        foreach (var item in collection)
+        {
+            item.PropertyChanged += OnSlicePropertyChanged;
+        }
+
+        _slicesHandlersAttached = true;
+    }
+
+    private void DetachSlicesHandlers(ObservableCollection<PieAction> collection)
+    {
+        if (!_slicesHandlersAttached || collection == null)
+        {
+            return;
+        }
+
+        collection.CollectionChanged -= OnSlicesCollectionChanged;
+        foreach (var item in collection)
+        {
+            item.PropertyChanged -= OnSlicePropertyChanged;
+        }
+
+        _slicesHandlersAttached = false;
     }
 
     private void OnSlicesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -332,15 +409,19 @@ public partial class PieControl : UserControl
         _drag = null;
         _dragCandidate = null;
 
-        var enabledSlices = Slices?
-            .Where(slice => slice?.IsEnabled == true)
+        // Edit mode shows every action so hidden ones can still be selected and edited; the live menu only shows enabled ones.
+        var visibleSlices = Slices?
+            .Where(slice => slice != null && (IsEditMode || slice.IsEnabled))
             .ToList();
 
-        if (enabledSlices == null || enabledSlices.Count == 0 || ActualWidth <= 0 || ActualHeight <= 0)
+        // The ghost add slice takes up one extra slot in edit mode, so an empty editor still renders a full-circle ghost.
+        var slotCount = (visibleSlices?.Count ?? 0) + (IsEditMode ? 1 : 0);
+
+        if (visibleSlices == null || slotCount == 0 || ActualWidth <= 0 || ActualHeight <= 0)
         {
             Log.Debug(
-                "Skipping pie render (EnabledSlices={EnabledSliceCount}, TotalSlices={TotalSliceCount}, Width={Width}, Height={Height})",
-                enabledSlices?.Count ?? 0,
+                "Skipping pie render (VisibleSlices={VisibleSliceCount}, TotalSlices={TotalSliceCount}, Width={Width}, Height={Height})",
+                visibleSlices?.Count ?? 0,
                 Slices?.Count ?? 0,
                 ActualWidth,
                 ActualHeight);
@@ -356,15 +437,15 @@ public partial class PieControl : UserControl
         if (!PieLayoutCalculator.TryCreateLayout(
                 ActualWidth,
                 ActualHeight,
-                enabledSlices.Count,
+                slotCount,
                 DefaultCenterHoleRatio,
                 theme.SliceStrokeThickness,
                 SnapToDevicePixel,
                 out var layout))
         {
             Log.Warning(
-                "Failed to create pie layout (EnabledSlices={EnabledSliceCount}, TotalSlices={TotalSliceCount}, Width={Width}, Height={Height})",
-                enabledSlices.Count,
+                "Failed to create pie layout (VisibleSlices={VisibleSliceCount}, TotalSlices={TotalSliceCount}, Width={Width}, Height={Height})",
+                visibleSlices.Count,
                 Slices?.Count ?? 0,
                 ActualWidth,
                 ActualHeight);
@@ -394,6 +475,7 @@ public partial class PieControl : UserControl
         var angleStep = layout.AngleStep;
         _layoutCenter = center;
         _layoutAngleStep = angleStep;
+        _layoutSlotCount = slotCount;
 
         if (innerRadius > 0)
         {
@@ -416,73 +498,22 @@ public partial class PieControl : UserControl
             };
             _centerVisual = centerVisual;
 
-            var isCenterMouseDown = false;
-
-            centerElements.Target.MouseEnter += (_, _) =>
+            if (IsEditMode)
             {
-                if (_interactionMode != InteractionMode.Mouse)
+                // The hub is inert in edit mode; there is no menu to close.
+                centerElements.Target.Cursor = Cursors.Arrow;
+                foreach (UIElement child in centerElements.Target.Children)
                 {
-                    return;
-                }
-
-                ApplyCenterHoverVisual(animate: true);
-            };
-
-            centerElements.Target.MouseLeave += (_, _) =>
-            {
-                if (_interactionMode == InteractionMode.Mouse)
-                {
-                    ApplyCenterNormalVisual(animate: true);
-                }
-
-                if (!isCenterMouseDown)
-                {
-                    return;
-                }
-
-                isCenterMouseDown = false;
-                _animationService.AnimateClickUp(centerElements.Target, pressDuration, _renderState.StandardEasing);
-            };
-
-            centerElements.Target.MouseLeftButtonDown += (_, e) =>
-            {
-                EnterMouseInteractionMode(refreshVisualState: false, animate: false);
-                isCenterMouseDown = true;
-                _animationService.AnimateClickDown(centerElements.Target, pressDuration, _renderState.StandardEasing);
-                e.Handled = true;
-            };
-
-            centerElements.Target.MouseLeftButtonUp += (_, e) =>
-            {
-                if (!isCenterMouseDown)
-                {
-                    return;
-                }
-
-                isCenterMouseDown = false;
-                _animationService.AnimateClickUp(centerElements.Target, pressDuration, _renderState.StandardEasing);
-                if (_interactionMode == InteractionMode.Mouse)
-                {
-                    if (centerElements.Target.IsMouseOver)
+                    if (child is FrameworkElement childElement)
                     {
-                        ApplyCenterHoverVisual(animate: true);
-                    }
-                    else
-                    {
-                        ApplyCenterNormalVisual(animate: true);
+                        childElement.Cursor = Cursors.Arrow;
                     }
                 }
-
-                CenterClicked?.Invoke(this, EventArgs.Empty);
-                e.Handled = true;
-            };
-
-            centerElements.Target.MouseRightButtonUp += (_, e) =>
+            }
+            else
             {
-                EnterMouseInteractionMode(refreshVisualState: false, animate: false);
-                CenterContextMenuRequested?.Invoke(this, EventArgs.Empty);
-                e.Handled = true;
-            };
+                WireCenterInteractions(centerElements, pressDuration);
+            }
 
             Canvas.SetLeft(centerElements.Target, SnapToDevicePixel(center.X - innerRadius, isXAxis: true));
             Canvas.SetTop(centerElements.Target, SnapToDevicePixel(center.Y - innerRadius, isXAxis: false));
@@ -490,9 +521,9 @@ public partial class PieControl : UserControl
             PieCanvas.Children.Add(centerElements.Target);
         }
 
-        for (var i = 0; i < enabledSlices.Count; i++)
+        for (var i = 0; i < visibleSlices.Count; i++)
         {
-            var sliceAction = enabledSlices[i];
+            var sliceAction = visibleSlices[i];
             var startAngle = (i * angleStep) - 90;
             var endAngle = startAngle + angleStep;
 
@@ -527,7 +558,8 @@ public partial class PieControl : UserControl
             var reorderRotation = new RotateTransform(0, center.X, center.Y);
             slice.RenderTransform = new TransformGroup { Children = { pressScale, reorderRotation } };
 
-            var contextMenu = CreateSliceContextMenu(sliceAction);
+            // No "Edit..." context menu in edit mode; the slice is already being edited in place.
+            var contextMenu = IsEditMode ? null : CreateSliceContextMenu(sliceAction);
             slice.ContextMenu = contextMenu;
 
             var sliceVisual = new PieSliceVisual
@@ -577,6 +609,12 @@ public partial class PieControl : UserControl
 
                 isMouseDown = false;
                 _animationService.AnimateClickUp(slice, pressDuration, _renderState.StandardEasing);
+
+                if (IsEditMode)
+                {
+                    SelectedSlice = sliceAction;
+                }
+
                 if (_interactionMode == InteractionMode.Mouse)
                 {
                     if (slice.IsMouseOver)
@@ -585,7 +623,7 @@ public partial class PieControl : UserControl
                     }
                     else
                     {
-                        ApplySliceNormalVisual(sliceVisual, animate: true);
+                        ApplySliceRestingVisual(sliceVisual, animate: true);
                     }
                 }
                 else
@@ -616,7 +654,7 @@ public partial class PieControl : UserControl
 
                 if (_interactionMode == InteractionMode.Mouse && _drag == null)
                 {
-                    ApplySliceNormalVisual(sliceVisual, animate: true);
+                    ApplySliceRestingVisual(sliceVisual, animate: true);
                 }
 
                 if (!isMouseDown)
@@ -627,10 +665,17 @@ public partial class PieControl : UserControl
                 isMouseDown = false;
                 _animationService.AnimateClickUp(slice, pressDuration, _renderState.StandardEasing);
             };
+            // Hidden actions render dimmed in edit mode so they can still be selected and edited.
+            if (IsEditMode && !sliceAction.IsEnabled)
+            {
+                slice.Opacity = 0.45;
+            }
+
             Panel.SetZIndex(slice, SliceZIndex);
             PieCanvas.Children.Add(slice);
 
-            if (i < MaxDigitHints)
+            // Digit hints only matter for triggering slices from the live menu.
+            if (!IsEditMode && i < MaxDigitHints)
             {
                 var digitHint = PieVisualBuilder.CreateSliceDigitHint(
                     i + 1,
@@ -687,8 +732,18 @@ public partial class PieControl : UserControl
             sliceVisual.ContentCounter = contentCounter;
             sliceVisual.ContentOrbit = contentOrbit;
 
+            if (IsEditMode && !sliceAction.IsEnabled)
+            {
+                contentPanel.Opacity = 0.45;
+            }
+
             Panel.SetZIndex(contentPanel, SliceContentZIndex);
             PieCanvas.Children.Add(contentPanel);
+        }
+
+        if (IsEditMode)
+        {
+            AddGhostSlice(theme, center, outerRadius, innerRadius, visibleSlices.Count, angleStep);
         }
 
         _selectionController.EnsureSelectionIsValid(GetSelectionItems());
@@ -698,6 +753,190 @@ public partial class PieControl : UserControl
             _sliceVisuals.Count,
             canvasSize);
         RefreshVisualState(animate: false);
+    }
+
+    /// <summary>
+    /// Adds the dashed "+" slice that follows the real slices in edit mode and adds a new action when clicked.
+    /// </summary>
+    private void AddGhostSlice(PieThemeSnapshot theme, Point center, double outerRadius, double innerRadius, int slotIndex, double angleStep)
+    {
+        var startAngle = (slotIndex * angleStep) - 90;
+        var endAngle = startAngle + angleStep;
+
+        // A full-circle arc degenerates (start and end coincide), so an empty editor gets a ring instead of a slice.
+        var ghost = angleStep >= 360
+            ? new Path
+            {
+                Data = new CombinedGeometry(
+                    GeometryCombineMode.Exclude,
+                    new EllipseGeometry(center, outerRadius, outerRadius),
+                    new EllipseGeometry(center, innerRadius, innerRadius)),
+            }
+            : PieLayoutCalculator.CreateSlice(
+                center,
+                outerRadius,
+                innerRadius,
+                startAngle,
+                endAngle,
+                (centerPoint, radius, angle) => PieLayoutCalculator.GetPointOnCircle(centerPoint, radius, angle, SnapPoint));
+        if (theme.SlicePathStyle != null)
+        {
+            ghost.Style = theme.SlicePathStyle;
+        }
+
+        var transparentFill = Color.FromArgb(0, theme.HoverColor.R, theme.HoverColor.G, theme.HoverColor.B);
+        var fillBrush = new SolidColorBrush(transparentFill);
+        var strokeBrush = new SolidColorBrush(theme.BorderColor);
+
+        ghost.Fill = fillBrush;
+        ghost.Stroke = strokeBrush;
+        ghost.StrokeThickness = theme.SliceStrokeThickness;
+        ghost.StrokeDashArray = [4, 3];
+        ghost.Cursor = Cursors.Hand;
+        ghost.SnapsToDevicePixels = true;
+        ghost.ToolTip = "Add an action";
+
+        var pathBounds = ghost.Data.Bounds;
+        ghost.RenderTransform = new ScaleTransform(1, 1)
+        {
+            CenterX = pathBounds.X + (pathBounds.Width / 2),
+            CenterY = pathBounds.Y + (pathBounds.Height / 2),
+        };
+
+        var pressDuration = _renderState.PressDuration;
+        var isMouseDown = false;
+
+        ghost.MouseEnter += (_, _) =>
+        {
+            _animationService.AnimateBrushColor(fillBrush, theme.HoverColor, _renderState.HoverDuration, _renderState.StandardEasing);
+            _animationService.AnimateBrushColor(strokeBrush, theme.AccentColor, _renderState.HoverDuration, _renderState.StandardEasing);
+        };
+
+        ghost.MouseLeave += (_, _) =>
+        {
+            if (isMouseDown)
+            {
+                isMouseDown = false;
+                _animationService.AnimateClickUp(ghost, pressDuration, _renderState.StandardEasing);
+            }
+
+            _animationService.AnimateBrushColor(fillBrush, transparentFill, _renderState.HoverDuration, _renderState.StandardEasing);
+            _animationService.AnimateBrushColor(strokeBrush, theme.BorderColor, _renderState.HoverDuration, _renderState.StandardEasing);
+        };
+
+        ghost.MouseLeftButtonDown += (_, e) =>
+        {
+            isMouseDown = true;
+            _animationService.AnimateClickDown(ghost, pressDuration, _renderState.StandardEasing);
+            e.Handled = true;
+        };
+
+        ghost.MouseLeftButtonUp += (_, e) =>
+        {
+            if (!isMouseDown)
+            {
+                return;
+            }
+
+            isMouseDown = false;
+            _animationService.AnimateClickUp(ghost, pressDuration, _renderState.StandardEasing);
+            AddSliceRequested?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
+        };
+
+        Panel.SetZIndex(ghost, SliceZIndex);
+        PieCanvas.Children.Add(ghost);
+
+        var textRadius = innerRadius > 0 ? (outerRadius + innerRadius) / 2 : outerRadius * 0.6;
+        var glyphPosition = PieLayoutCalculator.GetTextPosition(center, textRadius, startAngle, endAngle, SnapPoint);
+
+        var addGlyph = new TextBlock
+        {
+            Style = theme.IconTextStyle,
+            Text = "\uE710",
+            FontFamily = new FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"),
+            Foreground = new SolidColorBrush(theme.AccentColor),
+            FontSize = Math.Max(16, outerRadius * 0.1),
+            IsHitTestVisible = false,
+            SnapsToDevicePixels = true,
+        };
+
+        addGlyph.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        Canvas.SetLeft(addGlyph, SnapToDevicePixel(glyphPosition.X - (addGlyph.DesiredSize.Width / 2), isXAxis: true));
+        Canvas.SetTop(addGlyph, SnapToDevicePixel(glyphPosition.Y - (addGlyph.DesiredSize.Height / 2), isXAxis: false));
+        Panel.SetZIndex(addGlyph, SliceContentZIndex);
+        PieCanvas.Children.Add(addGlyph);
+    }
+
+    private void WireCenterInteractions(PieVisualBuilder.CenterElements centerElements, Duration pressDuration)
+    {
+        var isCenterMouseDown = false;
+
+        centerElements.Target.MouseEnter += (_, _) =>
+        {
+            if (_interactionMode != InteractionMode.Mouse)
+            {
+                return;
+            }
+
+            ApplyCenterHoverVisual(animate: true);
+        };
+
+        centerElements.Target.MouseLeave += (_, _) =>
+        {
+            if (_interactionMode == InteractionMode.Mouse)
+            {
+                ApplyCenterNormalVisual(animate: true);
+            }
+
+            if (!isCenterMouseDown)
+            {
+                return;
+            }
+
+            isCenterMouseDown = false;
+            _animationService.AnimateClickUp(centerElements.Target, pressDuration, _renderState.StandardEasing);
+        };
+
+        centerElements.Target.MouseLeftButtonDown += (_, e) =>
+        {
+            EnterMouseInteractionMode(refreshVisualState: false, animate: false);
+            isCenterMouseDown = true;
+            _animationService.AnimateClickDown(centerElements.Target, pressDuration, _renderState.StandardEasing);
+            e.Handled = true;
+        };
+
+        centerElements.Target.MouseLeftButtonUp += (_, e) =>
+        {
+            if (!isCenterMouseDown)
+            {
+                return;
+            }
+
+            isCenterMouseDown = false;
+            _animationService.AnimateClickUp(centerElements.Target, pressDuration, _renderState.StandardEasing);
+            if (_interactionMode == InteractionMode.Mouse)
+            {
+                if (centerElements.Target.IsMouseOver)
+                {
+                    ApplyCenterHoverVisual(animate: true);
+                }
+                else
+                {
+                    ApplyCenterNormalVisual(animate: true);
+                }
+            }
+
+            CenterClicked?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
+        };
+
+        centerElements.Target.MouseRightButtonUp += (_, e) =>
+        {
+            EnterMouseInteractionMode(refreshVisualState: false, animate: false);
+            CenterContextMenuRequested?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
+        };
     }
 
     private void EnterMouseInteractionMode(bool refreshVisualState, bool animate)
@@ -788,11 +1027,14 @@ public partial class PieControl : UserControl
 
         SetSliceRotation(drag.Slice, drag.RotationOffset);
 
-        var targetSlot = PieReorderCalculator.GetTargetSlot(
-            drag.Slice.Index,
-            drag.RotationOffset,
-            _layoutAngleStep,
-            _sliceVisuals.Count);
+        // Wrap over every layout slot (including the edit-mode ghost) so the angle math matches the geometry, then land ghost-slot drops on the last real slot.
+        var targetSlot = Math.Min(
+            PieReorderCalculator.GetTargetSlot(
+                drag.Slice.Index,
+                drag.RotationOffset,
+                _layoutAngleStep,
+                _layoutSlotCount),
+            _sliceVisuals.Count - 1);
         if (targetSlot == drag.TargetSlot)
         {
             return;
@@ -941,7 +1183,7 @@ public partial class PieControl : UserControl
             }
             else
             {
-                ApplySliceNormalVisual(sliceVisual, animate);
+                ApplySliceRestingVisual(sliceVisual, animate);
             }
         }
 
@@ -950,7 +1192,7 @@ public partial class PieControl : UserControl
             return;
         }
 
-        var isCenterHovered = _interactionMode == InteractionMode.Mouse && _centerVisual.Target.IsMouseOver;
+        var isCenterHovered = !IsEditMode && _interactionMode == InteractionMode.Mouse && _centerVisual.Target.IsMouseOver;
         if (isCenterHovered)
         {
             ApplyCenterHoverVisual(animate);
@@ -961,18 +1203,51 @@ public partial class PieControl : UserControl
         }
     }
 
+    /// <summary>
+    /// Applies the visual a slice returns to when not hovered: the accent selection highlight in edit mode when it is the selected slice, otherwise the normal resting look.
+    /// </summary>
+    private void ApplySliceRestingVisual(PieSliceVisual sliceVisual, bool animate)
+    {
+        if (IsSelectedInEditMode(sliceVisual))
+        {
+            ApplySliceSelectedVisual(sliceVisual, animate);
+        }
+        else
+        {
+            ApplySliceNormalVisual(sliceVisual, animate);
+        }
+    }
+
     private void ApplySliceNormalVisual(PieSliceVisual sliceVisual, bool animate)
     {
         Panel.SetZIndex(sliceVisual.Path, SliceZIndex);
+        sliceVisual.Path.StrokeThickness = _renderState.SliceStrokeThickness;
         _animationService.ApplyBrushColor(sliceVisual.FillBrush, _renderState.SliceColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
         _animationService.ApplyBrushColor(sliceVisual.StrokeBrush, _renderState.BorderColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
+    }
+
+    private void ApplySliceSelectedVisual(PieSliceVisual sliceVisual, bool animate)
+    {
+        // Raised above neighbors so the accent stroke is not painted over by their edges.
+        Panel.SetZIndex(sliceVisual.Path, SelectedSliceZIndex);
+        sliceVisual.Path.StrokeThickness = _renderState.SliceStrokeThickness + 1;
+        _animationService.ApplyBrushColor(sliceVisual.FillBrush, _renderState.SelectedFillColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
+        _animationService.ApplyBrushColor(sliceVisual.StrokeBrush, _renderState.AccentColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
     }
 
     private void ApplySliceHoverVisual(PieSliceVisual sliceVisual, bool animate)
     {
         Panel.SetZIndex(sliceVisual.Path, HoveredSliceZIndex);
+        sliceVisual.Path.StrokeThickness = IsSelectedInEditMode(sliceVisual)
+            ? _renderState.SliceStrokeThickness + 1
+            : _renderState.SliceStrokeThickness;
         _animationService.ApplyBrushColor(sliceVisual.FillBrush, _renderState.HoverColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
         _animationService.ApplyBrushColor(sliceVisual.StrokeBrush, _renderState.BorderHoverColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
+    }
+
+    private bool IsSelectedInEditMode(PieSliceVisual sliceVisual)
+    {
+        return IsEditMode && SelectedSlice != null && sliceVisual.Action == SelectedSlice;
     }
 
     private void ApplyCenterNormalVisual(bool animate)
@@ -1123,6 +1398,11 @@ public partial class PieControl : UserControl
     /// Occurs when the center target requests the main context menu.
     /// </summary>
     public event EventHandler CenterContextMenuRequested;
+
+    /// <summary>
+    /// Occurs when the ghost add slice is clicked in edit mode.
+    /// </summary>
+    public event EventHandler AddSliceRequested;
 }
 
 /// <summary>
