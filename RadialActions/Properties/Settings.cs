@@ -41,6 +41,12 @@ public sealed partial class Settings
     private bool _keepMenuOpenAfterSliceClick;
 
     /// <summary>
+    /// Triggers the hovered slice when the held activation hotkey is released.
+    /// </summary>
+    [ObservableProperty]
+    private bool _triggerSliceOnHotkeyRelease = true;
+
+    /// <summary>
     /// Opens the menu at the center of the current screen instead of the cursor.
     /// </summary>
     [ObservableProperty]

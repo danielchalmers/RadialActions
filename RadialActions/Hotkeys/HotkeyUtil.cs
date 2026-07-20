@@ -90,6 +90,24 @@ public static class HotkeyUtil
         return key != Key.None;
     }
 
+    /// <summary>
+    /// Returns whether a key is part of a hotkey combination, either as its main key or as one of its modifiers.
+    /// </summary>
+    public static bool IsHotkeyComponent(Key key, ModifierKeys modifiers, Key hotkeyKey)
+    {
+        if (key == hotkeyKey && key != Key.None)
+            return true;
+
+        return key switch
+        {
+            Key.LeftCtrl or Key.RightCtrl => modifiers.HasFlag(ModifierKeys.Control),
+            Key.LeftAlt or Key.RightAlt => modifiers.HasFlag(ModifierKeys.Alt),
+            Key.LeftShift or Key.RightShift => modifiers.HasFlag(ModifierKeys.Shift),
+            Key.LWin or Key.RWin => modifiers.HasFlag(ModifierKeys.Windows),
+            _ => false
+        };
+    }
+
     public static string BuildHotkeyString(Key key, ModifierKeys modifiers)
     {
         if (key == Key.None)

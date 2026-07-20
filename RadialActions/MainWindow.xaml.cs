@@ -21,6 +21,12 @@ public partial class MainWindow : Window
     private readonly HotkeyService _hotkeyService = new();
     private readonly MenuService _menuService;
 
+    /// <summary>
+    /// True while the menu was opened by the activation hotkey and the keys have not been released
+    /// yet, so releasing them over a slice triggers it (flick gesture).
+    /// </summary>
+    private bool _hotkeyReleasePending;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -96,22 +102,25 @@ public partial class MainWindow : Window
 
     public void ShowMenu(bool atCursor)
     {
+        _hotkeyReleasePending = false;
         _menuService.ShowMenu(atCursor);
     }
 
     public void HideMenu(bool animate = true)
     {
+        _hotkeyReleasePending = false;
         _menuService.HideMenu(animate);
     }
 
     private void ShowMenuUsingConfiguredPosition()
     {
+        _hotkeyReleasePending = false;
         _menuService.ShowMenu(!Settings.Default.OpenMenuInScreenCenter);
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        _menuService.HideMenu(animate: false);
+        HideMenu(animate: false);
 
         var handle = new WindowInteropHelper(this).Handle;
         _hotkeyService.Initialize(handle, OnHotkeyPressed);
@@ -137,11 +146,12 @@ public partial class MainWindow : Window
 
         if (IsActive)
         {
-            _menuService.HideMenu();
+            HideMenu();
         }
         else
         {
             ShowMenuUsingConfiguredPosition();
+            _hotkeyReleasePending = Settings.Default.TriggerSliceOnHotkeyRelease;
         }
     }
 
@@ -223,7 +233,7 @@ public partial class MainWindow : Window
 
         if (!Settings.Default.KeepMenuOpenAfterSliceClick)
         {
-            _menuService.HideMenu();
+            HideMenu();
         }
     }
 
@@ -239,7 +249,7 @@ public partial class MainWindow : Window
     private void OnCenterClicked(object sender, EventArgs e)
     {
         Log.Debug("Center close target clicked");
-        _menuService.HideMenu();
+        HideMenu();
     }
 
     private void OnCenterContextMenuRequested(object sender, EventArgs e)
@@ -263,13 +273,13 @@ public partial class MainWindow : Window
         OpenSettingsWindow(1);
         var settingsWindow = Application.Current.Windows.OfType<SettingsWindow>().FirstOrDefault();
         settingsWindow?.SelectAction(e.Slice);
-        _menuService.HideMenu();
+        HideMenu();
     }
 
     private void Window_Deactivated(object sender, EventArgs e)
     {
         Log.Debug("Lost focus");
-        _menuService.HideMenu();
+        HideMenu();
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -277,7 +287,7 @@ public partial class MainWindow : Window
         if (e.Key == Key.Escape)
         {
             Log.Debug("Escape pressed");
-            _menuService.HideMenu();
+            HideMenu();
             e.Handled = true;
             return;
         }
@@ -294,6 +304,33 @@ public partial class MainWindow : Window
             Log.Debug("Context menu key pressed with no selected slice; opening main context menu");
             OpenMainContextMenu();
             e.Handled = true;
+        }
+    }
+
+    private void Window_KeyUp(object sender, KeyEventArgs e)
+    {
+        if (!_hotkeyReleasePending)
+        {
+            return;
+        }
+
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (!HotkeyUtil.TryParse(Settings.Default.ActivationHotkey, out var modifiers, out var hotkeyKey)
+            || !HotkeyUtil.IsHotkeyComponent(key, modifiers, hotkeyKey))
+        {
+            return;
+        }
+
+        _hotkeyReleasePending = false;
+
+        if (PieMenu.TriggerHoveredSlice())
+        {
+            Log.Debug("Activation hotkey released over a slice; triggered it");
+            e.Handled = true;
+        }
+        else
+        {
+            Log.Debug("Activation hotkey released with no slice hovered; menu stays open");
         }
     }
 

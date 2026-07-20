@@ -10,6 +10,7 @@
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         AllowsTransparency="True" Background="Transparent"
         Deactivated="Window_Deactivated" PreviewKeyDown="Window_KeyDown"
+        PreviewKeyUp="Window_KeyUp"
         Loaded="Window_Loaded" Opacity="0"
         ResizeMode="NoResize" ShowActivated="False" ShowInTaskbar="False"
         SizeToContent="WidthAndHeight"
