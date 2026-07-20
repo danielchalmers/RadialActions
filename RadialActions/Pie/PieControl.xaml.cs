@@ -130,6 +130,27 @@ public partial class PieControl : UserControl
         EnterMouseInteractionMode(refreshVisualState: true, animate: false);
     }
 
+    /// <summary>
+    /// Triggers the slice currently under the mouse, if any.
+    /// </summary>
+    /// <returns>True if a hovered slice was triggered.</returns>
+    public bool TriggerHoveredSlice()
+    {
+        if (_drag != null)
+        {
+            return false;
+        }
+
+        var hoveredSlice = _sliceVisuals.FirstOrDefault(slice => slice.Path.IsMouseOver);
+        if (hoveredSlice == null)
+        {
+            return false;
+        }
+
+        SliceClicked?.Invoke(this, new SliceClickEventArgs(hoveredSlice.Action));
+        return true;
+    }
+
     public bool HandleMenuKey(Key key, ModifierKeys modifiers)
     {
         switch (key)

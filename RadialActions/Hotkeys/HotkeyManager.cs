@@ -16,6 +16,11 @@ public class HotkeyManager : IDisposable
     private const uint ModControl = 0x0002;
     private const uint ModShift = 0x0004;
     private const uint ModWin = 0x0008;
+
+    /// <summary>
+    /// Prevents keyboard autorepeat from firing extra WM_HOTKEY messages while the hotkey is held.
+    /// </summary>
+    private const uint ModNoRepeat = 0x4000;
     private int _currentId;
     private readonly Dictionary<string, int> _hotkeys = new(StringComparer.OrdinalIgnoreCase);
     private bool _disposed;
@@ -74,7 +79,7 @@ public class HotkeyManager : IDisposable
 
         var id = ++_currentId;
 
-        if (RegisterHotKey(_windowHandle, id, ToModifierFlags(modifiers), keyCode))
+        if (RegisterHotKey(_windowHandle, id, ToModifierFlags(modifiers) | ModNoRepeat, keyCode))
         {
             _hotkeys[hotkey] = id;
             Log.Information($"Registered hotkey: {hotkey} (ID: {id})");

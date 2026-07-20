@@ -133,6 +133,17 @@ public class SettingsSerializationTests
     }
 
     [Fact]
+    public void TriggerSliceOnHotkeyRelease_DefaultsToTrueAndRoundTrips()
+    {
+        var settings = Settings.DeserializeFromJson("{}");
+        Assert.True(settings.TriggerSliceOnHotkeyRelease);
+
+        settings.TriggerSliceOnHotkeyRelease = false;
+        var loaded = Settings.DeserializeFromJson(settings.SerializeToJson());
+        Assert.False(loaded.TriggerSliceOnHotkeyRelease);
+    }
+
+    [Fact]
     public void DeserializeFromJson_MissingIsEnabled_DefaultsToTrue()
     {
         const string json = """

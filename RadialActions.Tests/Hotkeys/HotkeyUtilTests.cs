@@ -23,6 +23,28 @@ public class HotkeyUtilTests
     }
 
     [Theory]
+    [InlineData(Key.Space, true)]
+    [InlineData(Key.LeftCtrl, true)]
+    [InlineData(Key.RightCtrl, true)]
+    [InlineData(Key.LeftAlt, true)]
+    [InlineData(Key.RightAlt, true)]
+    [InlineData(Key.LeftShift, false)]
+    [InlineData(Key.LWin, false)]
+    [InlineData(Key.A, false)]
+    public void IsHotkeyComponent_CtrlAltSpace_MatchesMainKeyAndModifiers(Key key, bool expected)
+    {
+        var isComponent = HotkeyUtil.IsHotkeyComponent(key, ModifierKeys.Control | ModifierKeys.Alt, Key.Space);
+
+        Assert.Equal(expected, isComponent);
+    }
+
+    [Fact]
+    public void IsHotkeyComponent_NoneKey_NeverMatches()
+    {
+        Assert.False(HotkeyUtil.IsHotkeyComponent(Key.None, ModifierKeys.None, Key.None));
+    }
+
+    [Theory]
     [InlineData(Key.Space, ModifierKeys.Control | ModifierKeys.Alt)]
     [InlineData(Key.F12, ModifierKeys.Shift)]
     [InlineData(Key.D7, ModifierKeys.None)]

@@ -53,6 +53,31 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0"
+                               Text="&#xE7C9;"
+                               Style="{StaticResource SettingsCardIconTextBlock}" />
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Release hotkey to trigger"
+                                   Style="{StaticResource SettingsCardTitleTextBlock}" />
+                        <TextBlock Text="Hold the hotkey, glide onto a slice, and release to run it in one motion."
+                                   Style="{StaticResource SettingsCardDescriptionTextBlock}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="2"
+                              MinWidth="0"
+                              Margin="16,0,0,0"
+                              VerticalAlignment="Center"
+                              IsChecked="{Binding Settings.TriggerSliceOnHotkeyRelease, Mode=TwoWay}" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource SettingsCardRowBorder}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
                                Text="&#xE740;"
                                Style="{StaticResource SettingsCardIconTextBlock}" />
                     <StackPanel Grid.Column="1"
