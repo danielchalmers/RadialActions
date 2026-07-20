@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
@@ -70,6 +71,7 @@ public partial class PieControl : UserControl
     private Point _dragPressPosition;
     private DragReorderState _drag;
     private bool _isReleasingDragCapture;
+    private Path _ghostPath;
 
     private sealed class DragReorderState
     {
@@ -156,6 +158,101 @@ public partial class PieControl : UserControl
 
         SliceClicked?.Invoke(this, new SliceClickEventArgs(hoveredSlice.Action));
         return true;
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (!IsEditMode || e.Handled)
+        {
+            return;
+        }
+
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        e.Handled = HandleEditModeKey(key, Keyboard.Modifiers);
+    }
+
+    /// <summary>
+    /// Keyboard support for the editor pie: arrows move the selection around the ring, Ctrl+arrows reorder the selected action, Enter or Insert adds one, and Delete removes it.
+    /// </summary>
+    private bool HandleEditModeKey(Key key, ModifierKeys modifiers)
+    {
+        switch (key)
+        {
+            case Key.Right:
+            case Key.Down:
+                return modifiers.HasFlag(ModifierKeys.Control) ? MoveSelectedSlice(1) : MoveEditSelection(1);
+            case Key.Left:
+            case Key.Up:
+                return modifiers.HasFlag(ModifierKeys.Control) ? MoveSelectedSlice(-1) : MoveEditSelection(-1);
+            case Key.Return:
+            case Key.Insert:
+                RequestAddSlice();
+                return true;
+            case Key.Delete:
+                if (SelectedSlice == null)
+                {
+                    return false;
+                }
+
+                RemoveSliceRequested?.Invoke(this, new SliceClickEventArgs(SelectedSlice));
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private bool MoveEditSelection(int delta)
+    {
+        if (_sliceVisuals.Count == 0)
+        {
+            return false;
+        }
+
+        var count = _sliceVisuals.Count;
+        var index = _sliceVisuals.FindIndex(visual => visual.Action == SelectedSlice);
+        index = index < 0
+            ? (delta > 0 ? 0 : count - 1)
+            : (((index + delta) % count) + count) % count;
+        SelectedSlice = _sliceVisuals[index].Action;
+        return true;
+    }
+
+    private bool MoveSelectedSlice(int delta)
+    {
+        if (SelectedSlice == null || Slices == null)
+        {
+            return false;
+        }
+
+        var fromIndex = Slices.IndexOf(SelectedSlice);
+        if (fromIndex < 0 || Slices.Count < 2)
+        {
+            return false;
+        }
+
+        // Wrap like the ring does, so moving past either end carries the slice around.
+        var count = Slices.Count;
+        var toIndex = (((fromIndex + delta) % count) + count) % count;
+        Log.Information("Reordered slice by keyboard: {SliceName} ({FromIndex} -> {ToIndex})", SelectedSlice.Name, fromIndex, toIndex);
+        Slices.Move(fromIndex, toIndex);
+        SlicesReordered?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
+    internal void RequestAddSlice()
+    {
+        AddSliceRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    internal IReadOnlyList<PieSliceVisual> SliceVisuals => _sliceVisuals;
+
+    internal Path GhostPath => _ghostPath;
+
+    protected override AutomationPeer OnCreateAutomationPeer()
+    {
+        return new PieControlAutomationPeer(this);
     }
 
     public bool HandleMenuKey(Key key, ModifierKeys modifiers)
@@ -292,10 +389,14 @@ public partial class PieControl : UserControl
 
     private static void OnIsEditModePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is PieControl control)
+        if (d is not PieControl control)
         {
-            control.RequestRenderRefresh();
+            return;
         }
+
+        // The editor is a keyboard-navigable control; the live menu keeps window-level key handling and stays unfocusable.
+        control.Focusable = e.NewValue is true;
+        control.RequestRenderRefresh();
     }
 
     public static readonly DependencyProperty SelectedSliceProperty =
@@ -316,9 +417,18 @@ public partial class PieControl : UserControl
 
     private static void OnSelectedSlicePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is PieControl control)
+        if (d is not PieControl control)
         {
-            control.RefreshVisualState(animate: true);
+            return;
+        }
+
+        control.RefreshVisualState(animate: true);
+
+        if (e.NewValue is PieAction selected
+            && AutomationPeer.ListenerExists(AutomationEvents.SelectionItemPatternOnElementSelected)
+            && UIElementAutomationPeer.FromElement(control) is PieControlAutomationPeer peer)
+        {
+            peer.RaiseSelectionEvent(selected);
         }
     }
 
@@ -408,6 +518,7 @@ public partial class PieControl : UserControl
         _renderRefreshPending = false;
         _drag = null;
         _dragCandidate = null;
+        _ghostPath = null;
 
         // Edit mode shows every action so hidden ones can still be selected and edited; the live menu only shows enabled ones.
         var visibleSlices = Slices?
@@ -581,6 +692,11 @@ public partial class PieControl : UserControl
             slice.MouseLeftButtonDown += (_, e) =>
             {
                 EnterMouseInteractionMode(refreshVisualState: false, animate: false);
+                if (IsEditMode)
+                {
+                    Focus();
+                }
+
                 isMouseDown = true;
                 _animationService.AnimateBrushColor(fillBrush, theme.PressedColor, pressDuration, _renderState.StandardEasing);
                 _animationService.AnimateBrushColor(strokeBrush, _renderState.BorderHoverColor, pressDuration, _renderState.StandardEasing);
@@ -748,6 +864,12 @@ public partial class PieControl : UserControl
 
         _selectionController.EnsureSelectionIsValid(GetSelectionItems());
 
+        // The rendered slices back the automation tree in edit mode, so rebuilds must invalidate the cached child peers.
+        if (IsEditMode && UIElementAutomationPeer.FromElement(this) is PieControlAutomationPeer peer)
+        {
+            peer.ResetChildrenCache();
+        }
+
         Log.Debug(
             "Pie menu rendered with {SliceCount} slices at {CanvasSize}px",
             _sliceVisuals.Count,
@@ -826,6 +948,7 @@ public partial class PieControl : UserControl
 
         ghost.MouseLeftButtonDown += (_, e) =>
         {
+            Focus();
             isMouseDown = true;
             _animationService.AnimateClickDown(ghost, pressDuration, _renderState.StandardEasing);
             e.Handled = true;
@@ -844,6 +967,7 @@ public partial class PieControl : UserControl
             e.Handled = true;
         };
 
+        _ghostPath = ghost;
         Panel.SetZIndex(ghost, SliceZIndex);
         PieCanvas.Children.Add(ghost);
 
@@ -1403,6 +1527,11 @@ public partial class PieControl : UserControl
     /// Occurs when the ghost add slice is clicked in edit mode.
     /// </summary>
     public event EventHandler AddSliceRequested;
+
+    /// <summary>
+    /// Occurs when removal of the selected slice is requested by keyboard in edit mode.
+    /// </summary>
+    public event EventHandler<SliceClickEventArgs> RemoveSliceRequested;
 }
 
 /// <summary>

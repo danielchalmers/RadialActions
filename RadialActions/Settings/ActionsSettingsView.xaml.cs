@@ -20,6 +20,11 @@ public partial class ActionsSettingsView
         ViewModel?.AddActionCommand.Execute(null);
     }
 
+    private void EditorPie_RemoveSliceRequested(object sender, SliceClickEventArgs e)
+    {
+        ViewModel?.RemoveActionCommand.Execute(null);
+    }
+
     private void PieStage_DragOver(object sender, DragEventArgs e)
     {
         e.Effects = GetDropTargets(e.Data).Count > 0 ? DragDropEffects.Copy : DragDropEffects.None;

@@ -42,9 +42,11 @@
                                   Grid.Row="0"
                                   Margin="8"
                                   IsEditMode="True"
+                                  AutomationProperties.Name="Actions"
                                   Slices="{Binding Actions}"
                                   SelectedSlice="{Binding SelectedAction, Mode=TwoWay}"
-                                  AddSliceRequested="EditorPie_AddSliceRequested" />
+                                  AddSliceRequested="EditorPie_AddSliceRequested"
+                                  RemoveSliceRequested="EditorPie_RemoveSliceRequested" />
 
                 <TextBlock Grid.Row="1"
                            Margin="0,10,0,0"
@@ -53,7 +55,7 @@
                            TextWrapping="Wrap"
                            FontSize="12"
                            Opacity="0.72"
-                           Text="Click a slice to edit it, drag it around the ring to reorder, or drop files, apps, and links here to add them." />
+                           Text="Click a slice or use the arrow keys to pick one. Drag or Ctrl+Arrow reorders, Enter adds, Delete removes, and dropped files, apps, or links become new actions." />
             </Grid>
         </GroupBox>
 
