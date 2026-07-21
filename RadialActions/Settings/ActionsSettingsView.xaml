@@ -19,7 +19,7 @@
             <RowDefinition Height="12" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1.25*" />
+            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="8" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
@@ -55,7 +55,8 @@
                            TextWrapping="Wrap"
                            FontSize="12"
                            Opacity="0.72"
-                           Text="Click a slice or use the arrow keys to pick one. Drag or Ctrl+Arrow reorders, Enter adds, Delete removes, and dropped files, apps, or links become new actions." />
+                           ToolTip="Keyboard: arrow keys select, Ctrl+Arrow reorders, Enter adds, Delete removes"
+                           Text="Click a slice to edit it, drag to reorder, or drop files and links to add them." />
             </Grid>
         </GroupBox>
 
