@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -6,6 +6,11 @@ namespace RadialActions;
 
 internal sealed class PieAnimationService
 {
+    /// <summary>
+    /// Desired frame rate in Hz for animations, matching the refresh rate of the display the menu is on. Null uses the WPF default of about 60.
+    /// </summary>
+    public int? DesiredFrameRate { get; set; }
+
     public void ApplyBrushColor(
         SolidColorBrush brush,
         Color color,
@@ -43,6 +48,7 @@ internal sealed class PieAnimationService
             EasingFunction = easingFunction,
         };
 
+        Timeline.SetDesiredFrameRate(colorAnimation, DesiredFrameRate);
         brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation, HandoffBehavior.SnapshotAndReplace);
     }
 
@@ -73,6 +79,7 @@ internal sealed class PieAnimationService
             opacityAnimation.Completed += (_, _) => onCompleted();
         }
 
+        Timeline.SetDesiredFrameRate(opacityAnimation, DesiredFrameRate);
         element.BeginAnimation(UIElement.OpacityProperty, opacityAnimation, HandoffBehavior.SnapshotAndReplace);
     }
 
@@ -103,6 +110,7 @@ internal sealed class PieAnimationService
             rotationAnimation.Completed += (_, _) => onCompleted();
         }
 
+        Timeline.SetDesiredFrameRate(rotationAnimation, DesiredFrameRate);
         transform.BeginAnimation(RotateTransform.AngleProperty, rotationAnimation, HandoffBehavior.SnapshotAndReplace);
     }
 
@@ -133,6 +141,7 @@ internal sealed class PieAnimationService
             FillBehavior = FillBehavior.HoldEnd,
         };
 
+        Timeline.SetDesiredFrameRate(scaleAnimation, DesiredFrameRate);
         scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
         scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
     }
@@ -161,6 +170,7 @@ internal sealed class PieAnimationService
             EasingFunction = easingFunction,
         };
 
+        Timeline.SetDesiredFrameRate(scaleAnimation, DesiredFrameRate);
         scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
         scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
     }

@@ -76,6 +76,15 @@ public partial class PieControl : UserControl
         public required int TargetSlot { get; set; }
     }
 
+    /// <summary>
+    /// Desired frame rate in Hz for pie animations, matching the refresh rate of the display the menu is on. Null uses the WPF default of about 60.
+    /// </summary>
+    public int? AnimationFrameRate
+    {
+        get => _animationService.DesiredFrameRate;
+        set => _animationService.DesiredFrameRate = value;
+    }
+
     public PieControl()
     {
         InitializeComponent();

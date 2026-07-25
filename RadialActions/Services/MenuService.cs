@@ -41,6 +41,8 @@ internal sealed class MenuService
             _window.CenterOnScreen();
         }
 
+        SyncAnimationFrameRate();
+
         if (!_window.IsVisible)
         {
             _window.Opacity = 0;
@@ -52,6 +54,21 @@ internal sealed class MenuService
         _pieMenu.ResetInputState();
         _window.IsHitTestVisible = true;
         BeginFadeIn();
+    }
+
+    /// <summary>
+    /// Points the animation clock at the refresh rate of the display the menu is opening on, so animations aren't capped at the WPF default of about 60 fps.
+    /// Re-queried on every show because the menu can open on a different display each time and rates change with hotplug or settings.
+    /// </summary>
+    private void SyncAnimationFrameRate()
+    {
+        var refreshRate = WpfUtil.GetCursorMonitorRefreshRate();
+        int? desiredFrameRate = refreshRate > 0 ? refreshRate : null;
+        Log.Debug($"Display refresh rate: {refreshRate} Hz");
+
+        Timeline.SetDesiredFrameRate(_fadeInStoryboard, desiredFrameRate);
+        Timeline.SetDesiredFrameRate(_fadeOutStoryboard, desiredFrameRate);
+        _pieMenu.AnimationFrameRate = desiredFrameRate;
     }
 
     public void HideMenu(bool animate = true)

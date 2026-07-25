@@ -5,7 +5,7 @@ using System.Windows.Interop;
 namespace RadialActions;
 
 /// <summary>
-/// Utility methods for WPF window positioning.
+/// Utility methods for WPF window positioning and display information.
 /// </summary>
 public static class WpfUtil
 {
@@ -19,8 +19,11 @@ public static class WpfUtil
     [DllImport("user32.dll")]
     private static extern IntPtr MonitorFromPoint(POINT pt, uint dwFlags);
 
-    [DllImport("user32.dll")]
-    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFOEX lpmi);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool EnumDisplaySettings(string lpszDeviceName, int iModeNum, ref DEVMODE lpDevMode);
 
     [DllImport("shcore.dll")]
     private static extern int GetDpiForMonitor(IntPtr hmonitor, MonitorDpiType dpiType, out uint dpiX, out uint dpiY);
@@ -41,13 +44,52 @@ public static class WpfUtil
         public int Bottom;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    private struct MONITORINFO
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct MONITORINFOEX
     {
         public int cbSize;
         public RECT rcMonitor;
         public RECT rcWork;
         public uint dwFlags;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string szDevice;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct DEVMODE
+    {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string dmDeviceName;
+        public ushort dmSpecVersion;
+        public ushort dmDriverVersion;
+        public ushort dmSize;
+        public ushort dmDriverExtra;
+        public uint dmFields;
+        public int dmPositionX;
+        public int dmPositionY;
+        public uint dmDisplayOrientation;
+        public uint dmDisplayFixedOutput;
+        public short dmColor;
+        public short dmDuplex;
+        public short dmYResolution;
+        public short dmTTOption;
+        public short dmCollate;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string dmFormName;
+        public ushort dmLogPixels;
+        public uint dmBitsPerPel;
+        public uint dmPelsWidth;
+        public uint dmPelsHeight;
+        public uint dmDisplayFlags;
+        public uint dmDisplayFrequency;
+        public uint dmICMMethod;
+        public uint dmICMIntent;
+        public uint dmMediaType;
+        public uint dmDitherType;
+        public uint dmReserved1;
+        public uint dmReserved2;
+        public uint dmPanningWidth;
+        public uint dmPanningHeight;
     }
 
     private enum MonitorDpiType
@@ -58,6 +100,7 @@ public static class WpfUtil
     private const uint SWP_NOZORDER = 0x0004;
     private const uint SWP_NOSIZE = 0x0001;
     private const uint MONITOR_DEFAULTTONEAREST = 2;
+    private const int ENUM_CURRENT_SETTINGS = -1;
     private const int DefaultDpi = 96;
 
     /// <summary>
@@ -145,11 +188,32 @@ public static class WpfUtil
         return (int)Math.Round(dipValue * dpiScale);
     }
 
-    private static bool TryGetMonitorInfo(POINT point, out IntPtr monitor, out MONITORINFO monitorInfo)
+    private static bool TryGetMonitorInfo(POINT point, out IntPtr monitor, out MONITORINFOEX monitorInfo)
     {
         monitor = MonitorFromPoint(point, MONITOR_DEFAULTTONEAREST);
-        monitorInfo = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+        monitorInfo = new MONITORINFOEX { cbSize = Marshal.SizeOf<MONITORINFOEX>() };
         return monitor != IntPtr.Zero && GetMonitorInfo(monitor, ref monitorInfo);
+    }
+
+    /// <summary>
+    /// Gets the refresh rate in Hz of the display the cursor is currently on, or 0 if it can't be determined.
+    /// </summary>
+    public static int GetCursorMonitorRefreshRate()
+    {
+        if (!GetCursorPos(out var cursorPosition) || !TryGetMonitorInfo(cursorPosition, out _, out var monitorInfo))
+        {
+            return 0;
+        }
+
+        var devMode = new DEVMODE { dmSize = (ushort)Marshal.SizeOf<DEVMODE>() };
+
+        // A frequency of 0 or 1 means the hardware default, not a real rate.
+        if (EnumDisplaySettings(monitorInfo.szDevice, ENUM_CURRENT_SETTINGS, ref devMode) && devMode.dmDisplayFrequency > 1)
+        {
+            return (int)devMode.dmDisplayFrequency;
+        }
+
+        return 0;
     }
 
     private static Size GetWindowSize(Window window)
