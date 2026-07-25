@@ -113,8 +113,8 @@ public partial class PieControl : UserControl
 
         if (!isVisible)
         {
-            Log.Debug("PieControl hidden; deferring render refresh");
-            _renderRefreshPending = true;
+            // Hiding doesn't invalidate anything on its own. Real changes while hidden (theme, slices, size) set the pending flag
+            // themselves through RequestRenderRefresh, whose queued callback returns without clearing it while the menu isn't visible.
             return;
         }
 
@@ -1072,7 +1072,10 @@ public partial class PieControl : UserControl
             }
 
             CreatePieMenu();
-        }, DispatcherPriority.Background);
+
+            // Render priority so the rebuild lands before the next frame is presented. At Background the menu could fade in
+            // while the pie was still missing, making it pop in partway through the animation.
+        }, DispatcherPriority.Render);
     }
 
     private PieSelectionController.Item[] GetSelectionItems()
