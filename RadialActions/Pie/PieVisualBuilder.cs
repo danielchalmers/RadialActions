@@ -53,13 +53,23 @@ public static class PieVisualBuilder
             SnapsToDevicePixels = true,
         };
 
+        UIElement surfaceElement = surfacePath;
+
         if (!isHighContrast && ambientShadowEffect != null)
         {
             surfacePath.Effect = ambientShadowEffect.CloneCurrentValue();
+
+            // Wrap in a cached container so the expensive shadow blur is baked into a bitmap once instead of being re-evaluated on every animation frame.
+            surfaceElement = new Border
+            {
+                Child = surfacePath,
+                IsHitTestVisible = false,
+                CacheMode = new BitmapCache(VisualTreeHelper.GetDpi(canvas).PixelsPerDip),
+            };
         }
 
-        Panel.SetZIndex(surfacePath, 0);
-        canvas.Children.Add(surfacePath);
+        Panel.SetZIndex(surfaceElement, 0);
+        canvas.Children.Add(surfaceElement);
     }
 
     public static CenterElements CreateCenterElements(
