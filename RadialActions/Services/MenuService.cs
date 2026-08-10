@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
@@ -14,6 +15,7 @@ internal sealed class MenuService
     private readonly Dispatcher _dispatcher;
 
     private bool _isFadingOut;
+    private int _fadeInRequestVersion;
 
     public MenuService(
         Window window,
@@ -51,7 +53,44 @@ internal sealed class MenuService
         _ = FocusMenuForKeyboardInputAsync();
         _pieMenu.ResetInputState();
         _window.IsHitTestVisible = true;
-        BeginFadeIn();
+        BeginFadeInWhenSurfaceReady();
+    }
+
+    /// <summary>
+    /// Starts the fade-in only after the layered window has rendered and submitted a frame.
+    /// </summary>
+    /// <remarks>
+    /// The OS hit-tests a layered window against its last submitted surface, and the first submission after
+    /// <see cref="Window.Show"/> lags by several frames. Starting the animation immediately made the fade run
+    /// against a still-invisible, click-through window: the menu appeared mid-animation at high opacity, and
+    /// clicks in that gap fell through to the window beneath, which dismissed the menu via deactivation.
+    /// Waiting two composition ticks (one to render the shown surface, one so it is submitted) keeps the menu
+    /// hittable from the first visible pixel and lets the full fade actually be seen.
+    /// </remarks>
+    private void BeginFadeInWhenSurfaceReady()
+    {
+        var version = ++_fadeInRequestVersion;
+        var renderedTicks = 0;
+
+        void OnRendering(object sender, EventArgs e)
+        {
+            if (version != _fadeInRequestVersion)
+            {
+                CompositionTarget.Rendering -= OnRendering;
+                return;
+            }
+
+            renderedTicks++;
+            if (renderedTicks < 2)
+            {
+                return;
+            }
+
+            CompositionTarget.Rendering -= OnRendering;
+            BeginFadeIn();
+        }
+
+        CompositionTarget.Rendering += OnRendering;
     }
 
     public void HideMenu(bool animate = true)
@@ -122,6 +161,8 @@ internal sealed class MenuService
 
     private void BeginFadeOut()
     {
+        // Cancels any fade-in still waiting on its first rendered frame.
+        _fadeInRequestVersion++;
         StopFadeAnimations();
 
         if (IsReducedMotionEnabled())
@@ -148,6 +189,8 @@ internal sealed class MenuService
 
     private void HideMenuImmediately()
     {
+        // Cancels any fade-in still waiting on its first rendered frame.
+        _fadeInRequestVersion++;
         _isFadingOut = false;
         StopFadeAnimations();
         _window.IsHitTestVisible = false;
