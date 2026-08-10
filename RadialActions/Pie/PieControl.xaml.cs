@@ -136,23 +136,25 @@ public partial class PieControl : UserControl
     }
 
     /// <summary>
-    /// Triggers the slice currently under the mouse, if any.
+    /// Triggers the active slice: the keyboard-selected slice in keyboard mode, otherwise the slice under the mouse.
     /// </summary>
-    /// <returns>True if a hovered slice was triggered.</returns>
-    public bool TriggerHoveredSlice()
+    /// <returns>True if a slice was triggered.</returns>
+    public bool TriggerActiveSlice()
     {
-        if (_drag != null)
+        var hoveredIndex = _sliceVisuals.FirstOrDefault(slice => slice.Path.IsMouseOver)?.Index ?? PieSelectionController.NoSelection;
+        var targetIndex = PieSelectionController.GetReleaseTriggerIndex(
+            _drag != null,
+            _interactionMode == InteractionMode.Keyboard,
+            _selectionController.SelectedIndex,
+            hoveredIndex);
+
+        var targetSlice = _sliceVisuals.FirstOrDefault(slice => slice.Index == targetIndex);
+        if (targetSlice == null)
         {
             return false;
         }
 
-        var hoveredSlice = _sliceVisuals.FirstOrDefault(slice => slice.Path.IsMouseOver);
-        if (hoveredSlice == null)
-        {
-            return false;
-        }
-
-        SliceClicked?.Invoke(this, new SliceClickEventArgs(hoveredSlice.Action));
+        SliceClicked?.Invoke(this, new SliceClickEventArgs(targetSlice.Action));
         return true;
     }
 

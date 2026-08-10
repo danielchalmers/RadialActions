@@ -327,7 +327,7 @@ public partial class MainWindow : Window
 
         _hotkeyReleasePending = false;
 
-        if (PieMenu.TriggerHoveredSlice())
+        if (PieMenu.TriggerActiveSlice())
         {
             Log.Debug("Activation hotkey released over a slice; triggered it");
             e.Handled = true;
