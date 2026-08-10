@@ -221,6 +221,10 @@ public partial class MainWindow : Window
     private void OnSliceClicked(object sender, SliceClickEventArgs e)
     {
         Log.Debug($"Slice clicked: {e.Slice.Name}");
+
+        // A slice has fired; releasing the still-held hotkey must not fire another one when the menu stays open.
+        _hotkeyReleasePending = false;
+
         try
         {
             e.Slice.Execute();
