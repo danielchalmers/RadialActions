@@ -1049,6 +1049,13 @@ public partial class PieControl : UserControl
 
     private void OnSystemParametersChanged(object sender, PropertyChangedEventArgs e)
     {
+        // SystemEvents can deliver on a worker thread, and the refresh path reads dependency properties.
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(() => OnSystemParametersChanged(sender, e));
+            return;
+        }
+
         var propertyName = e.PropertyName;
         if (string.IsNullOrEmpty(propertyName)
             || propertyName.Contains("Color", StringComparison.OrdinalIgnoreCase)
@@ -1062,6 +1069,13 @@ public partial class PieControl : UserControl
 
     private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
     {
+        // SystemEvents can deliver on a worker thread, and the refresh path reads dependency properties.
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(() => OnUserPreferenceChanged(sender, e));
+            return;
+        }
+
         RequestRenderRefresh();
     }
 
