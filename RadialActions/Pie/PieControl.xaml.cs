@@ -91,6 +91,15 @@ public partial class PieControl : UserControl
         RequestRenderRefresh();
     }
 
+    protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
+    {
+        base.OnDpiChanged(oldDpi, newDpi);
+
+        // Snapped geometry and the surface shadow's BitmapCache scale are baked at build-time DPI, and the menu's
+        // size in DIPs doesn't change when it opens on a different-DPI monitor, so nothing else triggers a rebuild.
+        RequestRenderRefresh();
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         SystemParameters.StaticPropertyChanged += OnSystemParametersChanged;
