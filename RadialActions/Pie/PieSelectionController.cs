@@ -15,6 +15,21 @@ internal sealed class PieSelectionController
         SelectedIndex = NoSelection;
     }
 
+    /// <summary>
+    /// Decides which slice a hotkey-release flick should trigger, honoring the active interaction mode
+    /// so the triggered slice always matches the one shown highlighted.
+    /// </summary>
+    /// <returns>The slice index to trigger, or <see cref="NoSelection"/> to trigger nothing.</returns>
+    public static int GetReleaseTriggerIndex(bool isDragActive, bool isKeyboardMode, int selectedIndex, int hoveredIndex)
+    {
+        if (isDragActive)
+        {
+            return NoSelection;
+        }
+
+        return isKeyboardMode ? selectedIndex : hoveredIndex;
+    }
+
     public void EnsureSelectionIsValid(IReadOnlyList<Item> items)
     {
         if (SelectedIndex == NoSelection)

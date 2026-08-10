@@ -13,6 +13,25 @@ public class PieSelectionControllerTests
     ];
 
     [Theory]
+    [InlineData(true, false, 1, 2, PieSelectionController.NoSelection)]
+    [InlineData(true, true, 1, 2, PieSelectionController.NoSelection)]
+    [InlineData(false, true, 1, 2, 1)]
+    [InlineData(false, true, PieSelectionController.NoSelection, 2, PieSelectionController.NoSelection)]
+    [InlineData(false, false, 1, 2, 2)]
+    [InlineData(false, false, PieSelectionController.NoSelection, PieSelectionController.NoSelection, PieSelectionController.NoSelection)]
+    public void GetReleaseTriggerIndex_FollowsInteractionMode(
+        bool isDragActive,
+        bool isKeyboardMode,
+        int selectedIndex,
+        int hoveredIndex,
+        int expectedIndex)
+    {
+        var result = PieSelectionController.GetReleaseTriggerIndex(isDragActive, isKeyboardMode, selectedIndex, hoveredIndex);
+
+        Assert.Equal(expectedIndex, result);
+    }
+
+    [Theory]
     [InlineData(Key.Up, 0)]
     [InlineData(Key.Right, 1)]
     [InlineData(Key.Down, 2)]

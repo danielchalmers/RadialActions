@@ -91,6 +91,15 @@ public partial class PieControl : UserControl
         RequestRenderRefresh();
     }
 
+    protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
+    {
+        base.OnDpiChanged(oldDpi, newDpi);
+
+        // Snapped geometry and the surface shadow's BitmapCache scale are baked at build-time DPI, and the menu's
+        // size in DIPs doesn't change when it opens on a different-DPI monitor, so nothing else triggers a rebuild.
+        RequestRenderRefresh();
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         SystemParameters.StaticPropertyChanged += OnSystemParametersChanged;
@@ -127,27 +136,34 @@ public partial class PieControl : UserControl
 
     public void ResetInputState()
     {
+        // The visuals survive across opens, so press and drag tracking from the previous open must be discarded
+        // here or a held button in the next open can resume a drag that was never started there.
+        _drag = null;
+        _dragCandidate = null;
+
         EnterMouseInteractionMode(refreshVisualState: true, animate: false);
     }
 
     /// <summary>
-    /// Triggers the slice currently under the mouse, if any.
+    /// Triggers the active slice: the keyboard-selected slice in keyboard mode, otherwise the slice under the mouse.
     /// </summary>
-    /// <returns>True if a hovered slice was triggered.</returns>
-    public bool TriggerHoveredSlice()
+    /// <returns>True if a slice was triggered.</returns>
+    public bool TriggerActiveSlice()
     {
-        if (_drag != null)
+        var hoveredIndex = _sliceVisuals.FirstOrDefault(slice => slice.Path.IsMouseOver)?.Index ?? PieSelectionController.NoSelection;
+        var targetIndex = PieSelectionController.GetReleaseTriggerIndex(
+            _drag != null,
+            _interactionMode == InteractionMode.Keyboard,
+            _selectionController.SelectedIndex,
+            hoveredIndex);
+
+        var targetSlice = _sliceVisuals.FirstOrDefault(slice => slice.Index == targetIndex);
+        if (targetSlice == null)
         {
             return false;
         }
 
-        var hoveredSlice = _sliceVisuals.FirstOrDefault(slice => slice.Path.IsMouseOver);
-        if (hoveredSlice == null)
-        {
-            return false;
-        }
-
-        SliceClicked?.Invoke(this, new SliceClickEventArgs(hoveredSlice.Action));
+        SliceClicked?.Invoke(this, new SliceClickEventArgs(targetSlice.Action));
         return true;
     }
 
@@ -345,6 +361,9 @@ public partial class PieControl : UserControl
                 ActualWidth,
                 ActualHeight);
             _selectionController.Reset();
+
+            // Nothing was rendered; keep the refresh pending so the next opportunity (like the next open) retries.
+            _renderRefreshPending = true;
             return;
         }
 
@@ -368,6 +387,9 @@ public partial class PieControl : UserControl
                 Slices?.Count ?? 0,
                 ActualWidth,
                 ActualHeight);
+
+            // Nothing was rendered; keep the refresh pending so the next opportunity (like the next open) retries.
+            _renderRefreshPending = true;
             return;
         }
 
@@ -863,9 +885,11 @@ public partial class PieControl : UserControl
 
         // Move the dragged action to the position of the action that was built at the target
         // slot; disabled actions keep their relative placement in the collection.
-        var targetAction = _sliceVisuals.First(visual => visual.Index == targetSlot).Action;
+        // The commit runs from an animation callback, so a rebuild (settings edit, theme change) may have
+        // replaced the visuals in the meantime and the target slot may no longer exist.
+        var targetAction = _sliceVisuals.FirstOrDefault(visual => visual.Index == targetSlot)?.Action;
         var fromIndex = Slices.IndexOf(sliceVisual.Action);
-        var toIndex = Slices.IndexOf(targetAction);
+        var toIndex = targetAction == null ? -1 : Slices.IndexOf(targetAction);
         if (fromIndex < 0 || toIndex < 0 || fromIndex == toIndex)
         {
             Log.Warning(
@@ -1034,6 +1058,13 @@ public partial class PieControl : UserControl
 
     private void OnSystemParametersChanged(object sender, PropertyChangedEventArgs e)
     {
+        // SystemEvents can deliver on a worker thread, and the refresh path reads dependency properties.
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(() => OnSystemParametersChanged(sender, e));
+            return;
+        }
+
         var propertyName = e.PropertyName;
         if (string.IsNullOrEmpty(propertyName)
             || propertyName.Contains("Color", StringComparison.OrdinalIgnoreCase)
@@ -1047,6 +1078,13 @@ public partial class PieControl : UserControl
 
     private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
     {
+        // SystemEvents can deliver on a worker thread, and the refresh path reads dependency properties.
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(() => OnUserPreferenceChanged(sender, e));
+            return;
+        }
+
         RequestRenderRefresh();
     }
 
