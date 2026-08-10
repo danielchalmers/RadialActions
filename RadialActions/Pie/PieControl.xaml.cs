@@ -127,6 +127,11 @@ public partial class PieControl : UserControl
 
     public void ResetInputState()
     {
+        // The visuals survive across opens, so press and drag tracking from the previous open must be discarded
+        // here or a held button in the next open can resume a drag that was never started there.
+        _drag = null;
+        _dragCandidate = null;
+
         EnterMouseInteractionMode(refreshVisualState: true, animate: false);
     }
 
