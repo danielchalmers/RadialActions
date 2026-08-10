@@ -352,6 +352,9 @@ public partial class PieControl : UserControl
                 ActualWidth,
                 ActualHeight);
             _selectionController.Reset();
+
+            // Nothing was rendered; keep the refresh pending so the next opportunity (like the next open) retries.
+            _renderRefreshPending = true;
             return;
         }
 
@@ -375,6 +378,9 @@ public partial class PieControl : UserControl
                 Slices?.Count ?? 0,
                 ActualWidth,
                 ActualHeight);
+
+            // Nothing was rendered; keep the refresh pending so the next opportunity (like the next open) retries.
+            _renderRefreshPending = true;
             return;
         }
 
