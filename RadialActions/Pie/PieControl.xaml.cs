@@ -870,9 +870,11 @@ public partial class PieControl : UserControl
 
         // Move the dragged action to the position of the action that was built at the target
         // slot; disabled actions keep their relative placement in the collection.
-        var targetAction = _sliceVisuals.First(visual => visual.Index == targetSlot).Action;
+        // The commit runs from an animation callback, so a rebuild (settings edit, theme change) may have
+        // replaced the visuals in the meantime and the target slot may no longer exist.
+        var targetAction = _sliceVisuals.FirstOrDefault(visual => visual.Index == targetSlot)?.Action;
         var fromIndex = Slices.IndexOf(sliceVisual.Action);
-        var toIndex = Slices.IndexOf(targetAction);
+        var toIndex = targetAction == null ? -1 : Slices.IndexOf(targetAction);
         if (fromIndex < 0 || toIndex < 0 || fromIndex == toIndex)
         {
             Log.Warning(
