@@ -104,7 +104,9 @@
 
     <Style x:Key="ActionEditorLabelTextBlock"
            TargetType="TextBlock"
-           BasedOn="{StaticResource LabelTextBlock}" />
+           BasedOn="{StaticResource LabelTextBlock}">
+        <Setter Property="Margin" Value="0,14,0,6" />
+    </Style>
 
     <Style TargetType="Hyperlink"
            BasedOn="{StaticResource {x:Type Hyperlink}}">

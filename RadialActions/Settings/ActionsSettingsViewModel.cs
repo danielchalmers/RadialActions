@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RadialActions.Properties;
@@ -10,9 +11,6 @@ public partial class ActionsSettingsViewModel : ObservableObject
     [ObservableProperty]
     private PieAction _selectedAction;
 
-    [ObservableProperty]
-    private int _selectedActionIndex = -1;
-
     public ActionsSettingsViewModel(Settings settings)
     {
         Settings = settings;
@@ -20,7 +18,6 @@ public partial class ActionsSettingsViewModel : ObservableObject
 
         if (Actions.Count > 0)
         {
-            SelectedActionIndex = 0;
             SelectedAction = Actions[0];
         }
     }
@@ -31,27 +28,18 @@ public partial class ActionsSettingsViewModel : ObservableObject
 
     public void SelectAction(PieAction action)
     {
-        if (action == null)
+        if (action == null || !Actions.Contains(action))
             return;
 
-        var index = Actions.IndexOf(action);
-        if (index < 0)
-            return;
-
-        SelectedActionIndex = index;
         SelectedAction = action;
     }
 
     [RelayCommand]
     private void AddAction()
     {
-        var newAction = new PieAction("Blank action") { Type = ActionType.None };
-
-        var selectedIndex = SelectedAction == null ? -1 : Actions.IndexOf(SelectedAction);
-        var insertionIndex = selectedIndex >= 0 ? selectedIndex + 1 : Actions.Count;
-
-        Actions.Insert(insertionIndex, newAction);
-        SelectedActionIndex = insertionIndex;
+        // The ghost add slice sits at the end of the ring, so the new slice appears where it was clicked.
+        var newAction = new PieAction();
+        Actions.Add(newAction);
         SelectedAction = newAction;
         Log.Debug("Added new action");
     }
@@ -75,56 +63,56 @@ public partial class ActionsSettingsViewModel : ObservableObject
             added++;
         }
 
-        SelectedActionIndex = insertionIndex - 1;
-        SelectedAction = Actions[SelectedActionIndex];
+        SelectedAction = Actions[insertionIndex - 1];
         Log.Debug("Added {Count} action(s) from drop", added);
     }
 
     [RelayCommand]
     private void RemoveAction()
     {
-        if (SelectedAction == null || Actions.Count == 0)
+        if (SelectedAction == null)
             return;
 
         var removed = SelectedAction;
-        var index = SelectedActionIndex;
+        var index = Actions.IndexOf(removed);
         Editor.Forget(removed);
         Actions.Remove(removed);
 
-        if (Actions.Count > 0)
-        {
-            SelectedActionIndex = Math.Min(index, Actions.Count - 1);
-            SelectedAction = Actions[SelectedActionIndex];
-        }
-        else
-        {
-            SelectedAction = null;
-            SelectedActionIndex = -1;
-        }
+        SelectedAction = Actions.Count > 0
+            ? Actions[Math.Min(index, Actions.Count - 1)]
+            : null;
 
         Log.Debug("Removed action");
     }
 
     [RelayCommand]
-    private void MoveUp()
+    private void DuplicateAction()
     {
-        if (SelectedAction == null || SelectedActionIndex <= 0)
+        if (SelectedAction == null)
             return;
 
-        var index = SelectedActionIndex;
-        Actions.Move(index, index - 1);
-        SelectedActionIndex = index - 1;
+        var source = SelectedAction;
+        var copy = source.Clone();
+        Actions.Insert(Actions.IndexOf(source) + 1, copy);
+        SelectedAction = copy;
+        Log.Debug("Duplicated action");
     }
 
     [RelayCommand]
-    private void MoveDown()
+    private void TestAction()
     {
-        if (SelectedAction == null || SelectedActionIndex >= Actions.Count - 1)
+        if (SelectedAction == null)
             return;
 
-        var index = SelectedActionIndex;
-        Actions.Move(index, index + 1);
-        SelectedActionIndex = index + 1;
+        try
+        {
+            SelectedAction.Execute();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Test run failed for action: {ActionName}", SelectedAction.Name);
+            MessageBox.Show(ex.Message, $"Couldn't run \"{SelectedAction.Name}\"", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     partial void OnSelectedActionChanged(PieAction value)

@@ -13,25 +13,50 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <StackPanel>
-        <TextBlock Text="Enabled:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
+    <StackPanel Margin="0,0,4,0">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="0,0,0,6"
+                       Text="Icon:"
+                       Style="{StaticResource LabelTextBlock}" />
+            <TextBox Grid.Row="1"
+                     Grid.Column="0"
+                     Width="44"
+                     Height="44"
+                     FontSize="18"
+                     TextAlignment="Center"
+                     VerticalContentAlignment="Center"
+                     MaxLength="8"
+                     ToolTip="A short symbol or emoji that fits in a slice"
+                     Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Grid.Row="0"
+                       Grid.Column="2"
+                       Margin="0,0,0,6"
+                       Text="Name:"
+                       Style="{StaticResource LabelTextBlock}" />
+            <TextBox Grid.Row="1"
+                     Grid.Column="2"
+                     VerticalAlignment="Center"
+                     ToolTip="Shown on the slice as you type; changes are saved automatically"
+                     Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
+
         <CheckBox Content="Show this action in the menu"
+                  Margin="0,14,0,0"
+                  ToolTip="Hidden actions stay dimmed in the editor without losing their configuration"
                   IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}" />
-        <TextBlock Text="Hide this action without removing its configuration."
-                   Style="{StaticResource DescriptionTextBlock}" />
-
-        <TextBlock Text="Name:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <TextBox Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Text="Shown next to the icon in the radial menu."
-                   Style="{StaticResource DescriptionTextBlock}" />
-
-        <TextBlock Text="Icon:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <TextBox Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Text="Use a short symbol or emoji that fits in a slice."
-                   Style="{StaticResource DescriptionTextBlock}" />
 
         <TextBlock Text="Type:"
                    Style="{StaticResource ActionEditorLabelTextBlock}" />
@@ -51,10 +76,10 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock Text="Use Key for shortcuts and media controls, Open for apps, files, folders, or URLs, and Script to run PowerShell."
+        <TextBlock Text="Key sends a shortcut or media control, Open launches apps, files, or links, and Script runs PowerShell."
                    Style="{StaticResource DescriptionTextBlock}" />
 
-        <StackPanel Margin="0,0,0,4"
+        <StackPanel
               Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
             <TextBlock Text="Key Action:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
@@ -90,7 +115,7 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <TextBlock Text="Pick a media, volume, or system command, or record your own shortcut with Custom Shortcut."
+            <TextBlock Text="Pick a command, or record your own with Custom Shortcut."
                        Style="{StaticResource DescriptionTextBlock}" />
 
             <TextBlock Text="Shortcut:"
@@ -99,7 +124,7 @@
             <TextBox Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Tag="HotkeyInput"
                      Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
-            <TextBlock Text="Click the box, then press the key combination to record it, such as Ctrl+Shift+M. Press Backspace to clear."
+            <TextBlock Text="Click the box, then press a combination like Ctrl+Shift+M to record it. Backspace clears."
                        Style="{StaticResource DescriptionTextBlock}"
                        Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
         </StackPanel>
@@ -121,14 +146,13 @@
                         Command="{Binding BrowseOpenTargetCommand}"
                         Padding="8,2" />
             </Grid>
-            <TextBlock Text="Choose the app, file, folder, URL, or command to open."
+            <TextBlock Text="The app, file, folder, URL, or command to open."
                        Style="{StaticResource DescriptionTextBlock}" />
 
             <TextBlock Text="Arguments:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <TextBox Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="Optional command-line arguments for the target."
-                       Style="{StaticResource DescriptionTextBlock}" />
+            <TextBox ToolTip="Optional command-line arguments for the target"
+                     Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
             <TextBlock Text="Working Directory:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
@@ -139,14 +163,13 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0"
+                         ToolTip="Optional folder to use as the target's start location"
                          Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Button Grid.Column="2"
                         Content="Browse..."
                         Command="{Binding BrowseWorkingDirectoryCommand}"
                         Padding="8,2" />
             </Grid>
-            <TextBlock Text="Optional folder to use as the target's start location."
-                       Style="{StaticResource DescriptionTextBlock}" />
         </StackPanel>
 
         <StackPanel
@@ -158,19 +181,18 @@
                      AcceptsTab="True"
                      TextWrapping="NoWrap"
                      FontFamily="Consolas, Cascadia Mono, Courier New, monospace"
-                     MinHeight="150"
-                     MaxHeight="320"
+                     MinHeight="140"
+                     MaxHeight="300"
                      VerticalContentAlignment="Top"
                      VerticalScrollBarVisibility="Auto"
                      HorizontalScrollBarVisibility="Auto" />
-            <TextBlock Text="Runs when the slice is clicked. No separate file needed, for example: Get-Date | Out-File $env:TEMP\now.txt"
+            <TextBlock Text="Runs inline when the slice is clicked; no separate file needed."
                        Style="{StaticResource DescriptionTextBlock}" />
 
             <TextBlock Text="Run With:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <TextBox Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="The PowerShell to run the script with: powershell.exe (default), or pwsh.exe for PowerShell 7."
-                       Style="{StaticResource DescriptionTextBlock}" />
+            <TextBox ToolTip="powershell.exe (default), or pwsh.exe for PowerShell 7"
+                     Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
             <TextBlock Text="Working Directory:"
                        Style="{StaticResource ActionEditorLabelTextBlock}" />
@@ -181,20 +203,18 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0"
+                         ToolTip="Optional folder to run the script in"
                          Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Button Grid.Column="2"
                         Content="Browse..."
                         Command="{Binding BrowseWorkingDirectoryCommand}"
                         Padding="8,2" />
             </Grid>
-            <TextBlock Text="Optional folder to run the script in."
-                       Style="{StaticResource DescriptionTextBlock}" />
 
             <CheckBox Content="Run hidden"
-                      Margin="0,8,0,0"
+                      Margin="0,14,0,0"
+                      ToolTip="Run without showing a console window"
                       IsChecked="{Binding SelectedAction.RunHidden, Mode=TwoWay}" />
-            <TextBlock Text="Run without showing a console window."
-                       Style="{StaticResource DescriptionTextBlock}" />
         </StackPanel>
     </StackPanel>
 </UserControl>
