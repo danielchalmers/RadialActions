@@ -5,6 +5,12 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>RadialActions.ico</ApplicationIcon>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+
+    <!-- Precompile the app and its NuGet dependencies on publish so startup and the first menu open don't pay the JIT for them.
+         Composite is off because the SDK defaults it on for single-file publishes, which recompiles the whole framework
+         into one image and adds about 19 MB per download; the runtime pack's framework is already precompiled. -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRunComposite>false</PublishReadyToRunComposite>
   </PropertyGroup>
 
   <ItemGroup>
