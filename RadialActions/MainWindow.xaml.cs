@@ -218,26 +218,31 @@ public partial class MainWindow : Window
         Exit();
     }
 
-    private void OnSliceClicked(object sender, SliceClickEventArgs e)
+    private async void OnSliceClicked(object sender, SliceClickEventArgs e)
     {
-        Log.Debug($"Slice clicked: {e.Slice.Name}");
+        var slice = e.Slice;
+        Log.Debug($"Slice clicked: {slice.Name}");
 
         // A slice has fired; releasing the still-held hotkey must not fire another one when the menu stays open.
         _hotkeyReleasePending = false;
 
-        try
-        {
-            e.Slice.Execute();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to execute action: {e.Slice.Name}");
-            _trayService.ShowActionFailedNotification(e.Slice, ex);
-        }
-
+        // Dismiss before running the action so the fade-out starts on the same frame as the click.
         if (!Settings.Default.KeepMenuOpenAfterSliceClick)
         {
             HideMenu();
+        }
+
+        // Launching a process can block for hundreds of milliseconds (ShellExecute resolving a target, PowerShell
+        // starting up), which would freeze the menu mid-fade if it ran on the UI thread. Failures come back here
+        // on the UI thread so the tray notification is shown from the right context.
+        try
+        {
+            await Task.Run(slice.Execute);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to execute action: {slice.Name}");
+            _trayService.ShowActionFailedNotification(slice, ex);
         }
     }
 
