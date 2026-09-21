@@ -52,7 +52,7 @@ public partial class PieControl : UserControl
     }
 
     private bool _renderRefreshPending;
-    private bool _renderRefreshQueued;
+    private DispatcherOperation _renderRefreshOperation;
     private readonly List<PieSliceVisual> _sliceVisuals = [];
     private PieCenterVisual _centerVisual;
     private readonly PieAnimationService _animationService = new();
@@ -122,14 +122,15 @@ public partial class PieControl : UserControl
 
         if (!isVisible)
         {
-            // Hiding doesn't invalidate anything on its own. Real changes while hidden (theme, slices, size) set the pending flag
-            // themselves through RequestRenderRefresh, whose queued callback returns without clearing it while the menu isn't visible.
+            // Hiding doesn't invalidate anything on its own. Changes while hidden (theme, slices, size) go through
+            // RequestRenderRefresh, which builds them at idle so the next open normally finds the pie ready.
             return;
         }
 
         if (_renderRefreshPending)
         {
-            Log.Debug("PieControl visible again; applying deferred render refresh");
+            // An idle build is still outstanding (or produced nothing); promote it so it lands before the first frame.
+            Log.Debug("PieControl visible with a pending render refresh; building before the first frame");
             RequestRenderRefresh();
         }
     }
@@ -1092,28 +1093,40 @@ public partial class PieControl : UserControl
     {
         _renderRefreshPending = true;
 
-        if (!IsLoaded || _renderRefreshQueued)
+        if (!IsLoaded)
         {
             return;
         }
 
-        _renderRefreshQueued = true;
+        // Visible: Render priority so the rebuild lands before the next frame is presented. Any lower and the menu could
+        // fade in while the pie was still missing, making it pop in partway through the animation.
+        // Hidden: build at idle so the work happens while nothing is waiting on it and the next open skips the rebuild.
+        // The hidden build still coalesces bursts (every keystroke while editing an action) into one pass.
+        var priority = IsVisible ? DispatcherPriority.Render : DispatcherPriority.ApplicationIdle;
 
-        Dispatcher.InvokeAsync(() =>
+        if (_renderRefreshOperation != null)
         {
-            _renderRefreshQueued = false;
-
-            if (!IsLoaded || !IsVisible)
+            // Already queued; only ever promote it (an idle build that became visible must not wait until idle).
+            if (_renderRefreshOperation.Priority < priority)
             {
-                Log.Debug("Skipping render refresh because PieControl is not ready (IsLoaded={IsLoaded}, IsVisible={IsVisible})", IsLoaded, IsVisible);
+                _renderRefreshOperation.Priority = priority;
+            }
+
+            return;
+        }
+
+        _renderRefreshOperation = Dispatcher.InvokeAsync(() =>
+        {
+            _renderRefreshOperation = null;
+
+            if (!IsLoaded)
+            {
+                Log.Debug("Skipping render refresh because PieControl is unloaded");
                 return;
             }
 
             CreatePieMenu();
-
-            // Render priority so the rebuild lands before the next frame is presented. At Background the menu could fade in
-            // while the pie was still missing, making it pop in partway through the animation.
-        }, DispatcherPriority.Render);
+        }, priority);
     }
 
     private PieSelectionController.Item[] GetSelectionItems()
