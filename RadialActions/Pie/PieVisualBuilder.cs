@@ -143,6 +143,21 @@ public static class PieVisualBuilder
         };
     }
 
+    public static TextBlock CreateSliceReleaseHint(Style iconTextStyle, Color iconTextColor)
+    {
+        return new TextBlock
+        {
+            Style = iconTextStyle,
+            Text = "\uE7C9",
+            FontFamily = new FontFamily("Segoe MDL2 Assets"),
+            Foreground = new SolidColorBrush(iconTextColor),
+            FontSize = 14,
+            Opacity = 0,
+            IsHitTestVisible = false,
+            SnapsToDevicePixels = true,
+        };
+    }
+
     public static StackPanel CreateSliceContentPanel(
         PieAction sliceAction,
         Style iconTextStyle,

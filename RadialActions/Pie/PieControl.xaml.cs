@@ -68,6 +68,8 @@ public partial class PieControl : UserControl
     private Point _dragPressPosition;
     private DragReorderState _drag;
     private bool _isReleasingDragCapture;
+    private bool _isReleaseTriggerArmed;
+    private double _digitHintOpacity;
 
     private sealed class DragReorderState
     {
@@ -136,8 +138,29 @@ public partial class PieControl : UserControl
         }
     }
 
+    /// <summary>
+    /// True while the activation hotkey that opened the menu is still held, so releasing it over a slice triggers it.
+    /// The targeted slice shows a release hint while this is set.
+    /// </summary>
+    public bool IsReleaseTriggerArmed
+    {
+        get => _isReleaseTriggerArmed;
+        set
+        {
+            if (_isReleaseTriggerArmed == value)
+            {
+                return;
+            }
+
+            _isReleaseTriggerArmed = value;
+            RefreshVisualState(animate: true);
+        }
+    }
+
     public void ResetInputState()
     {
+        _isReleaseTriggerArmed = false;
+
         // The visuals survive across opens, so press and drag tracking from the previous open must be discarded
         // here or a held button in the next open can resume a drag that was never started there.
         _drag = null;
@@ -374,6 +397,7 @@ public partial class PieControl : UserControl
             TryFindResource,
             PieThemeSnapshot.IsAppDarkModeEnabled());
         _renderState.ApplyTheme(theme);
+        _digitHintOpacity = theme.IsHighContrast ? 1 : 0.3;
 
         if (!PieLayoutCalculator.TryCreateLayout(
                 ActualWidth,
@@ -655,6 +679,7 @@ public partial class PieControl : UserControl
             Panel.SetZIndex(slice, SliceZIndex);
             PieCanvas.Children.Add(slice);
 
+            var hintPosition = PieLayoutCalculator.GetTextPosition(center, outerRadius * DigitHintRadiusRatio, startAngle, endAngle, SnapPoint);
             if (i < MaxDigitHints)
             {
                 var digitHint = PieVisualBuilder.CreateSliceDigitHint(
@@ -662,13 +687,14 @@ public partial class PieControl : UserControl
                     theme.LabelTextStyle,
                     theme.LabelTextColor,
                     theme.IsHighContrast);
-                digitHint.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                var hintPosition = PieLayoutCalculator.GetTextPosition(center, outerRadius * DigitHintRadiusRatio, startAngle, endAngle, SnapPoint);
-                Canvas.SetLeft(digitHint, SnapToDevicePixel(hintPosition.X - (digitHint.DesiredSize.Width / 2), isXAxis: true));
-                Canvas.SetTop(digitHint, SnapToDevicePixel(hintPosition.Y - (digitHint.DesiredSize.Height / 2), isXAxis: false));
-                Panel.SetZIndex(digitHint, SliceContentZIndex);
-                PieCanvas.Children.Add(digitHint);
+                AddRimHint(digitHint, hintPosition);
+                sliceVisual.DigitHint = digitHint;
             }
+
+            // Takes the digit hint's spot on the rim while the held hotkey targets this slice; the digit fades out to make room.
+            var releaseHint = PieVisualBuilder.CreateSliceReleaseHint(theme.IconTextStyle, theme.IconTextColor);
+            AddRimHint(releaseHint, hintPosition);
+            sliceVisual.ReleaseHint = releaseHint;
 
             var textRadius = innerRadius > 0 ? (outerRadius + innerRadius) / 2 : outerRadius * 0.6;
             var textPosition = PieLayoutCalculator.GetTextPosition(center, textRadius, startAngle, endAngle, SnapPoint);
@@ -723,6 +749,15 @@ public partial class PieControl : UserControl
             _sliceVisuals.Count,
             canvasSize);
         RefreshVisualState(animate: false);
+    }
+
+    private void AddRimHint(TextBlock hint, Point position)
+    {
+        hint.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        Canvas.SetLeft(hint, SnapToDevicePixel(position.X - (hint.DesiredSize.Width / 2), isXAxis: true));
+        Canvas.SetTop(hint, SnapToDevicePixel(position.Y - (hint.DesiredSize.Height / 2), isXAxis: false));
+        Panel.SetZIndex(hint, SliceContentZIndex);
+        PieCanvas.Children.Add(hint);
     }
 
     private void EnterMouseInteractionMode(bool refreshVisualState, bool animate)
@@ -993,6 +1028,7 @@ public partial class PieControl : UserControl
         Panel.SetZIndex(sliceVisual.Path, SliceZIndex);
         _animationService.ApplyBrushColor(sliceVisual.FillBrush, _renderState.SliceColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
         _animationService.ApplyBrushColor(sliceVisual.StrokeBrush, _renderState.BorderColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
+        ApplyReleaseHintVisual(sliceVisual, isTargeted: false, animate);
     }
 
     private void ApplySliceHoverVisual(PieSliceVisual sliceVisual, bool animate)
@@ -1000,6 +1036,22 @@ public partial class PieControl : UserControl
         Panel.SetZIndex(sliceVisual.Path, HoveredSliceZIndex);
         _animationService.ApplyBrushColor(sliceVisual.FillBrush, _renderState.HoverColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
         _animationService.ApplyBrushColor(sliceVisual.StrokeBrush, _renderState.BorderHoverColor, animate, _renderState.HoverDuration, _renderState.StandardEasing);
+        ApplyReleaseHintVisual(sliceVisual, isTargeted: true, animate);
+    }
+
+    private void ApplyReleaseHintVisual(PieSliceVisual sliceVisual, bool isTargeted, bool animate)
+    {
+        // A release never triggers during a drag, so the hint must not promise one.
+        var showReleaseHint = isTargeted && _isReleaseTriggerArmed && _drag == null;
+        if (sliceVisual.ReleaseHint != null)
+        {
+            _animationService.ApplyOpacity(sliceVisual.ReleaseHint, showReleaseHint ? 1 : 0, animate, _renderState.HoverDuration, _renderState.StandardEasing);
+        }
+
+        if (sliceVisual.DigitHint != null)
+        {
+            _animationService.ApplyOpacity(sliceVisual.DigitHint, showReleaseHint ? 0 : _digitHintOpacity, animate, _renderState.HoverDuration, _renderState.StandardEasing);
+        }
     }
 
     private void ApplyCenterNormalVisual(bool animate)

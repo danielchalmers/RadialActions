@@ -46,6 +46,23 @@ internal sealed class PieAnimationService
         brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation, HandoffBehavior.SnapshotAndReplace);
     }
 
+    public void ApplyOpacity(
+        UIElement element,
+        double opacity,
+        bool animate,
+        Duration duration,
+        IEasingFunction easingFunction)
+    {
+        if (animate)
+        {
+            AnimateOpacity(element, opacity, duration, easingFunction);
+            return;
+        }
+
+        element.BeginAnimation(UIElement.OpacityProperty, null);
+        element.Opacity = opacity;
+    }
+
     public void AnimateOpacity(
         UIElement element,
         double toOpacity,
