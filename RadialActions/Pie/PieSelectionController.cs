@@ -16,18 +16,54 @@ internal sealed class PieSelectionController
     }
 
     /// <summary>
-    /// Decides which slice a hotkey-release flick should trigger, honoring the active interaction mode
-    /// so the triggered slice always matches the one shown highlighted.
+    /// What releasing the held activation hotkey should do.
     /// </summary>
-    /// <returns>The slice index to trigger, or <see cref="NoSelection"/> to trigger nothing.</returns>
-    public static int GetReleaseTriggerIndex(bool isDragActive, bool isKeyboardMode, int selectedIndex, int hoveredIndex)
+    public enum ReleaseOutcome
+    {
+        /// <summary>Nothing is targeted and no slice was ever targeted during the hold; the menu stays open for clicking.</summary>
+        None,
+
+        /// <summary>Trigger the targeted slice.</summary>
+        TriggerSlice,
+
+        /// <summary>A slice was targeted during the hold but the release landed on nothing; dismiss the menu.</summary>
+        Dismiss,
+    }
+
+    public readonly record struct ReleaseDecision(ReleaseOutcome Outcome, int SliceIndex)
+    {
+        public static readonly ReleaseDecision None = new(ReleaseOutcome.None, NoSelection);
+        public static readonly ReleaseDecision Dismiss = new(ReleaseOutcome.Dismiss, NoSelection);
+    }
+
+    /// <summary>
+    /// Decides what a hotkey-release flick should do, honoring the active interaction mode so the triggered slice
+    /// always matches the one shown highlighted.
+    /// </summary>
+    /// <param name="wasSliceTargetedDuringHold">
+    /// True if a slice was targeted at any point while the hotkey was held. Releasing on nothing then dismisses the
+    /// menu as an abandoned flick, while a plain tap that never reached a slice leaves it open for clicking.
+    /// </param>
+    public static ReleaseDecision GetReleaseDecision(
+        bool isDragActive,
+        bool isKeyboardMode,
+        int selectedIndex,
+        int hoveredIndex,
+        bool wasSliceTargetedDuringHold)
     {
         if (isDragActive)
         {
-            return NoSelection;
+            return ReleaseDecision.None;
         }
 
-        return isKeyboardMode ? selectedIndex : hoveredIndex;
+        var targetIndex = isKeyboardMode ? selectedIndex : hoveredIndex;
+        if (targetIndex != NoSelection)
+        {
+            return new ReleaseDecision(ReleaseOutcome.TriggerSlice, targetIndex);
+        }
+
+        // Keyboard mode keeps its selection until the mouse moves, so the only way to reach here with nothing targeted is through the mouse gliding off a slice again.
+        return !isKeyboardMode && wasSliceTargetedDuringHold ? ReleaseDecision.Dismiss : ReleaseDecision.None;
     }
 
     public void EnsureSelectionIsValid(IReadOnlyList<Item> items)

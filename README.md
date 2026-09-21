@@ -11,7 +11,7 @@ Radial Actions is a free, open source pie menu launcher for Windows. Press a glo
 
 - Opens with a global hotkey, `Ctrl+Alt+Space` by default. You can change it in Settings.
 - Appears at the mouse pointer, or at the center of the screen if you turn on "Open at screen center".
-- Hold the hotkey, move onto a slice, and release to run it, or press the hotkey and click a slice. "Release hotkey to trigger" can be turned off in Settings.
+- Hold the hotkey, move onto a slice, and release to run it. Move back off the slices and release to close instead. Or press the hotkey and click a slice. "Release hotkey to trigger" can be turned off in Settings.
 - Works from the keyboard too. The arrow keys select a slice, `Enter` runs it, and the number keys `1` to `9` run slices clockwise from the top.
 - An Open action launches an app, file, folder, or URL, with optional arguments and a working directory.
 - A Key action sends a media key (play/pause, previous, next, stop), a volume key (mute, down, up), Print Screen, or a shortcut you record, such as `Ctrl+Shift+M`.

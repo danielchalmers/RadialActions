@@ -19,16 +19,75 @@ public class PieSelectionControllerTests
     [InlineData(false, true, PieSelectionController.NoSelection, 2, PieSelectionController.NoSelection)]
     [InlineData(false, false, 1, 2, 2)]
     [InlineData(false, false, PieSelectionController.NoSelection, PieSelectionController.NoSelection, PieSelectionController.NoSelection)]
-    public void GetReleaseTriggerIndex_FollowsInteractionMode(
+    public void GetReleaseDecision_TriggersTheSliceForTheInteractionMode(
         bool isDragActive,
         bool isKeyboardMode,
         int selectedIndex,
         int hoveredIndex,
         int expectedIndex)
     {
-        var result = PieSelectionController.GetReleaseTriggerIndex(isDragActive, isKeyboardMode, selectedIndex, hoveredIndex);
+        var result = PieSelectionController.GetReleaseDecision(isDragActive, isKeyboardMode, selectedIndex, hoveredIndex, wasSliceTargetedDuringHold: false);
 
-        Assert.Equal(expectedIndex, result);
+        var expectedOutcome = expectedIndex == PieSelectionController.NoSelection
+            ? PieSelectionController.ReleaseOutcome.None
+            : PieSelectionController.ReleaseOutcome.TriggerSlice;
+        Assert.Equal(expectedOutcome, result.Outcome);
+        Assert.Equal(expectedIndex, result.SliceIndex);
+    }
+
+    [Fact]
+    public void GetReleaseDecision_DismissesWhenTheMouseLeftASliceDuringTheHold()
+    {
+        var result = PieSelectionController.GetReleaseDecision(
+            isDragActive: false,
+            isKeyboardMode: false,
+            selectedIndex: PieSelectionController.NoSelection,
+            hoveredIndex: PieSelectionController.NoSelection,
+            wasSliceTargetedDuringHold: true);
+
+        Assert.Equal(PieSelectionController.ReleaseOutcome.Dismiss, result.Outcome);
+    }
+
+    [Fact]
+    public void GetReleaseDecision_StaysOpenForATapThatNeverReachedASlice()
+    {
+        var result = PieSelectionController.GetReleaseDecision(
+            isDragActive: false,
+            isKeyboardMode: false,
+            selectedIndex: PieSelectionController.NoSelection,
+            hoveredIndex: PieSelectionController.NoSelection,
+            wasSliceTargetedDuringHold: false);
+
+        Assert.Equal(PieSelectionController.ReleaseOutcome.None, result.Outcome);
+    }
+
+    [Fact]
+    public void GetReleaseDecision_HoveredSliceWinsOverAnAbandonedFlick()
+    {
+        var result = PieSelectionController.GetReleaseDecision(
+            isDragActive: false,
+            isKeyboardMode: false,
+            selectedIndex: PieSelectionController.NoSelection,
+            hoveredIndex: 3,
+            wasSliceTargetedDuringHold: true);
+
+        Assert.Equal(PieSelectionController.ReleaseOutcome.TriggerSlice, result.Outcome);
+        Assert.Equal(3, result.SliceIndex);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void GetReleaseDecision_NeverDismissesDuringADragOrInKeyboardMode(bool isDragActive, bool isKeyboardMode)
+    {
+        var result = PieSelectionController.GetReleaseDecision(
+            isDragActive,
+            isKeyboardMode,
+            selectedIndex: PieSelectionController.NoSelection,
+            hoveredIndex: PieSelectionController.NoSelection,
+            wasSliceTargetedDuringHold: true);
+
+        Assert.Equal(PieSelectionController.ReleaseOutcome.None, result.Outcome);
     }
 
     [Theory]

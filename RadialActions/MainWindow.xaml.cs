@@ -323,16 +323,20 @@ public partial class MainWindow : Window
             return;
         }
 
-        PieMenu.IsReleaseTriggerArmed = false;
-
-        if (PieMenu.TriggerActiveSlice())
+        switch (PieMenu.HandleHotkeyReleased())
         {
-            Log.Debug("Activation hotkey released over a slice; triggered it");
-            e.Handled = true;
-        }
-        else
-        {
-            Log.Debug("Activation hotkey released with no slice hovered; menu stays open");
+            case PieSelectionController.ReleaseOutcome.TriggerSlice:
+                Log.Debug("Activation hotkey released over a slice; triggered it");
+                e.Handled = true;
+                break;
+            case PieSelectionController.ReleaseOutcome.Dismiss:
+                Log.Debug("Activation hotkey released after leaving a slice; dismissing the menu");
+                HideMenu();
+                e.Handled = true;
+                break;
+            default:
+                Log.Debug("Activation hotkey released with no slice hovered; menu stays open");
+                break;
         }
     }
 

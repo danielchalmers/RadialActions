@@ -69,6 +69,7 @@ public partial class PieControl : UserControl
     private DragReorderState _drag;
     private bool _isReleasingDragCapture;
     private bool _isReleaseTriggerArmed;
+    private bool _wasSliceTargetedWhileArmed;
     private double _digitHintOpacity;
 
     private sealed class DragReorderState
@@ -153,6 +154,7 @@ public partial class PieControl : UserControl
             }
 
             _isReleaseTriggerArmed = value;
+            _wasSliceTargetedWhileArmed = false;
             RefreshVisualState(animate: true);
         }
     }
@@ -160,6 +162,7 @@ public partial class PieControl : UserControl
     public void ResetInputState()
     {
         _isReleaseTriggerArmed = false;
+        _wasSliceTargetedWhileArmed = false;
 
         // The visuals survive across opens, so press and drag tracking from the previous open must be discarded
         // here or a held button in the next open can resume a drag that was never started there.
@@ -170,26 +173,35 @@ public partial class PieControl : UserControl
     }
 
     /// <summary>
-    /// Triggers the active slice: the keyboard-selected slice in keyboard mode, otherwise the slice under the mouse.
+    /// Completes the flick gesture when the held activation hotkey is released: triggers the targeted slice (the
+    /// keyboard-selected slice in keyboard mode, otherwise the slice under the mouse), or reports that the flick was
+    /// abandoned so the caller can dismiss the menu. Disarms the release trigger either way.
     /// </summary>
-    /// <returns>True if a slice was triggered.</returns>
-    public bool TriggerActiveSlice()
+    internal PieSelectionController.ReleaseOutcome HandleHotkeyReleased()
     {
         var hoveredIndex = _sliceVisuals.FirstOrDefault(slice => slice.Path.IsMouseOver)?.Index ?? PieSelectionController.NoSelection;
-        var targetIndex = PieSelectionController.GetReleaseTriggerIndex(
+        var decision = PieSelectionController.GetReleaseDecision(
             _drag != null,
             _interactionMode == InteractionMode.Keyboard,
             _selectionController.SelectedIndex,
-            hoveredIndex);
+            hoveredIndex,
+            _wasSliceTargetedWhileArmed);
 
-        var targetSlice = _sliceVisuals.FirstOrDefault(slice => slice.Index == targetIndex);
+        IsReleaseTriggerArmed = false;
+
+        if (decision.Outcome != PieSelectionController.ReleaseOutcome.TriggerSlice)
+        {
+            return decision.Outcome;
+        }
+
+        var targetSlice = _sliceVisuals.FirstOrDefault(slice => slice.Index == decision.SliceIndex);
         if (targetSlice == null)
         {
-            return false;
+            return PieSelectionController.ReleaseOutcome.None;
         }
 
         SliceClicked?.Invoke(this, new SliceClickEventArgs(targetSlice.Action));
-        return true;
+        return PieSelectionController.ReleaseOutcome.TriggerSlice;
     }
 
     public bool HandleMenuKey(Key key, ModifierKeys modifiers)
@@ -1043,6 +1055,12 @@ public partial class PieControl : UserControl
     {
         // A release never triggers during a drag, so the hint must not promise one.
         var showReleaseHint = isTargeted && _isReleaseTriggerArmed && _drag == null;
+        if (showReleaseHint)
+        {
+            // Once the hint has promised a release, releasing on nothing reads as an abandoned flick rather than a tap.
+            _wasSliceTargetedWhileArmed = true;
+        }
+
         if (sliceVisual.ReleaseHint != null)
         {
             _animationService.ApplyOpacity(sliceVisual.ReleaseHint, showReleaseHint ? 1 : 0, animate, _renderState.HoverDuration, _renderState.StandardEasing);
