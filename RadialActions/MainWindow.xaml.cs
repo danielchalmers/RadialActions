@@ -21,12 +21,6 @@ public partial class MainWindow : Window
     private readonly HotkeyService _hotkeyService = new();
     private readonly MenuService _menuService;
 
-    /// <summary>
-    /// True while the menu was opened by the activation hotkey and the keys have not been released
-    /// yet, so releasing them over a slice triggers it (flick gesture).
-    /// </summary>
-    private bool _hotkeyReleasePending;
-
     public MainWindow()
     {
         InitializeComponent();
@@ -102,19 +96,17 @@ public partial class MainWindow : Window
 
     public void ShowMenu(bool atCursor)
     {
-        _hotkeyReleasePending = false;
         _menuService.ShowMenu(atCursor);
     }
 
     public void HideMenu(bool animate = true)
     {
-        _hotkeyReleasePending = false;
+        PieMenu.IsReleaseTriggerArmed = false;
         _menuService.HideMenu(animate);
     }
 
     private void ShowMenuUsingConfiguredPosition()
     {
-        _hotkeyReleasePending = false;
         _menuService.ShowMenu(!Settings.Default.OpenMenuInScreenCenter);
     }
 
@@ -151,7 +143,9 @@ public partial class MainWindow : Window
         else
         {
             ShowMenuUsingConfiguredPosition();
-            _hotkeyReleasePending = Settings.Default.TriggerSliceOnHotkeyRelease;
+
+            // Arms the flick gesture: the keys are still held, so releasing them over a slice triggers it.
+            PieMenu.IsReleaseTriggerArmed = Settings.Default.TriggerSliceOnHotkeyRelease;
         }
     }
 
@@ -224,7 +218,7 @@ public partial class MainWindow : Window
         Log.Debug($"Slice clicked: {slice.Name}");
 
         // A slice has fired; releasing the still-held hotkey must not fire another one when the menu stays open.
-        _hotkeyReleasePending = false;
+        PieMenu.IsReleaseTriggerArmed = false;
 
         // Dismiss before running the action so the fade-out starts on the same frame as the click.
         if (!Settings.Default.KeepMenuOpenAfterSliceClick)
@@ -317,7 +311,7 @@ public partial class MainWindow : Window
 
     private void Window_KeyUp(object sender, KeyEventArgs e)
     {
-        if (!_hotkeyReleasePending)
+        if (!PieMenu.IsReleaseTriggerArmed)
         {
             return;
         }
@@ -329,7 +323,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        _hotkeyReleasePending = false;
+        PieMenu.IsReleaseTriggerArmed = false;
 
         if (PieMenu.TriggerActiveSlice())
         {

@@ -32,6 +32,16 @@ internal sealed class PieSliceVisual
     public StackPanel ContentPanel { get; set; }
 
     /// <summary>
+    /// The number key hint at the slice rim, or null for slices past the ninth.
+    /// </summary>
+    public TextBlock DigitHint { get; set; }
+
+    /// <summary>
+    /// Shown in place of the digit hint while releasing the held activation hotkey would trigger this slice.
+    /// </summary>
+    public TextBlock ReleaseHint { get; set; }
+
+    /// <summary>
     /// The slot this slice currently occupies; starts equal to <see cref="Index"/>.
     /// </summary>
     public int CurrentSlot { get; set; }
