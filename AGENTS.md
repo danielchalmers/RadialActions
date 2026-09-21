@@ -57,6 +57,7 @@ For documentation-only changes, explain why build or test commands were skipped.
 ## Product Invariants
 
 - Radial Actions is a lightweight Windows utility opened by a global hotkey. Startup, hotkey registration, tray behavior, and menu display should stay fast and predictable.
+- Opening the menu must not wait on a pie rebuild. `PieControl` builds at idle while hidden and only builds at render priority when a refresh is still pending at open.
 - Running a slice must not block the UI thread. `MainWindow` starts the dismiss first and executes the action on a worker thread; only the failure notification returns to the UI thread.
 - User-configured actions must not execute during tests, settings load, preview rendering, or validation.
 - Invalid or stale settings should normalize to safe defaults instead of crashing on startup.
