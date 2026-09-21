@@ -148,7 +148,7 @@ public static class PieVisualBuilder
         return new TextBlock
         {
             Style = iconTextStyle,
-            Text = "\uE7C9",
+            Text = "\uE945",
             FontFamily = new FontFamily("Segoe MDL2 Assets"),
             Foreground = new SolidColorBrush(iconTextColor),
             FontSize = 14,
