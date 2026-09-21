@@ -53,6 +53,7 @@ public partial class PieControl : UserControl
 
     private bool _renderRefreshPending;
     private DispatcherOperation _renderRefreshOperation;
+    private DpiScale _buildDpi;
     private readonly List<PieSliceVisual> _sliceVisuals = [];
     private PieCenterVisual _centerVisual;
     private readonly PieAnimationService _animationService = new();
@@ -348,6 +349,7 @@ public partial class PieControl : UserControl
         _renderRefreshPending = false;
         _drag = null;
         _dragCandidate = null;
+        _buildDpi = VisualTreeHelper.GetDpi(this);
 
         var enabledSlices = Slices?
             .Where(slice => slice?.IsEnabled == true)
@@ -1142,8 +1144,7 @@ public partial class PieControl : UserControl
 
     private double SnapToDevicePixel(double value, bool isXAxis)
     {
-        var dpiInfo = VisualTreeHelper.GetDpi(this);
-        var scale = isXAxis ? dpiInfo.DpiScaleX : dpiInfo.DpiScaleY;
+        var scale = isXAxis ? _buildDpi.DpiScaleX : _buildDpi.DpiScaleY;
         if (scale <= 0)
         {
             return value;
