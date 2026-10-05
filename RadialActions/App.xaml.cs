@@ -13,15 +13,6 @@ namespace RadialActions;
 [INotifyPropertyChanged]
 public partial class App : Application
 {
-    // Debug builds use their own name so they can run next to an installed copy.
-#if DEBUG
-    private const string SingleInstanceName = @"Local\RadialActions.Debug";
-#else
-    private const string SingleInstanceName = @"Local\RadialActions";
-#endif
-
-    private SingleInstance _singleInstance;
-
     /// <summary>
     /// The main executable file of the application.
     /// </summary>
@@ -59,26 +50,6 @@ public partial class App : Application
 
         Log.Information($"Starting Radial Actions {FileVersionInfo.GetVersionInfo(MainFileInfo.FullName).FileVersion}");
         Log.Information($"Runtime: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture}");
-
-        // Only the first copy builds the main window, since a second copy's tray icon would replace the running copy's and its hotkey would fail.
-        _singleInstance = new SingleInstance(SingleInstanceName);
-        if (!_singleInstance.IsFirst)
-        {
-            Log.Information("Radial Actions is already running; asking that copy to open Settings");
-            _singleInstance.RequestShow();
-            Shutdown();
-            return;
-        }
-
-        var mainWindow = new MainWindow();
-        _singleInstance.ListenForShowRequests(() => mainWindow.Dispatcher.InvokeAsync(mainWindow.OpenSettingsForRelaunch));
-        mainWindow.Show();
-    }
-
-    protected override void OnExit(ExitEventArgs e)
-    {
-        _singleInstance?.Dispose();
-        base.OnExit(e);
     }
 
     /// <summary>
