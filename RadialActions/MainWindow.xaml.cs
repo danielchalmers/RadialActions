@@ -199,7 +199,7 @@ public partial class MainWindow : Window
             registration,
             Settings.Default.ActivationHotkey,
             Settings.Default.HasShownWelcomeNotification,
-            StartupRegistration.ForCurrentApp().IsEnabled,
+            App.IsRunOnStartupEnabled(),
             out var isWelcome);
 
         if (notification == null)
