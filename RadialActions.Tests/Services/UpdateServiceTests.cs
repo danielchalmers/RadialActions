@@ -28,6 +28,15 @@ public class UpdateServiceTests
         Assert.False(isAvailable);
     }
 
+    [Fact]
+    public void IsUpdateAvailable_InstalledFileVersionMatchesReleaseTag_ReturnsFalse()
+    {
+        // The exe reports a four-part file version while release tags have three parts.
+        var isAvailable = UpdateService.IsUpdateAvailable(new Version(0, 7, 0, 0), UpdateService.TryParseVersion("v0.7.0"));
+
+        Assert.False(isAvailable);
+    }
+
     [Theory]
     [InlineData("v1.2.3", "1.2.3")]
     [InlineData("V2.0", "2.0")]
@@ -54,15 +63,18 @@ public class UpdateServiceTests
     }
 
     [Fact]
-    public void TryGetLatestReleaseVersion_UsesHighestParseableStableTagVersion()
+    public void TryGetLatestReleaseVersion_StableReleaseWithInstaller_ReturnsItsVersion()
     {
         const string payload = """
-        [
-          { "tag_name": "v2.4.1", "name": "v2.4.1", "draft": false },
-          { "tag_name": "v9.9.9", "name": "v9.9.9", "draft": true },
-          { "tag_name": "v1.2.3-preview1", "name": "v1.2.3-preview1", "draft": false },
-          { "tag_name": "v3.0.0", "name": "v3.0.0", "draft": false }
-        ]
+        {
+          "tag_name": "v3.0.0",
+          "draft": false,
+          "prerelease": false,
+          "assets": [
+            { "name": "RadialActions-3.0.0-x64.zip" },
+            { "name": "RadialActions-3.0.0-x64.msi" }
+          ]
+        }
         """;
 
         var ok = UpdateService.TryGetLatestReleaseVersion(payload, out var latestVersion);
@@ -71,10 +83,13 @@ public class UpdateServiceTests
         Assert.Equal(new Version(3, 0, 0), latestVersion);
     }
 
-    [Fact]
-    public void TryGetLatestReleaseVersion_EmptyPayload_ReturnsFailure()
+    [Theory]
+    [InlineData("[]")]
+    [InlineData("""[{ "name": "RadialActions-3.0.0-x64.zip" }, { "name": "RadialActions-3.0.0-arm64.zip" }]""")]
+    [InlineData("null")]
+    public void TryGetLatestReleaseVersion_ReleaseWithoutInstaller_ReturnsFailure(string assets)
     {
-        const string payload = "[]";
+        var payload = $$"""{ "tag_name": "v3.0.0", "draft": false, "prerelease": false, "assets": {{assets}} }""";
 
         var ok = UpdateService.TryGetLatestReleaseVersion(payload, out var latestVersion);
 
@@ -82,13 +97,18 @@ public class UpdateServiceTests
         Assert.Null(latestVersion);
     }
 
-    [Fact]
-    public void TryGetLatestReleaseVersion_DraftRelease_ReturnsFailure()
+    [Theory]
+    [InlineData("true", "false")]
+    [InlineData("false", "true")]
+    public void TryGetLatestReleaseVersion_DraftOrPrerelease_ReturnsFailure(string draft, string prerelease)
     {
-        const string payload = """
-        [
-          { "tag_name": "v1.5.0", "name": "v1.5.0", "draft": true }
-        ]
+        var payload = $$"""
+        {
+          "tag_name": "v3.0.0",
+          "draft": {{draft}},
+          "prerelease": {{prerelease}},
+          "assets": [{ "name": "RadialActions-3.0.0-x64.msi" }]
+        }
         """;
 
         var ok = UpdateService.TryGetLatestReleaseVersion(payload, out var latestVersion);
@@ -98,15 +118,22 @@ public class UpdateServiceTests
     }
 
     [Fact]
-    public void TryGetLatestReleaseVersion_UnparseableRelease_ReturnsFailure()
+    public void TryGetLatestReleaseVersion_UnparseableTag_ReturnsFailure()
     {
         const string payload = """
-        [
-          { "tag_name": "not-a-version", "name": "still-not-a-version", "draft": false }
-        ]
+        { "tag_name": "not-a-version", "draft": false, "prerelease": false, "assets": [{ "name": "RadialActions.msi" }] }
         """;
 
         var ok = UpdateService.TryGetLatestReleaseVersion(payload, out var latestVersion);
+
+        Assert.False(ok);
+        Assert.Null(latestVersion);
+    }
+
+    [Fact]
+    public void TryGetLatestReleaseVersion_NullPayload_ReturnsFailure()
+    {
+        var ok = UpdateService.TryGetLatestReleaseVersion("null", out var latestVersion);
 
         Assert.False(ok);
         Assert.Null(latestVersion);
