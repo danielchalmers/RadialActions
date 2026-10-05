@@ -29,6 +29,7 @@ jobs:
         with:
           tag: ${{ github.ref_name }}
           artifacts: "publish/*.zip,publish/*.msi"
+          artifactErrorsFailBuild: true
           allowUpdates: true
           removeArtifacts: true
           omitBodyDuringUpdate: true

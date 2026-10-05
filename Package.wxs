@@ -5,6 +5,10 @@
            UpgradeCode="EB19552B-9520-4638-9459-D2D257B52D05"
            Scope="perUser">
     <Property Id="ARPNOMODIFY" Value="1" />
+    <Icon Id="RadialActions.ico" SourceFile="RadialActions/RadialActions.ico" />
+    <Property Id="ARPPRODUCTICON" Value="RadialActions.ico" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/danielchalmers/RadialActions" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/danielchalmers/RadialActions/issues" />
     <!--  Skip the System Restore point, which can hold the installer at "Please wait" for most of a minute and protects nothing in a per-user app folder  -->
     <Property Id="MSIFASTINSTALL" Value="1" />
     <!--  Keep the default schedule: in a per-user install without elevation, rolling back an in-transaction removal (afterInstallInitialize) restores the old files but not the old product's registration, leaving a copy no update or uninstall can find  -->
@@ -45,6 +49,7 @@
       <Component Id="MainExecutable" Guid="*">
         <File Id="RadialActionsExe" Source="publish/$(var.Arch)/RadialActions.exe" KeyPath="yes" />
         <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
+        <RemoveFolder Id="RemoveRootFolder" Directory="RadialActionsRoot" On="uninstall" />
       </Component>
       <Component Id="StartMenuShortcut" Guid="*">
         <Shortcut Id="RadialActionsShortcut"
@@ -55,14 +60,16 @@
                   WorkingDirectory="INSTALLFOLDER" />
         <RemoveFolder Id="RemoveStartMenuFolder" Directory="ProgramMenuRadialActions" On="uninstall" />
         <RegistryValue Root="HKCU"
-                       Key="Software\\Daniel Chalmers\\RadialActions"
+                       Key="Software\Daniel Chalmers\RadialActions"
                        Name="StartMenuShortcut"
                        Type="integer"
                        Value="1"
                        KeyPath="yes" />
       </Component>
+      <!--  Settings next to the exe must never be installer-owned, or an upgrade deletes them  -->
       <Files Include="publish/$(var.Arch)/**">
         <Exclude Files="publish/$(var.Arch)/RadialActions.exe" />
+        <Exclude Files="publish/$(var.Arch)/*.settings*" />
       </Files>
     </ComponentGroup>
   </Fragment>
