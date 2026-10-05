@@ -6,7 +6,12 @@ namespace RadialActions;
 
 public static class UpdateService
 {
-    // The same release the Settings banner's Download button opens, so the announced version is always the one users land on.
+    /// <summary>
+    /// The page for the latest release, with its notes and downloads.
+    /// </summary>
+    public const string LatestReleasePageUrl = "https://github.com/danielchalmers/RadialActions/releases/latest";
+
+    // The same release LatestReleasePageUrl opens, so the announced version is always the one users land on.
     private const string GitHubLatestReleaseApiUrl = "https://api.github.com/repos/danielchalmers/RadialActions/releases/latest";
     private static readonly HttpClient HttpClient = CreateHttpClient();
 

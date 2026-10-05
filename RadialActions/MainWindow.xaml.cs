@@ -202,6 +202,7 @@ public partial class MainWindow : Window
             registration,
             Settings.Default.ActivationHotkey,
             Settings.Default.HasShownWelcomeNotification,
+            Settings.Default.RunOnStartup,
             out var isWelcome);
 
         if (notification == null)
@@ -280,7 +281,22 @@ public partial class MainWindow : Window
             return;
         }
 
-        // The welcome, hotkey and update notifications all lead to the General tab, where the hotkey and the update banner are.
+        if (_trayService.NotificationLink is { } link)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(link) { UseShellExecute = true });
+            }
+            catch (Win32Exception ex)
+            {
+                // No app is registered to open links.
+                Log.Warning(ex, "Failed to open {Link} from a notification", link);
+            }
+
+            return;
+        }
+
+        // The welcome and hotkey notifications lead to the General tab, where the hotkey and Run at Windows startup are.
         OpenSettingsWindow(GeneralTabIndex);
     }
 
