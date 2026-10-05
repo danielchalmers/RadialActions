@@ -12,15 +12,41 @@ public sealed partial class GeneralSettingsViewModel : ObservableObject
     public const string ActivationHotkeyIdleDescription = "Opens the menu from anywhere. Select the shortcut to change it.";
     public const string ActivationHotkeyRecordingDescription = "Press the new key combination, such as Ctrl+Alt+Space. Press Esc to cancel or Backspace to clear.";
 
+    private readonly IStartupRegistration _startupRegistration;
+
     public GeneralSettingsViewModel(Settings settings)
+        : this(settings, StartupRegistration.ForCurrentApp())
+    {
+    }
+
+    internal GeneralSettingsViewModel(Settings settings, IStartupRegistration startupRegistration)
     {
         Settings = settings;
+        _startupRegistration = startupRegistration;
 
         // Settings outlives every Settings window, so a weak subscription keeps closed windows collectable.
         PropertyChangedEventManager.AddHandler(settings, OnActivationHotkeyChanged, nameof(Settings.ActivationHotkey));
     }
 
     public Settings Settings { get; }
+
+    /// <summary>
+    /// Whether this copy starts when the user signs in. It's read from Windows instead of saved settings, so it also reflects Task Manager, a moved folder, or another copy taking over.
+    /// </summary>
+    public bool RunOnStartup
+    {
+        get => _startupRegistration.IsEnabled;
+        set
+        {
+            if (value != _startupRegistration.IsEnabled)
+            {
+                _startupRegistration.TrySetEnabled(value);
+            }
+
+            // Raised even when Windows refused the change, so the toggle shows what will actually happen.
+            OnPropertyChanged();
+        }
+    }
 
     /// <summary>
     /// True while the activation hotkey button is waiting for a new combination. Recording only starts when the user selects the button, so focus landing on it can't change the hotkey.

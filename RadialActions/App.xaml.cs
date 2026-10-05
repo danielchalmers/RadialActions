@@ -3,7 +3,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Win32;
 
 namespace RadialActions;
 
@@ -79,41 +78,6 @@ public partial class App : Application
     {
         _singleInstance?.Dispose();
         base.OnExit(e);
-    }
-
-    /// <summary>
-    /// Sets or deletes a value in the registry which enables the current executable to run on system startup.
-    /// </summary>
-    public static bool SetRunOnStartup(bool enable)
-    {
-        var keyName = "RadialActions";
-        using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
-        if (key == null)
-        {
-            Log.Error("Failed to open startup registry key");
-            return false;
-        }
-
-        try
-        {
-            if (enable)
-            {
-                Log.Information($"Setting to run on startup under key named {keyName}");
-                key.SetValue(keyName, MainFileInfo.FullName);
-            }
-            else
-            {
-                Log.Information($"Removing from startup under key named {keyName}");
-                key.DeleteValue(keyName, false);
-            }
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to set run on startup");
-            return false;
-        }
     }
 
     /// <summary>

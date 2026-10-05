@@ -63,9 +63,6 @@ public partial class MainWindow : Window
 
         switch (propertyName)
         {
-            case nameof(Settings.RunOnStartup):
-                App.SetRunOnStartup(Settings.Default.RunOnStartup);
-                break;
             case nameof(Settings.ActivationHotkey):
                 if (_isActivationHotkeySuspended)
                 {
@@ -202,7 +199,7 @@ public partial class MainWindow : Window
             registration,
             Settings.Default.ActivationHotkey,
             Settings.Default.HasShownWelcomeNotification,
-            Settings.Default.RunOnStartup,
+            StartupRegistration.ForCurrentApp().IsEnabled,
             out var isWelcome);
 
         if (notification == null)

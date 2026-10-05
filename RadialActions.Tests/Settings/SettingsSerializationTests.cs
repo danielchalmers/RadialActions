@@ -102,6 +102,16 @@ public class SettingsSerializationTests
     }
 
     [Fact]
+    public void DeserializeFromJson_RunOnStartupFromEarlierVersions_LoadsAndIsNotSavedAgain()
+    {
+        // Run at Windows startup now lives only in the Run key, so the copy earlier versions saved is ignored.
+        var settings = Settings.DeserializeFromJson("""{ "ActivationHotkey": "Ctrl+Shift+K", "RunOnStartup": true }""");
+
+        Assert.Equal("Ctrl+Shift+K", settings.ActivationHotkey);
+        Assert.DoesNotContain("RunOnStartup", settings.SerializeToJson());
+    }
+
+    [Fact]
     public void HasShownWelcomeNotification_DefaultsToFalseAndRoundTrips()
     {
         var settings = Settings.DeserializeFromJson("{}");

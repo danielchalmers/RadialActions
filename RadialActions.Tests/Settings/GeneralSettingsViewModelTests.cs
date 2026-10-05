@@ -265,10 +265,82 @@ public sealed class GeneralSettingsViewModelTests
         Assert.Null(viewModel.General.ActivationHotkeyHint);
     }
 
-    private static GeneralSettingsViewModel CreateViewModel(string hotkey)
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RunOnStartup_ReflectsWindows(bool isEnabled)
+    {
+        var startup = new FakeStartupRegistration { IsEnabled = isEnabled };
+
+        var viewModel = CreateViewModel("Ctrl+Alt+Space", startup);
+
+        Assert.Equal(isEnabled, viewModel.RunOnStartup);
+    }
+
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void RunOnStartup_Changed_UpdatesWindowsAndRaisesChange(bool before, bool after)
+    {
+        var startup = new FakeStartupRegistration { IsEnabled = before };
+        var viewModel = CreateViewModel("Ctrl+Alt+Space", startup);
+        var raised = new List<string>();
+        viewModel.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        viewModel.RunOnStartup = after;
+
+        Assert.Equal([after], startup.Requests);
+        Assert.Equal(after, viewModel.RunOnStartup);
+        Assert.Contains(nameof(GeneralSettingsViewModel.RunOnStartup), raised);
+    }
+
+    [Fact]
+    public void RunOnStartup_WindowsRefuses_StaysOffAndRaisesChangeSoTheToggleSnapsBack()
+    {
+        var startup = new FakeStartupRegistration { IsEnabled = false, Refuses = true };
+        var viewModel = CreateViewModel("Ctrl+Alt+Space", startup);
+        var raised = new List<string>();
+        viewModel.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        viewModel.RunOnStartup = true;
+
+        Assert.False(viewModel.RunOnStartup);
+        Assert.Contains(nameof(GeneralSettingsViewModel.RunOnStartup), raised);
+    }
+
+    [Fact]
+    public void RunOnStartup_SetToCurrentState_DoesNotWrite()
+    {
+        var startup = new FakeStartupRegistration { IsEnabled = true };
+        var viewModel = CreateViewModel("Ctrl+Alt+Space", startup);
+
+        viewModel.RunOnStartup = true;
+
+        Assert.Empty(startup.Requests);
+    }
+
+    private static GeneralSettingsViewModel CreateViewModel(string hotkey, FakeStartupRegistration startup = null)
     {
         var settings = Settings.DeserializeFromJson("{}");
         settings.ActivationHotkey = hotkey;
-        return new GeneralSettingsViewModel(settings);
+        return new GeneralSettingsViewModel(settings, startup ?? new FakeStartupRegistration());
+    }
+
+    private sealed class FakeStartupRegistration : IStartupRegistration
+    {
+        public bool IsEnabled { get; set; }
+
+        public bool Refuses { get; init; }
+
+        public List<bool> Requests { get; } = [];
+
+        public bool TrySetEnabled(bool enabled)
+        {
+            Requests.Add(enabled);
+            if (!Refuses)
+                IsEnabled = enabled;
+
+            return !Refuses;
+        }
     }
 }
