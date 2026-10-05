@@ -105,6 +105,15 @@ public partial class MainWindow : Window
         OpenSettingsWindow(index);
     }
 
+    /// <summary>
+    /// Opens Settings when the app is launched again while it's running, since the user is looking for it.
+    /// </summary>
+    public void OpenSettingsForRelaunch()
+    {
+        Log.Information("Launched again while running; opening Settings");
+        OpenSettingsWindow(GeneralTabIndex);
+    }
+
     private void OpenSettingsWindow(int tabIndex)
     {
         Log.Debug($"Opening settings window to tab {tabIndex}");
