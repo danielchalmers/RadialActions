@@ -82,6 +82,15 @@ public partial class App : Application
     }
 
     /// <summary>
+    /// Whether the registry value that starts the app on system startup exists.
+    /// </summary>
+    public static bool IsRunOnStartupEnabled()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
+        return key?.GetValue("RadialActions") != null;
+    }
+
+    /// <summary>
     /// Sets or deletes a value in the registry which enables the current executable to run on system startup.
     /// </summary>
     public static bool SetRunOnStartup(bool enable)

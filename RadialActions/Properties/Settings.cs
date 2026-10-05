@@ -31,12 +31,6 @@ public sealed partial class Settings
     private int _size = DefaultSize;
 
     /// <summary>
-    /// Starts the app in the background when you log in.
-    /// </summary>
-    [ObservableProperty]
-    private bool _runOnStartup;
-
-    /// <summary>
     /// Keeps the menu open after clicking a slice until focus is lost.
     /// </summary>
     [ObservableProperty]

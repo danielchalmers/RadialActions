@@ -23,6 +23,19 @@ public sealed partial class GeneralSettingsViewModel : ObservableObject
     public Settings Settings { get; }
 
     /// <summary>
+    /// Whether the app starts at sign-in, read from Windows instead of saved settings so the toggle can't disagree with it.
+    /// </summary>
+    public bool RunOnStartup
+    {
+        get => App.IsRunOnStartupEnabled();
+        set
+        {
+            App.SetRunOnStartup(value);
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
     /// True while the activation hotkey button is waiting for a new combination. Recording only starts when the user selects the button, so focus landing on it can't change the hotkey.
     /// </summary>
     [ObservableProperty]

@@ -263,7 +263,7 @@
                               Margin="{StaticResource SettingsRowControlMargin}"
                               AutomationProperties.HelpText="{Binding Text, ElementName=RunOnStartupDescription}"
                               AutomationProperties.LabeledBy="{Binding ElementName=RunOnStartupTitle}"
-                              IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}"
+                              IsChecked="{Binding RunOnStartup, Mode=TwoWay}"
                               Style="{StaticResource ToggleSwitchStyle}" />
                 </Grid>
             </Border>
