@@ -8,69 +8,105 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         Title="Radial Actions"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
-        AllowsTransparency="True" Background="Transparent"
-        Deactivated="Window_Deactivated" PreviewKeyDown="Window_KeyDown"
-        PreviewKeyUp="Window_KeyUp"
+        AllowsTransparency="True" AutomationProperties.Name="Radial Actions menu"
+        Background="Transparent" Deactivated="Window_Deactivated"
         Loaded="Window_Loaded" Opacity="0"
-        ResizeMode="NoResize" ShowActivated="False" ShowInTaskbar="False"
-        SizeToContent="WidthAndHeight"
+        PreviewKeyDown="Window_KeyDown" PreviewKeyUp="Window_KeyUp"
+        ResizeMode="NoResize" ShowActivated="False"
+        ShowInTaskbar="False" SizeToContent="WidthAndHeight"
         Topmost="True" Unloaded="Window_Unloaded"
         WindowStyle="None"
         mc:Ignorable="d">
     <Window.Resources>
-        <CubicEase x:Key="MenuFadeInEaseOut"
-                   EasingMode="EaseOut" />
-        <CubicEase x:Key="MenuFadeOutEaseIn"
-                   EasingMode="EaseIn" />
-
-        <Storyboard x:Key="FadeInStoryboard">
-            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             Duration="0:0:0.22"
-                             EasingFunction="{StaticResource MenuFadeInEaseOut}"
-                             To="1" />
+        <!--  Entrance: fade in while the pie grows from MotionMenuEnterScale, which MenuService sets before a fresh show so a reopen during the exit continues from the current scale  -->
+        <Storyboard x:Key="FadeInStoryboard"
+                    Completed="FadeInStoryboard_Completed">
+            <DoubleAnimation EasingFunction="{StaticResource MotionEaseDecelerate}"
+                             Storyboard.TargetProperty="Opacity"
+                             To="1"
+                             Duration="{StaticResource MotionDurationMenuEnter}" />
+            <DoubleAnimation EasingFunction="{StaticResource MotionEaseDecelerate}"
+                             Storyboard.TargetName="PieMenu"
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                             To="1"
+                             Duration="{StaticResource MotionDurationMenuEnter}" />
+            <DoubleAnimation EasingFunction="{StaticResource MotionEaseDecelerate}"
+                             Storyboard.TargetName="PieMenu"
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                             To="1"
+                             Duration="{StaticResource MotionDurationMenuEnter}" />
         </Storyboard>
 
         <Storyboard x:Key="FadeOutStoryboard"
                     Completed="FadeOutStoryboard_Completed">
-            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             Duration="0:0:0.12"
-                             EasingFunction="{StaticResource MenuFadeOutEaseIn}"
-                             To="0" />
+            <DoubleAnimation EasingFunction="{StaticResource MotionEaseAccelerate}"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0"
+                             Duration="{StaticResource MotionDurationMenuExit}" />
+            <DoubleAnimation EasingFunction="{StaticResource MotionEaseAccelerate}"
+                             Storyboard.TargetName="PieMenu"
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                             To="{StaticResource MotionMenuExitScale}"
+                             Duration="{StaticResource MotionDurationMenuExit}" />
+            <DoubleAnimation EasingFunction="{StaticResource MotionEaseAccelerate}"
+                             Storyboard.TargetName="PieMenu"
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                             To="{StaticResource MotionMenuExitScale}"
+                             Duration="{StaticResource MotionDurationMenuExit}" />
         </Storyboard>
 
+        <!--  Shared by the tray icon and the pie's center; the pie's copy hides "Open menu" because the menu is already open  -->
         <ContextMenu x:Key="MainContextMenu" x:Shared="False">
-            <MenuItem Header="_Settings"
-                      Click="OnTraySettingsMenuItemClick"
-                      Tag="0">
+            <MenuItem Header="Open _menu"
+                      Click="OnOpenMenuItemClick" Tag="OpenMenu">
+                <MenuItem.Style>
+                    <!--  Shows the hotkey only while it opens the menu, so a combination another app owns isn't advertised  -->
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="InputGestureText" Value="{Binding ActivationHotkey, Source={x:Static p:Settings.Default}}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasActivationHotkeyError, Source={x:Static local:App.CurrentApp}}"
+                                         Value="True">
+                                <Setter Property="InputGestureText" Value="" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE713;"
-                               FontFamily="Segoe MDL2 Assets" />
+                    <ContentControl Content="&#xE8A9;"
+                                    Style="{StaticResource MenuItemIconStyle}" />
+                </MenuItem.Icon>
+            </MenuItem>
+
+            <MenuItem Header="_Settings"
+                      Click="OnTraySettingsMenuItemClick" Tag="0">
+                <MenuItem.Icon>
+                    <ContentControl Content="&#xE713;"
+                                    Style="{StaticResource MenuItemIconStyle}" />
                 </MenuItem.Icon>
             </MenuItem>
 
             <MenuItem Header="_Actions"
-                      Click="OnTraySettingsMenuItemClick"
-                      Tag="1">
+                      Click="OnTraySettingsMenuItemClick" Tag="1">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE71D;"
-                               FontFamily="Segoe MDL2 Assets" />
+                    <ContentControl Content="&#xE71D;"
+                                    Style="{StaticResource MenuItemIconStyle}" />
                 </MenuItem.Icon>
             </MenuItem>
 
             <MenuItem Header="Ab_out"
-                      Click="OnTraySettingsMenuItemClick"
-                      Tag="2">
+                      Click="OnTraySettingsMenuItemClick" Tag="2">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE946;"
-                               FontFamily="Segoe MDL2 Assets" />
+                    <ContentControl Content="&#xE946;"
+                                    Style="{StaticResource MenuItemIconStyle}" />
                 </MenuItem.Icon>
             </MenuItem>
 
-            <MenuItem Header="_Feedback"
+            <MenuItem Header="Send _feedback"
                       Click="OnTrayFeedbackMenuItemClick">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xED15;"
-                               FontFamily="Segoe MDL2 Assets" />
+                    <ContentControl Content="&#xED15;"
+                                    Style="{StaticResource MenuItemIconStyle}" />
                 </MenuItem.Icon>
             </MenuItem>
 
@@ -79,18 +115,18 @@
             <MenuItem Header="E_xit"
                       Click="OnTrayExitMenuItemClick">
                 <MenuItem.Icon>
-                    <TextBlock Text="&#xE7E8;"
-                               FontFamily="Segoe MDL2 Assets" />
+                    <ContentControl Content="&#xE711;"
+                                    Style="{StaticResource MenuItemIconStyle}" />
                 </MenuItem.Icon>
             </MenuItem>
         </ContextMenu>
 
         <tb:TaskbarIcon x:Key="TrayIcon" x:Shared="False"
-                        ToolTipText="Radial Actions"
                         IconSource="RadialActions.ico" MenuActivation="RightClick"
-                        TrayBalloonTipClicked="OnTrayBalloonTipClicked"
-                        TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick"
-                        TrayLeftMouseClick="OnTrayLeftMouseDown" />
+                        ToolTipText="Radial Actions" TrayBalloonTipClicked="OnTrayBalloonTipClicked"
+                        TrayKeyboardKeySelect="OnTrayKeyboardKeySelect"
+                        TrayLeftMouseClick="OnTrayLeftMouseDown"
+                        TrayLeftMouseDoubleClick="OnTrayLeftMouseDoubleClick" />
     </Window.Resources>
 
     <local:PieControl x:Name="PieMenu"
@@ -99,8 +135,12 @@
                       Margin="28"
                       CenterClicked="OnCenterClicked"
                       CenterContextMenuRequested="OnCenterContextMenuRequested"
-                      SliceClicked="OnSliceClicked"
+                      RenderTransformOrigin="0.5,0.5" SliceClicked="OnSliceClicked"
                       SliceEditRequested="OnSliceEditRequested"
-                      SlicesReordered="OnSlicesReordered"
-                      Slices="{Binding Actions, Source={x:Static p:Settings.Default}}" />
+                      Slices="{Binding Actions, Source={x:Static p:Settings.Default}}"
+                      SlicesReordered="OnSlicesReordered">
+        <local:PieControl.RenderTransform>
+            <ScaleTransform />
+        </local:PieControl.RenderTransform>
+    </local:PieControl>
 </Window>

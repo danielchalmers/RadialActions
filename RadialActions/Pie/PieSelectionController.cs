@@ -56,6 +56,47 @@ internal sealed class PieSelectionController
         return true;
     }
 
+    /// <summary>
+    /// Selects the slice with <paramref name="index"/>, for example when assistive technology moves focus to it.
+    /// </summary>
+    /// <returns>False if no such slice exists; the selection is left unchanged.</returns>
+    public bool TrySelect(int index, IReadOnlyList<Item> items)
+    {
+        if (items.All(item => item.Index != index))
+        {
+            return false;
+        }
+
+        SelectedIndex = index;
+        return true;
+    }
+
+    /// <summary>
+    /// Moves clockwise like Tab: from no selection to the first slice, and from the last slice back to the first.
+    /// </summary>
+    public void SelectNext(IReadOnlyList<Item> items)
+    {
+        MoveBy(1, items);
+    }
+
+    /// <summary>
+    /// Moves counterclockwise like Shift+Tab: from no selection to the last slice, and from the first slice back to the last.
+    /// </summary>
+    public void SelectPrevious(IReadOnlyList<Item> items)
+    {
+        MoveBy(-1, items);
+    }
+
+    public void SelectFirst(IReadOnlyList<Item> items)
+    {
+        SelectedIndex = items.Count > 0 ? items[0].Index : NoSelection;
+    }
+
+    public void SelectLast(IReadOnlyList<Item> items)
+    {
+        SelectedIndex = items.Count > 0 ? items[^1].Index : NoSelection;
+    }
+
     public void HandleArrowKey(Key key, IReadOnlyList<Item> items)
     {
         if (items.Count == 0)
@@ -91,6 +132,24 @@ internal sealed class PieSelectionController
         {
             SelectedIndex = items[(selectedPosition - 1 + items.Count) % items.Count].Index;
         }
+    }
+
+    private void MoveBy(int offset, IReadOnlyList<Item> items)
+    {
+        if (items.Count == 0)
+        {
+            SelectedIndex = NoSelection;
+            return;
+        }
+
+        var selectedPosition = GetSelectedPosition(items);
+        if (selectedPosition < 0)
+        {
+            SelectedIndex = offset > 0 ? items[0].Index : items[^1].Index;
+            return;
+        }
+
+        SelectedIndex = items[(selectedPosition + offset + items.Count) % items.Count].Index;
     }
 
     private int GetSelectedPosition(IReadOnlyList<Item> items)

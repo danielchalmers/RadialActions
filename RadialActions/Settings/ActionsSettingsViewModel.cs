@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RadialActions.Properties;
@@ -8,15 +9,20 @@ namespace RadialActions;
 public partial class ActionsSettingsViewModel : ObservableObject
 {
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RemoveActionCommand), nameof(MoveUpCommand), nameof(MoveDownCommand))]
     private PieAction _selectedAction;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RemoveActionCommand), nameof(MoveUpCommand), nameof(MoveDownCommand))]
     private int _selectedActionIndex = -1;
 
     public ActionsSettingsViewModel(Settings settings)
     {
         Settings = settings;
         Editor = new ActionEditorViewModel(new ActionDefaultsService(), settings.Actions);
+
+        // The pie's drag reorder and drops change the list outside these commands; a weak subscription keeps the app-lifetime collection from holding closed windows alive.
+        CollectionChangedEventManager.AddHandler(Actions, OnActionsCollectionChanged);
 
         if (Actions.Count > 0)
         {
@@ -28,6 +34,8 @@ public partial class ActionsSettingsViewModel : ObservableObject
     public Settings Settings { get; }
     public ObservableCollection<PieAction> Actions => Settings.Actions;
     public ActionEditorViewModel Editor { get; }
+
+    private int SelectedPosition => SelectedAction == null ? -1 : Actions.IndexOf(SelectedAction);
 
     public void SelectAction(PieAction action)
     {
@@ -45,9 +53,9 @@ public partial class ActionsSettingsViewModel : ObservableObject
     [RelayCommand]
     private void AddAction()
     {
-        var newAction = new PieAction("Blank action") { Type = ActionType.None };
+        var newAction = new PieAction { Type = ActionType.None };
 
-        var selectedIndex = SelectedAction == null ? -1 : Actions.IndexOf(SelectedAction);
+        var selectedIndex = SelectedPosition;
         var insertionIndex = selectedIndex >= 0 ? selectedIndex + 1 : Actions.Count;
 
         Actions.Insert(insertionIndex, newAction);
@@ -64,7 +72,7 @@ public partial class ActionsSettingsViewModel : ObservableObject
         if (targets == null || targets.Count == 0)
             return;
 
-        var selectedIndex = SelectedAction == null ? -1 : Actions.IndexOf(SelectedAction);
+        var selectedIndex = SelectedPosition;
         var insertionIndex = selectedIndex >= 0 ? selectedIndex + 1 : Actions.Count;
 
         var added = 0;
@@ -80,49 +88,63 @@ public partial class ActionsSettingsViewModel : ObservableObject
         Log.Debug("Added {Count} action(s) from drop", added);
     }
 
-    [RelayCommand]
+    private bool CanRemoveAction() => SelectedPosition >= 0;
+
+    [RelayCommand(CanExecute = nameof(CanRemoveAction))]
     private void RemoveAction()
     {
-        if (SelectedAction == null || Actions.Count == 0)
+        var index = SelectedPosition;
+        if (index < 0)
             return;
 
-        var removed = SelectedAction;
-        var index = SelectedActionIndex;
-        Editor.Forget(removed);
-        Actions.Remove(removed);
+        Editor.Forget(SelectedAction);
 
-        if (Actions.Count > 0)
+        // Select the neighbor before removing so the list commands never read a selection that has left the list, which would briefly disable a focused Remove button.
+        var neighborIndex = index < Actions.Count - 1 ? index + 1 : index - 1;
+        if (neighborIndex >= 0)
         {
-            SelectedActionIndex = Math.Min(index, Actions.Count - 1);
-            SelectedAction = Actions[SelectedActionIndex];
+            var neighbor = Actions[neighborIndex];
+            SelectedActionIndex = neighborIndex;
+            SelectedAction = neighbor;
+            Actions.RemoveAt(index);
+            SelectedActionIndex = Actions.IndexOf(neighbor);
         }
         else
         {
             SelectedAction = null;
             SelectedActionIndex = -1;
+            Actions.RemoveAt(index);
         }
 
         Log.Debug("Removed action");
     }
 
-    [RelayCommand]
+    private bool CanMoveUp() => SelectedPosition > 0;
+
+    [RelayCommand(CanExecute = nameof(CanMoveUp))]
     private void MoveUp()
     {
-        if (SelectedAction == null || SelectedActionIndex <= 0)
+        var index = SelectedPosition;
+        if (index <= 0)
             return;
 
-        var index = SelectedActionIndex;
         Actions.Move(index, index - 1);
         SelectedActionIndex = index - 1;
     }
 
-    [RelayCommand]
+    private bool CanMoveDown()
+    {
+        var index = SelectedPosition;
+        return index >= 0 && index < Actions.Count - 1;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMoveDown))]
     private void MoveDown()
     {
-        if (SelectedAction == null || SelectedActionIndex >= Actions.Count - 1)
+        if (!CanMoveDown())
             return;
 
-        var index = SelectedActionIndex;
+        var index = SelectedPosition;
         Actions.Move(index, index + 1);
         SelectedActionIndex = index + 1;
     }
@@ -130,5 +152,13 @@ public partial class ActionsSettingsViewModel : ObservableObject
     partial void OnSelectedActionChanged(PieAction value)
     {
         Editor.SelectedAction = value;
+    }
+
+    // Removing or moving items can change which commands apply without changing the selection, for example when the selected action becomes the last one.
+    private void OnActionsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    {
+        RemoveActionCommand.NotifyCanExecuteChanged();
+        MoveUpCommand.NotifyCanExecuteChanged();
+        MoveDownCommand.NotifyCanExecuteChanged();
     }
 }

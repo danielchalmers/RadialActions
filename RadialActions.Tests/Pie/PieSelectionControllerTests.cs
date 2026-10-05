@@ -144,4 +144,91 @@ public class PieSelectionControllerTests
 
         Assert.Equal(PieSelectionController.NoSelection, controller.SelectedIndex);
     }
+
+    private static readonly PieSelectionController.Item[] ClockwiseItems =
+    [
+        new(0, -60),
+        new(1, 60),
+        new(2, 180),
+    ];
+
+    [Fact]
+    public void SelectNext_StartsAtFirstSliceAndWrapsForward()
+    {
+        var controller = new PieSelectionController();
+
+        controller.SelectNext(ClockwiseItems);
+        Assert.Equal(0, controller.SelectedIndex);
+
+        controller.SelectNext(ClockwiseItems);
+        controller.SelectNext(ClockwiseItems);
+        Assert.Equal(2, controller.SelectedIndex);
+
+        controller.SelectNext(ClockwiseItems);
+        Assert.Equal(0, controller.SelectedIndex);
+    }
+
+    [Fact]
+    public void SelectPrevious_StartsAtLastSliceAndWrapsBackward()
+    {
+        var controller = new PieSelectionController();
+
+        controller.SelectPrevious(ClockwiseItems);
+        Assert.Equal(2, controller.SelectedIndex);
+
+        controller.SelectPrevious(ClockwiseItems);
+        controller.SelectPrevious(ClockwiseItems);
+        Assert.Equal(0, controller.SelectedIndex);
+
+        controller.SelectPrevious(ClockwiseItems);
+        Assert.Equal(2, controller.SelectedIndex);
+    }
+
+    [Fact]
+    public void SelectFirstAndLast_SelectTheEndsOfTheClockwiseOrder()
+    {
+        var controller = new PieSelectionController();
+
+        controller.SelectLast(ClockwiseItems);
+        Assert.Equal(2, controller.SelectedIndex);
+
+        controller.SelectFirst(ClockwiseItems);
+        Assert.Equal(0, controller.SelectedIndex);
+    }
+
+    [Fact]
+    public void Navigation_WithNoSlices_LeavesNothingSelected()
+    {
+        var controller = new PieSelectionController();
+
+        controller.SelectNext([]);
+        controller.SelectPrevious([]);
+        controller.SelectFirst([]);
+        controller.SelectLast([]);
+
+        Assert.Equal(PieSelectionController.NoSelection, controller.SelectedIndex);
+    }
+
+    [Fact]
+    public void TrySelect_SelectsAnExistingSlice()
+    {
+        var controller = new PieSelectionController();
+
+        var selected = controller.TrySelect(1, ClockwiseItems);
+
+        Assert.True(selected);
+        Assert.Equal(1, controller.SelectedIndex);
+    }
+
+    [Fact]
+    public void TrySelect_KeepsTheSelectionWhenTheSliceDoesNotExist()
+    {
+        var controller = new PieSelectionController();
+        controller.TrySelect(2, ClockwiseItems);
+
+        var selected = controller.TrySelect(7, ClockwiseItems);
+
+        Assert.False(selected);
+        Assert.Equal(2, controller.SelectedIndex);
+    }
 }

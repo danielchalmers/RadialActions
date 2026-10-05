@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -14,16 +14,25 @@ namespace RadialActions;
 /// </summary>
 public partial class SettingsWindow : Window
 {
+    private const string LatestReleaseUrl = "https://github.com/danielchalmers/RadialActions/releases/latest";
+    private const string ShortcutInputTag = "HotkeyInput";
+
     private readonly SettingsWindowViewModel _viewModel;
 
     public SettingsWindow()
     {
         InitializeComponent();
+
+        // The default size can be taller than the work area on small or highly scaled displays, and WPF doesn't clamp it.
+        var workArea = SystemParameters.WorkArea;
+        Width = Math.Min(Width, workArea.Width);
+        Height = Math.Min(Height, workArea.Height);
+
         _viewModel = new SettingsWindowViewModel(Settings.Default);
         DataContext = _viewModel;
         Closed += OnClosed;
         AddHandler(Hyperlink.RequestNavigateEvent, new RequestNavigateEventHandler(Hyperlink_RequestNavigate));
-        AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(HotkeyInput_PreviewKeyDown), handledEventsToo: true);
+        AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(ShortcutInput_PreviewKeyDown), handledEventsToo: true);
     }
 
     public void SelectAction(PieAction action)
@@ -32,6 +41,7 @@ public partial class SettingsWindow : Window
             return;
 
         _viewModel.SelectAction(action);
+        ActionsView.FocusSelectedAction();
     }
 
     private void SaveSettings()
@@ -45,43 +55,39 @@ public partial class SettingsWindow : Window
 
     private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {
-        if (e.Uri.Scheme.Equals("radialactions", StringComparison.OrdinalIgnoreCase) &&
-            e.Uri.Host.Equals("licenses", StringComparison.OrdinalIgnoreCase))
-        {
-            OpenLicensesFile();
-            e.Handled = true;
-            return;
-        }
-
-        Log.Information("Opening link from Settings/Help: {Url}", e.Uri.AbsoluteUri);
-        Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+        OpenUrl(e.Uri.AbsoluteUri);
         e.Handled = true;
     }
 
-    private static void OpenLicensesFile()
+    private void DownloadUpdateButton_Click(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            Process.Start("notepad", Path.Combine(App.MainFileInfo.DirectoryName, "Licenses.txt"));
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Couldn't open Licenses.txt");
-            MessageBox.Show(
-                $"Couldn't open Licenses.txt.\n\n{ex.Message}",
-                "Licenses",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-        }
+        OpenUrl(LatestReleaseUrl);
     }
 
-    private void HotkeyInput_PreviewKeyDown(object sender, KeyEventArgs e)
+    private static void OpenUrl(string url)
     {
-        if (e.OriginalSource is not TextBox { Tag: "HotkeyInput" } textBox)
+        Log.Information("Opening link from Settings: {Url}", url);
+        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+    }
+
+    private void UpdateBanner_TargetUpdated(object sender, DataTransferEventArgs e)
+    {
+        // The update check can finish while Settings is open; announce the banner then, since it appears without focus moving to it.
+        if (e.Property != VisibilityProperty || !IsLoaded || UpdateBanner.Visibility != Visibility.Visible)
+            return;
+
+        LiveRegionAnnouncer.AnnounceAfterLayout(UpdateBannerMessage);
+    }
+
+    private void ShortcutInput_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        // The action editor's custom shortcut box records any combination; the activation hotkey has its own recorder button on the General tab.
+        if (e.OriginalSource is not TextBox { Tag: ShortcutInputTag } textBox)
             return;
 
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
-        if (key == Key.None)
+        var modifiers = Keyboard.Modifiers;
+        if (key == Key.None || HotkeyUtil.IsRecorderPassThroughKey(key, modifiers, isActivationHotkey: false))
             return;
 
         if (key is Key.Back or Key.Delete)
@@ -92,25 +98,20 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        if (IsModifierKey(key))
+        if (HotkeyUtil.IsModifierKey(key))
         {
             e.Handled = true;
             return;
         }
 
-        var hotkey = HotkeyUtil.BuildHotkeyString(key, Keyboard.Modifiers);
+        var hotkey = HotkeyUtil.BuildHotkeyString(key, modifiers);
         if (string.IsNullOrWhiteSpace(hotkey))
             return;
 
         textBox.Text = hotkey;
         textBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+        textBox.CaretIndex = textBox.Text.Length;
         e.Handled = true;
-    }
-
-    private static bool IsModifierKey(Key key)
-    {
-        return key is Key.LeftCtrl or Key.RightCtrl or Key.LeftShift or Key.RightShift or Key.LeftAlt or Key.RightAlt
-            or Key.LWin or Key.RWin;
     }
 
     private void OnClosed(object sender, EventArgs e)

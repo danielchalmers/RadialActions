@@ -7,7 +7,8 @@ This file is the root harness for coding agents working on Radial Actions. Keep 
 - `RadialActions.sln` is the entry point.
 - `RadialActions/` contains the WPF desktop app targeting `net10.0-windows`.
 - `RadialActions.Tests/` contains xUnit v3 tests for deterministic behavior.
-- Production code is grouped by ownership: `Actions/`, `Hotkeys/`, `Interop/`, `Pie/`, `Services/`, `Settings/`, and `Properties/`.
+- Production code is grouped by ownership: `Actions/`, `Hotkeys/`, `Interop/`, `Pie/`, `Services/`, `Settings/`, `Themes/`, and `Properties/`.
+- `RadialActions/Themes/AppTheme.xaml` is the shared design system. `App.xaml` merges it after the Fluent theme, so every window and view can use its keys without merging it again.
 - Tests mirror the production ownership folders where practical.
 - `.github/actions/full-build/action.yml` defines the CI build: `dotnet build`, `dotnet test`, publish x64/arm64 binaries, zip them, and build MSI installers.
 - `Package.wxs` defines the MSI packaging shape.
@@ -76,7 +77,10 @@ For documentation-only changes, explain why build or test commands were skipped.
 ## WPF And UI Guidance
 
 - Preserve existing XAML names and bindings used by code-behind.
-- Use the existing theme and layout patterns before introducing new resources.
+- Use the tokens and styles in `Themes/AppTheme.xaml` (type ramp, settings rows, cards, glyphs, toggle switch, tabs, motion) and the pie palette in `Pie/PieTheme.xaml` before introducing new resources. Settings views use the app-level resources and don't merge their own dictionaries.
+- In Settings and other XAML views, text sizes come from the Fluent type ramp (12, 14, 20, 28) and colors from Fluent brushes via `DynamicResource`, so light, dark, and high contrast all follow the system, and glyphs use `SymbolThemeFontFamily` through `FontIconStyle`, which keeps private-use characters out of screen reader output. The pie is the exception: `PieThemeSnapshot` resolves its app-owned palette and scaled text sizes from `Pie/PieTheme.xaml` and switches to system colors in high contrast.
+- Copy is Windows sentence case, with no trailing colons on labels. Every input has a visible label linked with `AutomationProperties.LabeledBy`, or an `AutomationProperties.Name` when it has no visible text, such as an icon button.
+- Every animation honors the Windows animation setting (`PieAnimationService.IsReducedMotionEnabled`, which reads `SystemParameters.ClientAreaAnimation`) and jumps to its end state when animations are off.
 - Keep visual changes inspectable: describe the expected before/after behavior and, when practical, manually run the app on Windows.
 - Avoid hiding failures in broad `catch` blocks. If user-facing recovery is needed, log the exception and keep the fallback narrow.
 

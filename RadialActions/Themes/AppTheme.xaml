@@ -1,0 +1,510 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:RadialActions"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <!--
+        Radial Actions design system. Built on the Fluent theme resources (merged before this dictionary in App.xaml).
+        Brushes are referenced with DynamicResource so they follow light, dark and high contrast switches; sizes and styles use StaticResource.
+        Rules: Fluent type ramp only (12, 14, 20, 28), secondary text uses TextFillColorSecondaryBrush (never Opacity or Gray), spacing on a 4px grid, ControlCornerRadius (4) for controls and settings rows, OverlayCornerRadius (8) for containers, SymbolThemeFontFamily for every glyph.
+    -->
+
+    <!--  Motion: durations and Fluent easing curves shared by the menu window, the pie and controls  -->
+    <Duration x:Key="MotionDurationPress">0:0:0.067</Duration>
+    <Duration x:Key="MotionDurationFast">0:0:0.083</Duration>
+    <Duration x:Key="MotionDurationNormal">0:0:0.167</Duration>
+    <Duration x:Key="MotionDurationMenuEnter">0:0:0.2</Duration>
+    <Duration x:Key="MotionDurationMenuExit">0:0:0.1</Duration>
+    <sys:Double x:Key="MotionMenuEnterScale">0.96</sys:Double>
+    <sys:Double x:Key="MotionMenuExitScale">0.98</sys:Double>
+
+    <!--  Fluent "decelerate": entrances and settling motion  -->
+    <local:CubicBezierEase x:Key="MotionEaseDecelerate"
+                           X1="0" X2="0"
+                           Y1="0" Y2="1" />
+    <!--  Fluent "point to point": state changes such as hover and selection  -->
+    <local:CubicBezierEase x:Key="MotionEaseStandard"
+                           X1="0.55" X2="0"
+                           Y1="0.55" Y2="1" />
+    <!--  Gentle accelerate: exits  -->
+    <local:CubicBezierEase x:Key="MotionEaseAccelerate"
+                           X1="0.32" X2="0.67"
+                           Y1="0" Y2="0" />
+
+    <!--  Spacing and sizing  -->
+    <Thickness x:Key="CardPadding">16</Thickness>
+    <Thickness x:Key="SettingsRowPadding">16,12</Thickness>
+    <sys:Double x:Key="SettingsRowMinHeight">68</sys:Double>
+    <Thickness x:Key="SettingsRowControlMargin">16,0,0,0</Thickness>
+    <FontFamily x:Key="MonospaceFontFamily">Cascadia Mono, Consolas, Courier New</FontFamily>
+
+    <!--  Typography  -->
+    <Style x:Key="TitleTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource TitleTextBlockStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SubtitleTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource SubtitleTextBlockStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="BodyTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource BodyTextBlockStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="BodyStrongTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource BodyStrongTextBlockStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SecondaryBodyTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource BodyTextStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+
+    <Style x:Key="CaptionTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource CaptionTextBlockStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!--  Section header above a group of cards. Use FirstSectionHeaderTextStyle for the first one on a page.  -->
+    <Style x:Key="SectionHeaderTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource BodyStrongTextStyle}">
+        <Setter Property="Margin" Value="1,24,0,8" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="AutomationProperties.HeadingLevel" Value="Level2" />
+    </Style>
+
+    <Style x:Key="FirstSectionHeaderTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource SectionHeaderTextStyle}">
+        <Setter Property="Margin" Value="1,0,0,8" />
+    </Style>
+
+    <!--  Settings row (Windows 11 Settings card): icon, title over description, control on the right  -->
+    <Style x:Key="SettingsRowStyle"
+           TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+        <Setter Property="Padding" Value="{StaticResource SettingsRowPadding}" />
+        <Setter Property="MinHeight" Value="{StaticResource SettingsRowMinHeight}" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+
+    <Style x:Key="SettingsRowTitleTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource BodyTextStyle}" />
+
+    <Style x:Key="SettingsRowDescriptionTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource CaptionTextStyle}">
+        <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+
+    <!--  Container card for larger panes (Actions list and editor, About sections)  -->
+    <Style x:Key="CardStyle"
+           TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource OverlayCornerRadius}" />
+        <Setter Property="Padding" Value="{StaticResource CardPadding}" />
+    </Style>
+
+    <!--  Decorative glyph. A ContentControl rather than a TextBlock so the private-use character stays out of what screen readers announce.  -->
+    <Style x:Key="FontIconStyle"
+           TargetType="ContentControl">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="FontFamily" Value="{DynamicResource SymbolThemeFontFamily}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContentControl">
+                    <TextBlock Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                               FontFamily="{TemplateBinding FontFamily}"
+                               FontSize="{TemplateBinding FontSize}"
+                               Foreground="{TemplateBinding Foreground}"
+                               TextAlignment="Center"
+                               TextWrapping="NoWrap" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SettingsRowIconStyle"
+           TargetType="ContentControl"
+           BasedOn="{StaticResource FontIconStyle}">
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="Margin" Value="2,0,18,0" />
+    </Style>
+
+    <!--  Form fields: header above the control, help text below, 16px between fields  -->
+    <Style x:Key="FieldHeaderTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource BodyTextStyle}">
+        <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+
+    <Style x:Key="FieldHelpTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource CaptionTextStyle}">
+        <Setter Property="Margin" Value="0,4,0,0" />
+    </Style>
+
+    <Style x:Key="FieldPanelStyle"
+           TargetType="StackPanel">
+        <Setter Property="Margin" Value="0,0,0,16" />
+    </Style>
+
+    <!--  Empty states: glyph, short title and one line of guidance, centered  -->
+    <Style x:Key="EmptyStateIconStyle"
+           TargetType="ContentControl"
+           BasedOn="{StaticResource FontIconStyle}">
+        <Setter Property="FontSize" Value="32" />
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+    </Style>
+
+    <Style x:Key="EmptyStateTitleTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource BodyStrongTextStyle}">
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="EmptyStateTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource SecondaryBodyTextStyle}">
+        <Setter Property="Margin" Value="0,4,0,0" />
+        <Setter Property="MaxWidth" Value="320" />
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <!--  Links. Inline links keep the Fluent underline (color alone is not enough); standalone links may drop it.  -->
+    <Style x:Key="StandaloneHyperlinkStyle"
+           TargetType="Hyperlink"
+           BasedOn="{StaticResource {x:Type Hyperlink}}">
+        <Setter Property="TextDecorations" Value="None" />
+    </Style>
+
+    <!--  Buttons: AccentButtonStyle (Fluent) for the one primary command on a surface, the implicit style for everything else  -->
+    <Style x:Key="IconButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="MinWidth" Value="32" />
+        <Setter Property="MinHeight" Value="32" />
+        <!--  7 plus the 1px Fluent border around a 16px glyph makes the documented 32px square  -->
+        <Setter Property="Padding" Value="7" />
+        <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+        <!--  Content is the glyph string. Rendering it through FontIconStyle keeps the private-use character out of the automation tree, so the button's AutomationProperties.Name is all a screen reader hears.  -->
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <ContentControl Content="{Binding}"
+                                    Style="{StaticResource FontIconStyle}" />
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Small rounded tag for metadata such as version, architecture or an action's type  -->
+    <Style x:Key="ChipBorderStyle"
+           TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+        <Setter Property="Padding" Value="8,2" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="ChipTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource CaptionTextStyle}">
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
+    <!--  Key combination shown as a keycap, for example inline in instructions  -->
+    <Style x:Key="KeycapBorderStyle"
+           TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="1,1,1,2" />
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+        <Setter Property="Padding" Value="6,0,6,1" />
+    </Style>
+
+    <Style x:Key="KeycapTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource BodyTextStyle}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
+    <!--  InfoBar (informational severity): icon disc, bold title, message and an optional action button. Put AutomationProperties.LiveSetting on the message TextBlock; a Border has no automation peer.  -->
+    <Style x:Key="InfoBarBorderStyle"
+           TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource InfoBarInformationalSeverityBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource InfoBarBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="MinHeight" Value="48" />
+    </Style>
+
+    <!--  The disc and glyph use Fluent's accent button pair: accent fill with text on accent in light and dark, Highlight with HighlightText in high contrast  -->
+    <Style x:Key="InfoBarIconDiscStyle"
+           TargetType="Ellipse">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Fill" Value="{DynamicResource AccentButtonBackground}" />
+    </Style>
+
+    <Style x:Key="InfoBarIconGlyphStyle"
+           TargetType="ContentControl"
+           BasedOn="{StaticResource FontIconStyle}">
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonForeground}" />
+    </Style>
+
+    <!--  Inline status message below a field, for example a hotkey that couldn't be registered  -->
+    <Style x:Key="CriticalStatusTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource CaptionTextStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+        <Setter Property="Margin" Value="0,4,0,0" />
+        <Setter Property="AutomationProperties.LiveSetting" Value="Assertive" />
+    </Style>
+
+    <!--  Toggle switch for immediate on/off settings, shown with an On/Off label to its left. Set AutomationProperties.LabeledBy to the row title.  -->
+    <Style x:Key="ToggleSwitchStyle"
+           TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{DynamicResource ToggleSwitchContentForeground}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource DefaultControlFocusVisualStyle}" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid MinHeight="{TemplateBinding MinHeight}"
+                          Background="{TemplateBinding Background}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <!--  Both labels share one cell so the switch does not shift when the text changes width  -->
+                        <Grid Grid.Column="0"
+                              Margin="0,0,12,0"
+                              VerticalAlignment="Center">
+                            <TextBlock x:Name="OffText"
+                                       Text="Off"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{TemplateBinding Foreground}" />
+                            <TextBlock x:Name="OnText"
+                                       Text="On"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       Visibility="Hidden" />
+                        </Grid>
+                        <Grid Grid.Column="1"
+                              Width="40"
+                              Height="20"
+                              VerticalAlignment="Center">
+                            <Border x:Name="Track"
+                                    Background="{DynamicResource ToggleSwitchFillOff}"
+                                    BorderBrush="{DynamicResource ToggleSwitchStrokeOff}"
+                                    BorderThickness="1"
+                                    CornerRadius="10" />
+                            <Grid x:Name="KnobSlot"
+                                  Width="20"
+                                  Height="20"
+                                  HorizontalAlignment="Left">
+                                <Grid.RenderTransform>
+                                    <TranslateTransform />
+                                </Grid.RenderTransform>
+                                <Ellipse x:Name="Knob"
+                                         Width="12"
+                                         Height="12"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"
+                                         Fill="{DynamicResource ToggleSwitchKnobFillOff}" />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource ToggleSwitchFillOffPointerOver}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOffPointerOver}" />
+                            <Setter TargetName="Knob" Property="Fill" Value="{DynamicResource ToggleSwitchKnobFillOffPointerOver}" />
+                            <Setter TargetName="Knob" Property="Width" Value="14" />
+                            <Setter TargetName="Knob" Property="Height" Value="14" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="OffText" Property="Visibility" Value="Hidden" />
+                            <Setter TargetName="OnText" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource ToggleSwitchFillOn}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOn}" />
+                            <Setter TargetName="Knob" Property="Fill" Value="{DynamicResource ToggleSwitchKnobFillOn}" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True" />
+                                <Condition Property="IsMouseOver" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource ToggleSwitchFillOnPointerOver}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOnPointerOver}" />
+                            <Setter TargetName="Knob" Property="Fill" Value="{DynamicResource ToggleSwitchKnobFillOnPointerOver}" />
+                        </MultiTrigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Knob" Property="Width" Value="17" />
+                            <Setter TargetName="Knob" Property="Height" Value="14" />
+                        </Trigger>
+                        <!--  The knob slides when animations are on and jumps when the user turned them off  -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsChecked, RelativeSource={RelativeSource Self}}" Value="True" />
+                                <Condition Binding="{Binding Path=(SystemParameters.ClientAreaAnimation)}" Value="True" />
+                            </MultiDataTrigger.Conditions>
+                            <MultiDataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation EasingFunction="{StaticResource MotionEaseDecelerate}"
+                                                         Storyboard.TargetName="KnobSlot"
+                                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                         To="20"
+                                                         Duration="{StaticResource MotionDurationNormal}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </MultiDataTrigger.EnterActions>
+                            <MultiDataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation EasingFunction="{StaticResource MotionEaseDecelerate}"
+                                                         Storyboard.TargetName="KnobSlot"
+                                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                         To="0"
+                                                         Duration="{StaticResource MotionDurationNormal}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </MultiDataTrigger.ExitActions>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsChecked, RelativeSource={RelativeSource Self}}" Value="True" />
+                                <Condition Binding="{Binding Path=(SystemParameters.ClientAreaAnimation)}" Value="False" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="KnobSlot" Property="Margin" Value="20,0,0,0" />
+                        </MultiDataTrigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="OffText" Property="Foreground" Value="{DynamicResource ToggleSwitchContentForegroundDisabled}" />
+                            <Setter TargetName="OnText" Property="Foreground" Value="{DynamicResource ToggleSwitchContentForegroundDisabled}" />
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource ToggleSwitchFillOffDisabled}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOffDisabled}" />
+                            <Setter TargetName="Knob" Property="Fill" Value="{DynamicResource ToggleSwitchKnobFillOffDisabled}" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True" />
+                                <Condition Property="IsEnabled" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource ToggleSwitchFillOnDisabled}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOnDisabled}" />
+                            <Setter TargetName="Knob" Property="Fill" Value="{DynamicResource ToggleSwitchKnobFillOnDisabled}" />
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Selector-bar tabs: secondary text, subtle hover fill, accent pill under the selected tab. The pill and selected text use Fluent's selection brushes, which become the Highlight system color in high contrast.  -->
+    <Style x:Key="SelectorTabControlStyle"
+           TargetType="TabControl"
+           BasedOn="{StaticResource {x:Type TabControl}}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0,12,0,0" />
+    </Style>
+
+    <Style x:Key="SelectorTabItemStyle"
+           TargetType="TabItem">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="FontSize" Value="{StaticResource BodyTextBlockFontSize}" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="MinHeight" Value="40" />
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource DefaultControlFocusVisualStyle}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Grid MinHeight="{TemplateBinding MinHeight}"
+                          Background="Transparent">
+                        <Border x:Name="HoverBackground"
+                                Margin="0,4"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{StaticResource ControlCornerRadius}" />
+                        <ContentPresenter x:Name="HeaderSite"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          ContentSource="Header"
+                                          RecognizesAccessKey="True"
+                                          TextElement.Foreground="{TemplateBinding Foreground}" />
+                        <Border x:Name="SelectionPill"
+                                Width="16"
+                                Height="3"
+                                Margin="0,0,0,1"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource NavigationViewSelectionIndicatorForeground}"
+                                CornerRadius="1.5"
+                                Visibility="Hidden" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="HoverBackground" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="SelectionPill" Property="Visibility" Value="Visible" />
+                            <Setter Property="Foreground" Value="{DynamicResource TabViewItemForegroundSelected}" />
+                            <Setter Property="Panel.ZIndex" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextFillColorDisabledBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Menu item glyphs (tray and slice context menus)  -->
+    <Style x:Key="MenuItemIconStyle"
+           TargetType="ContentControl"
+           BasedOn="{StaticResource FontIconStyle}">
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+</ResourceDictionary>

@@ -6,195 +6,276 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DataContext="{d:DesignInstance Type=local:ActionEditorViewModel}"
              mc:Ignorable="d">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/RadialActions;component/Settings/SettingsViewResources.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
     <StackPanel>
-        <TextBlock Text="Enabled:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <CheckBox Content="Show this action in the menu"
-                  IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}" />
-        <TextBlock Text="Hide this action without removing its configuration."
-                   Style="{StaticResource DescriptionTextBlock}" />
+        <StackPanel Style="{StaticResource FieldPanelStyle}">
+            <TextBlock x:Name="ShowInMenuHeader"
+                       Text="Show in menu"
+                       Style="{StaticResource FieldHeaderTextStyle}" />
+            <CheckBox HorizontalAlignment="Left"
+                      AutomationProperties.HelpText="{Binding Text, ElementName=ShowInMenuHelp}"
+                      AutomationProperties.LabeledBy="{Binding ElementName=ShowInMenuHeader}"
+                      IsChecked="{Binding SelectedAction.IsEnabled, Mode=TwoWay}"
+                      Style="{StaticResource ToggleSwitchStyle}" />
+            <TextBlock x:Name="ShowInMenuHelp"
+                       Text="Hidden actions keep their settings but don't appear in the menu."
+                       Style="{StaticResource FieldHelpTextStyle}" />
+        </StackPanel>
 
-        <TextBlock Text="Name:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <TextBox Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Text="Shown next to the icon in the radial menu."
-                   Style="{StaticResource DescriptionTextBlock}" />
+        <StackPanel Style="{StaticResource FieldPanelStyle}">
+            <TextBlock x:Name="NameHeader"
+                       Text="Name"
+                       Style="{StaticResource FieldHeaderTextStyle}" />
+            <TextBox x:Name="NameBox"
+                     Text="{Binding SelectedAction.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     AutomationProperties.HelpText="{Binding Text, ElementName=NameHelp}"
+                     AutomationProperties.LabeledBy="{Binding ElementName=NameHeader}" />
+            <TextBlock x:Name="NameHelp"
+                       Text="Shown on the slice under the icon."
+                       Style="{StaticResource FieldHelpTextStyle}" />
+        </StackPanel>
 
-        <TextBlock Text="Icon:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <TextBox Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock Text="Use a short symbol or emoji that fits in a slice."
-                   Style="{StaticResource DescriptionTextBlock}" />
+        <StackPanel Style="{StaticResource FieldPanelStyle}">
+            <TextBlock x:Name="IconHeader"
+                       Text="Icon"
+                       Style="{StaticResource FieldHeaderTextStyle}" />
+            <TextBox Text="{Binding SelectedAction.Icon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     AutomationProperties.HelpText="{Binding Text, ElementName=IconHelp}"
+                     AutomationProperties.LabeledBy="{Binding ElementName=IconHeader}" />
+            <TextBlock x:Name="IconHelp"
+                       Text="An emoji or short symbol. Press Win+. to open the emoji panel."
+                       Style="{StaticResource FieldHelpTextStyle}" />
+        </StackPanel>
 
-        <TextBlock Text="Type:"
-                   Style="{StaticResource ActionEditorLabelTextBlock}" />
-        <ComboBox ItemsSource="{Binding ActionTypes}"
-                  SelectedValue="{Binding SelectedActionType, Mode=TwoWay}"
-                  SelectedValuePath="Type">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Icon}"
-                                   Width="20"
-                                   FontSize="14" />
-                        <TextBlock Text="{Binding Name}"
-                                   Margin="4,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
-        <TextBlock Text="Use Key for shortcuts and media controls, Open for apps, files, folders, or URLs, and Script to run PowerShell."
-                   Style="{StaticResource DescriptionTextBlock}" />
-
-        <StackPanel Margin="0,0,0,4"
-              Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
-            <TextBlock Text="Key Action:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <ComboBox SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
-                      SelectedValuePath="Id"
-                      IsTextSearchEnabled="True"
-                      TextSearch.TextPath="Name"
-                      MaxDropDownHeight="420"
-                      ItemsSource="{Binding KeyActionOptionsView}">
-                <ComboBox.GroupStyle>
-                    <GroupStyle>
-                        <GroupStyle.HeaderTemplate>
-                            <DataTemplate>
+        <StackPanel Style="{StaticResource FieldPanelStyle}">
+            <TextBlock x:Name="TypeHeader"
+                       Text="Type"
+                       Style="{StaticResource FieldHeaderTextStyle}" />
+            <Grid>
+                <ComboBox SelectedValue="{Binding SelectedActionType, Mode=TwoWay}"
+                          SelectedValuePath="Type"
+                          AutomationProperties.HelpText="{Binding Text, ElementName=TypeHelp}"
+                          AutomationProperties.LabeledBy="{Binding ElementName=TypeHeader}"
+                          IsTextSearchEnabled="True"
+                          ItemsSource="{Binding ActionTypes}"
+                          TextSearch.TextPath="Name">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <ContentControl Content="{Binding Glyph}"
+                                                Style="{StaticResource FontIconStyle}" />
                                 <TextBlock Text="{Binding Name}"
-                                           FontSize="11"
-                                           FontWeight="SemiBold"
-                                           Opacity="0.6"
-                                           Margin="6,6,0,2" />
-                            </DataTemplate>
-                        </GroupStyle.HeaderTemplate>
-                    </GroupStyle>
-                </ComboBox.GroupStyle>
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Icon}"
-                                       Width="20"
-                                       FontSize="14" />
-                            <TextBlock Text="{Binding Name}"
-                                       Margin="4,0,0,0"
-                                       VerticalAlignment="Center" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <TextBlock Text="Pick a media, volume, or system command, or record your own shortcut with Custom Shortcut."
-                       Style="{StaticResource DescriptionTextBlock}" />
-
-            <TextBlock Text="Shortcut:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}"
-                       Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
-            <TextBox Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Tag="HotkeyInput"
-                     Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
-            <TextBlock Text="Click the box, then press the key combination to record it, such as Ctrl+Shift+M. Press Backspace to clear."
-                       Style="{StaticResource DescriptionTextBlock}"
-                       Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}" />
+                                           Margin="12,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <!--  ComboBox has no placeholder; this sits over the empty selection box at the ComboBox content padding  -->
+                <TextBlock Text="Choose a type"
+                           Margin="13,0,0,0" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           IsHitTestVisible="False"
+                           Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.None}}" />
+            </Grid>
+            <TextBlock x:Name="TypeHelp"
+                       Text="{Binding SelectedActionTypeDescription}"
+                       Style="{StaticResource FieldHelpTextStyle}" />
         </StackPanel>
 
-        <StackPanel
-              Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Open}}">
-            <TextBlock Text="Target:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="6" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0"
-                         Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Grid.Column="2"
-                        Content="Browse..."
-                        Command="{Binding BrowseOpenTargetCommand}"
-                        Padding="8,2" />
-            </Grid>
-            <TextBlock Text="Choose the app, file, folder, URL, or command to open."
-                       Style="{StaticResource DescriptionTextBlock}" />
+        <StackPanel Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Key}}">
+            <StackPanel Style="{StaticResource FieldPanelStyle}">
+                <TextBlock x:Name="KeyHeader"
+                           Text="Key"
+                           Style="{StaticResource FieldHeaderTextStyle}" />
+                <ComboBox SelectedValue="{Binding SelectedKeyActionId, Mode=TwoWay}"
+                          SelectedValuePath="Id"
+                          AutomationProperties.HelpText="{Binding Text, ElementName=KeyHelp}"
+                          AutomationProperties.LabeledBy="{Binding ElementName=KeyHeader}"
+                          IsTextSearchEnabled="True"
+                          ItemsSource="{Binding KeyActionOptionsView}"
+                          MaxDropDownHeight="420" TextSearch.TextPath="Name">
+                    <ComboBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <!--  Left margin lines the header up with the item content inside the Fluent ComboBoxItem  -->
+                                    <TextBlock Text="{Binding Name}"
+                                               Margin="23,12,0,4"
+                                               FontWeight="SemiBold"
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               TextWrapping="NoWrap" />
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ComboBox.GroupStyle>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Icon}"
+                                           Width="20"
+                                           VerticalAlignment="Center"
+                                           FontSize="16" />
+                                <TextBlock Text="{Binding Name}"
+                                           Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock x:Name="KeyHelp"
+                           Text="Choose Custom shortcut to record your own."
+                           Style="{StaticResource FieldHelpTextStyle}" />
+            </StackPanel>
 
-            <TextBlock Text="Arguments:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <TextBox Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="Optional command-line arguments for the target."
-                       Style="{StaticResource DescriptionTextBlock}" />
-
-            <TextBlock Text="Working Directory:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="6" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0"
-                         Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Grid.Column="2"
-                        Content="Browse..."
-                        Command="{Binding BrowseWorkingDirectoryCommand}"
-                        Padding="8,2" />
-            </Grid>
-            <TextBlock Text="Optional folder to use as the target's start location."
-                       Style="{StaticResource DescriptionTextBlock}" />
+            <StackPanel Style="{StaticResource FieldPanelStyle}"
+                        Visibility="{Binding SelectedKeyActionId, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionEditorViewModel.CustomKeyActionId}}">
+                <TextBlock x:Name="ShortcutHeader"
+                           Text="Shortcut"
+                           Style="{StaticResource FieldHeaderTextStyle}" />
+                <TextBox Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.HelpText="{Binding Text, ElementName=ShortcutHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=ShortcutHeader}"
+                         Tag="HotkeyInput" />
+                <TextBlock x:Name="ShortcutHelp"
+                           Text="Select the box and press the shortcut, such as Ctrl+Shift+M. Press Backspace to clear."
+                           Style="{StaticResource FieldHelpTextStyle}" />
+            </StackPanel>
         </StackPanel>
 
-        <StackPanel
-              Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Script}}">
-            <TextBlock Text="Script:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <TextBox Text="{Binding SelectedAction.Script, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     AcceptsReturn="True"
-                     AcceptsTab="True"
-                     TextWrapping="NoWrap"
-                     FontFamily="Consolas, Cascadia Mono, Courier New, monospace"
-                     MinHeight="150"
-                     MaxHeight="320"
-                     VerticalContentAlignment="Top"
-                     VerticalScrollBarVisibility="Auto"
-                     HorizontalScrollBarVisibility="Auto" />
-            <TextBlock Text="Runs when the slice is clicked. No separate file needed, for example: Get-Date | Out-File $env:TEMP\now.txt"
-                       Style="{StaticResource DescriptionTextBlock}" />
+        <StackPanel Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Open}}">
+            <StackPanel Style="{StaticResource FieldPanelStyle}">
+                <TextBlock x:Name="TargetHeader"
+                           Text="Target"
+                           Style="{StaticResource FieldHeaderTextStyle}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0"
+                             Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.HelpText="{Binding Text, ElementName=TargetHelp}"
+                             AutomationProperties.LabeledBy="{Binding ElementName=TargetHeader}" />
+                    <Button Grid.Column="2"
+                            Content="Browse&#x2026;"
+                            Command="{Binding BrowseOpenTargetCommand}"
+                            VerticalAlignment="Stretch"
+                            AutomationProperties.Name="Browse for target" />
+                </Grid>
+                <TextBlock x:Name="TargetHelp"
+                           Text="An app, file, folder, URL, or command to open."
+                           Style="{StaticResource FieldHelpTextStyle}" />
+            </StackPanel>
 
-            <TextBlock Text="Run With:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <TextBox Text="{Binding SelectedAction.Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="The PowerShell to run the script with: powershell.exe (default), or pwsh.exe for PowerShell 7."
-                       Style="{StaticResource DescriptionTextBlock}" />
+            <StackPanel Style="{StaticResource FieldPanelStyle}">
+                <TextBlock x:Name="ArgumentsHeader"
+                           Text="Arguments"
+                           Style="{StaticResource FieldHeaderTextStyle}" />
+                <TextBox Text="{Binding SelectedAction.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.HelpText="{Binding Text, ElementName=ArgumentsHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=ArgumentsHeader}" />
+                <TextBlock x:Name="ArgumentsHelp"
+                           Text="Optional command-line arguments for the target."
+                           Style="{StaticResource FieldHelpTextStyle}" />
+            </StackPanel>
 
-            <TextBlock Text="Working Directory:"
-                       Style="{StaticResource ActionEditorLabelTextBlock}" />
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="6" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0"
-                         Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Grid.Column="2"
-                        Content="Browse..."
-                        Command="{Binding BrowseWorkingDirectoryCommand}"
-                        Padding="8,2" />
-            </Grid>
-            <TextBlock Text="Optional folder to run the script in."
-                       Style="{StaticResource DescriptionTextBlock}" />
+            <StackPanel Style="{StaticResource FieldPanelStyle}">
+                <TextBlock x:Name="OpenWorkingDirectoryHeader"
+                           Text="Working directory"
+                           Style="{StaticResource FieldHeaderTextStyle}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0"
+                             Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.HelpText="{Binding Text, ElementName=OpenWorkingDirectoryHelp}"
+                             AutomationProperties.LabeledBy="{Binding ElementName=OpenWorkingDirectoryHeader}" />
+                    <Button Grid.Column="2"
+                            Content="Browse&#x2026;"
+                            Command="{Binding BrowseWorkingDirectoryCommand}"
+                            VerticalAlignment="Stretch"
+                            AutomationProperties.Name="Browse for working directory" />
+                </Grid>
+                <TextBlock x:Name="OpenWorkingDirectoryHelp"
+                           Text="Optional folder for the target to start in."
+                           Style="{StaticResource FieldHelpTextStyle}" />
+            </StackPanel>
+        </StackPanel>
 
-            <CheckBox Content="Run hidden"
-                      Margin="0,8,0,0"
-                      IsChecked="{Binding SelectedAction.RunHidden, Mode=TwoWay}" />
-            <TextBlock Text="Run without showing a console window."
-                       Style="{StaticResource DescriptionTextBlock}" />
+        <StackPanel Visibility="{Binding SelectedActionType, Converter={local:MatchToVisibilityConverter}, ConverterParameter={x:Static local:ActionType.Script}}">
+            <StackPanel Style="{StaticResource FieldPanelStyle}">
+                <TextBlock x:Name="ScriptHeader"
+                           Text="Script"
+                           Style="{StaticResource FieldHeaderTextStyle}" />
+                <!--  AcceptsTab stays off so Tab moves on to the next field instead of trapping keyboard users in the box  -->
+                <TextBox Text="{Binding SelectedAction.Script, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         MinHeight="150" MaxHeight="320"
+                         VerticalContentAlignment="Top"
+                         FontFamily="{StaticResource MonospaceFontFamily}"
+                         AcceptsReturn="True" AcceptsTab="False"
+                         AutomationProperties.HelpText="{Binding Text, ElementName=ScriptHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=ScriptHeader}"
+                         HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"
+                         VerticalScrollBarVisibility="Auto" />
+                <TextBlock x:Name="ScriptHelp"
+                           Text="PowerShell commands to run, such as Get-Date | Set-Clipboard."
+                           Style="{StaticResource FieldHelpTextStyle}" />
+            </StackPanel>
+
+            <StackPanel Style="{StaticResource FieldPanelStyle}">
+                <TextBlock x:Name="RunWithHeader"
+                           Text="Run with"
+                           Style="{StaticResource FieldHeaderTextStyle}" />
+                <ComboBox Text="{Binding ScriptInterpreter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          AutomationProperties.HelpText="{Binding Text, ElementName=RunWithHelp}"
+                          AutomationProperties.LabeledBy="{Binding ElementName=RunWithHeader}"
+                          IsEditable="True"
+                          ItemsSource="{Binding ScriptInterpreterOptions}" />
+                <TextBlock x:Name="RunWithHelp"
+                           Text="powershell.exe, or pwsh.exe for PowerShell 7."
+                           Style="{StaticResource FieldHelpTextStyle}" />
+            </StackPanel>
+
+            <StackPanel Style="{StaticResource FieldPanelStyle}">
+                <TextBlock x:Name="ScriptWorkingDirectoryHeader"
+                           Text="Working directory"
+                           Style="{StaticResource FieldHeaderTextStyle}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0"
+                             Text="{Binding SelectedAction.WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.HelpText="{Binding Text, ElementName=ScriptWorkingDirectoryHelp}"
+                             AutomationProperties.LabeledBy="{Binding ElementName=ScriptWorkingDirectoryHeader}" />
+                    <Button Grid.Column="2"
+                            Content="Browse&#x2026;"
+                            Command="{Binding BrowseWorkingDirectoryCommand}"
+                            VerticalAlignment="Stretch"
+                            AutomationProperties.Name="Browse for working directory" />
+                </Grid>
+                <TextBlock x:Name="ScriptWorkingDirectoryHelp"
+                           Text="Optional folder to run the script in."
+                           Style="{StaticResource FieldHelpTextStyle}" />
+            </StackPanel>
+
+            <StackPanel Style="{StaticResource FieldPanelStyle}">
+                <TextBlock x:Name="RunHiddenHeader"
+                           Text="Run hidden"
+                           Style="{StaticResource FieldHeaderTextStyle}" />
+                <CheckBox HorizontalAlignment="Left"
+                          AutomationProperties.HelpText="{Binding Text, ElementName=RunHiddenHelp}"
+                          AutomationProperties.LabeledBy="{Binding ElementName=RunHiddenHeader}"
+                          IsChecked="{Binding SelectedAction.RunHidden, Mode=TwoWay}"
+                          Style="{StaticResource ToggleSwitchStyle}" />
+                <TextBlock x:Name="RunHiddenHelp"
+                           Text="Run without showing a console window."
+                           Style="{StaticResource FieldHelpTextStyle}" />
+            </StackPanel>
         </StackPanel>
     </StackPanel>
 </UserControl>

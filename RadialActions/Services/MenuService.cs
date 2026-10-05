@@ -10,24 +10,40 @@ internal sealed class MenuService
 {
     private readonly Window _window;
     private readonly PieControl _pieMenu;
-    private readonly Storyboard _fadeInStoryboard;
-    private readonly Storyboard _fadeOutStoryboard;
+    private readonly Storyboard _enterStoryboard;
+    private readonly Storyboard _exitStoryboard;
+    private readonly double _enterStartScale;
     private readonly Dispatcher _dispatcher;
+    private readonly MenuTransitionState _state = new();
 
-    private bool _isFadingOut;
-    private int _fadeInRequestVersion;
-
+    /// <param name="pieMenu">The pie, whose ScaleTransform render transform the storyboards animate.</param>
+    /// <param name="enterStartScale">The scale the entrance grows from (MotionMenuEnterScale).</param>
     public MenuService(
         Window window,
         PieControl pieMenu,
-        Storyboard fadeInStoryboard,
-        Storyboard fadeOutStoryboard)
+        Storyboard enterStoryboard,
+        Storyboard exitStoryboard,
+        double enterStartScale)
     {
         _window = window;
         _pieMenu = pieMenu;
-        _fadeInStoryboard = fadeInStoryboard;
-        _fadeOutStoryboard = fadeOutStoryboard;
+        _enterStoryboard = enterStoryboard;
+        _exitStoryboard = exitStoryboard;
+        _enterStartScale = enterStartScale;
         _dispatcher = window.Dispatcher;
+    }
+
+    /// <summary>
+    /// True while the menu is on screen or on its way in; false while hidden or fading out.
+    /// </summary>
+    public bool IsOpen => _state.IsOpen;
+
+    /// <summary>
+    /// True when at least one action would appear in the menu.
+    /// </summary>
+    public static bool HasEnabledActions(IEnumerable<PieAction> actions)
+    {
+        return actions?.Any(action => action?.IsEnabled == true) == true;
     }
 
     public void ShowMenu(bool atCursor)
@@ -43,21 +59,38 @@ internal sealed class MenuService
             _window.CenterOnScreen();
         }
 
-        if (!_window.IsVisible)
+        var step = _state.Open();
+        if (step == MenuOpenStep.ShowThenEnter)
         {
             _window.Opacity = 0;
-            _window.Show();
+            SetPieScale(_enterStartScale);
+
+            if (!_window.IsVisible)
+            {
+                _window.Show();
+            }
         }
 
         _window.Activate();
         _ = FocusMenuForKeyboardInputAsync();
         _pieMenu.ResetInputState();
         _window.IsHitTestVisible = true;
-        BeginFadeInWhenSurfaceReady();
+
+        switch (step)
+        {
+            case MenuOpenStep.ShowThenEnter:
+            case MenuOpenStep.EnterWhenSurfaceReady:
+                BeginEnterWhenSurfaceReady();
+                break;
+            case MenuOpenStep.EnterNow:
+                Log.Debug("Reopening during the exit animation");
+                BeginEnter();
+                break;
+        }
     }
 
     /// <summary>
-    /// Starts the fade-in only after the layered window has rendered and submitted a frame.
+    /// Starts the entrance only after the layered window has rendered and submitted a frame.
     /// </summary>
     /// <remarks>
     /// The OS hit-tests a layered window against its last submitted surface, and the first submission after
@@ -67,14 +100,14 @@ internal sealed class MenuService
     /// Waiting two composition ticks (one to render the shown surface, one so it is submitted) keeps the menu
     /// hittable from the first visible pixel and lets the full fade actually be seen.
     /// </remarks>
-    private void BeginFadeInWhenSurfaceReady()
+    private void BeginEnterWhenSurfaceReady()
     {
-        var version = ++_fadeInRequestVersion;
+        var request = _state.EntranceRequest;
         var renderedTicks = 0;
 
         void OnRendering(object sender, EventArgs e)
         {
-            if (version != _fadeInRequestVersion)
+            if (!_state.IsEntranceWanted(request))
             {
                 CompositionTarget.Rendering -= OnRendering;
                 return;
@@ -87,7 +120,7 @@ internal sealed class MenuService
             }
 
             CompositionTarget.Rendering -= OnRendering;
-            BeginFadeIn();
+            BeginEnter();
         }
 
         CompositionTarget.Rendering += OnRendering;
@@ -95,30 +128,47 @@ internal sealed class MenuService
 
     public void HideMenu(bool animate = true)
     {
-        if (!_window.IsVisible || _isFadingOut)
+        if (!_window.IsVisible)
+        {
+            return;
+        }
+
+        var step = _state.Close(animate && !PieAnimationService.IsReducedMotionEnabled());
+        if (step == MenuCloseStep.None)
         {
             return;
         }
 
         Log.Information("Dismissing menu");
 
-        if (!animate || IsReducedMotionEnabled())
+        // Turning hit testing off sends MouseLeave to the slice under the pointer, so the pie freezes its visual state first and the slice that fired stays highlighted through the exit.
+        _pieMenu.BeginDismiss();
+        _window.IsHitTestVisible = false;
+
+        if (step == MenuCloseStep.HideNow)
         {
-            HideMenuImmediately();
+            HideWindow();
             return;
         }
 
-        BeginFadeOut();
+        StopAnimations();
+        _exitStoryboard.Begin(_window, HandoffBehavior.SnapshotAndReplace, true);
     }
 
-    public void OnFadeOutCompleted()
+    public void OnEnterCompleted()
     {
-        if (!_isFadingOut)
+        if (_state.Phase == MenuPhase.Opening)
         {
-            return;
+            SettleOpen();
         }
+    }
 
-        HideMenuImmediately();
+    public void OnExitCompleted()
+    {
+        if (_state.CompleteExit())
+        {
+            HideWindow();
+        }
     }
 
     private async Task FocusMenuForKeyboardInputAsync()
@@ -144,57 +194,51 @@ internal sealed class MenuService
         }, DispatcherPriority.Input);
     }
 
-    private void BeginFadeIn()
+    private void BeginEnter()
     {
-        StopFadeAnimations();
+        _state.MarkEntranceStarted();
+        StopAnimations();
 
-        if (IsReducedMotionEnabled())
+        if (PieAnimationService.IsReducedMotionEnabled())
         {
-            _isFadingOut = false;
-            _window.Opacity = 1;
+            SettleOpen();
             return;
         }
 
-        _isFadingOut = false;
-        _fadeInStoryboard.Begin(_window, HandoffBehavior.SnapshotAndReplace, true);
+        // SnapshotAndReplace continues from the current values, so a reopen during the exit reverses it smoothly.
+        _enterStoryboard.Begin(_window, HandoffBehavior.SnapshotAndReplace, true);
     }
 
-    private void BeginFadeOut()
+    private void SettleOpen()
     {
-        // Cancels any fade-in still waiting on its first rendered frame.
-        _fadeInRequestVersion++;
-        StopFadeAnimations();
+        _state.CompleteEntrance();
 
-        if (IsReducedMotionEnabled())
-        {
-            HideMenuImmediately();
-            return;
-        }
-
-        _isFadingOut = true;
-        _window.IsHitTestVisible = false;
-        _fadeOutStoryboard.Begin(_window, HandoffBehavior.SnapshotAndReplace, true);
+        // Hands the final values to the properties and drops the animation so the pie renders at exactly scale 1, with crisp snapped geometry.
+        _window.Opacity = 1;
+        SetPieScale(1);
+        StopAnimations();
     }
 
-    private void StopFadeAnimations()
+    private void HideWindow()
     {
-        _fadeInStoryboard.Remove(_window);
-        _fadeOutStoryboard.Remove(_window);
-    }
-
-    private static bool IsReducedMotionEnabled()
-    {
-        return !SystemParameters.ClientAreaAnimation;
-    }
-
-    private void HideMenuImmediately()
-    {
-        // Cancels any fade-in still waiting on its first rendered frame.
-        _fadeInRequestVersion++;
-        _isFadingOut = false;
-        StopFadeAnimations();
-        _window.IsHitTestVisible = false;
         _window.Opacity = 0;
+        SetPieScale(1);
+        StopAnimations();
         _window.Hide();
+    }
+
+    private void StopAnimations()
+    {
+        _enterStoryboard.Remove(_window);
+        _exitStoryboard.Remove(_window);
+    }
+
+    private void SetPieScale(double scale)
+    {
+        if (_pieMenu.RenderTransform is ScaleTransform pieScale)
+        {
+            pieScale.ScaleX = scale;
+            pieScale.ScaleY = scale;
+        }
     }
 }

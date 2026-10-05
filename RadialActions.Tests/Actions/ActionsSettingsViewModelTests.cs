@@ -48,7 +48,7 @@ public sealed class ActionsSettingsViewModelTests
     }
 
     [Fact]
-    public void AddAction_InsertsBlankActionAfterSelectedActionAndSelectsIt()
+    public void AddAction_InsertsNewActionAfterSelectedActionAndSelectsIt()
     {
         var first = PieAction.CreateKeyAction("Mute");
         var second = PieAction.CreateKeyAction("VolumeUp");
@@ -60,11 +60,152 @@ public sealed class ActionsSettingsViewModelTests
 
         var added = viewModel.Actions[2];
         Assert.Equal([first, second, added, third], viewModel.Actions);
-        Assert.Equal("Blank action", added.Name);
+        Assert.Equal(PieAction.DefaultName, added.Name);
+        Assert.Equal("New action", added.Name);
         Assert.Equal(ActionType.None, added.Type);
         Assert.Same(added, viewModel.SelectedAction);
         Assert.Equal(2, viewModel.SelectedActionIndex);
         Assert.Same(added, viewModel.Editor.SelectedAction);
+    }
+
+    [Fact]
+    public void AddAction_ThenChoosingOpenTarget_NamesActionAfterTarget()
+    {
+        var viewModel = CreateViewModel(PieAction.CreateKeyAction("Mute"));
+        viewModel.AddActionCommand.Execute(null);
+        var added = viewModel.SelectedAction;
+
+        viewModel.Editor.SelectedActionType = ActionType.Open;
+        added.Parameter = "https://example.com/docs";
+
+        Assert.Equal("example.com", added.Name);
+        Assert.Equal(OpenActionDefaults.WebIcon, added.Icon);
+    }
+
+    [Fact]
+    public void AddAction_ThenChoosingKey_NamesActionAfterKeyAndFollowsLaterKeyChanges()
+    {
+        var viewModel = CreateViewModel(PieAction.CreateKeyAction("Mute"));
+        viewModel.AddActionCommand.Execute(null);
+        var added = viewModel.SelectedAction;
+
+        viewModel.Editor.SelectedActionType = ActionType.Key;
+        Assert.Equal(PieAction.KeyActions[0].Name, added.Name);
+
+        viewModel.Editor.SelectedKeyActionId = "VolumeUp";
+        Assert.Equal("Volume Up", added.Name);
+
+        added.Name = "Louder";
+        viewModel.Editor.SelectedKeyActionId = "VolumeDown";
+        Assert.Equal("Louder", added.Name);
+    }
+
+    [Fact]
+    public void ListCommands_EmptyList_CannotExecute()
+    {
+        var viewModel = CreateViewModel();
+
+        Assert.True(viewModel.AddActionCommand.CanExecute(null));
+        Assert.False(viewModel.RemoveActionCommand.CanExecute(null));
+        Assert.False(viewModel.MoveUpCommand.CanExecute(null));
+        Assert.False(viewModel.MoveDownCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void ListCommands_FollowSelectedPosition()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var third = PieAction.CreateKeyAction("VolumeDown");
+        var viewModel = CreateViewModel(first, second, third);
+
+        Assert.True(viewModel.RemoveActionCommand.CanExecute(null));
+        Assert.False(viewModel.MoveUpCommand.CanExecute(null));
+        Assert.True(viewModel.MoveDownCommand.CanExecute(null));
+
+        viewModel.SelectAction(second);
+        Assert.True(viewModel.MoveUpCommand.CanExecute(null));
+        Assert.True(viewModel.MoveDownCommand.CanExecute(null));
+
+        viewModel.SelectAction(third);
+        Assert.True(viewModel.MoveUpCommand.CanExecute(null));
+        Assert.False(viewModel.MoveDownCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void ListCommands_NoSelection_CannotExecute()
+    {
+        var viewModel = CreateViewModel(PieAction.CreateKeyAction("Mute"), PieAction.CreateKeyAction("VolumeUp"));
+
+        viewModel.SelectedAction = null;
+        viewModel.SelectedActionIndex = -1;
+
+        Assert.False(viewModel.RemoveActionCommand.CanExecute(null));
+        Assert.False(viewModel.MoveUpCommand.CanExecute(null));
+        Assert.False(viewModel.MoveDownCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void ListCommands_RaiseCanExecuteChangedWhenSelectionChanges()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var viewModel = CreateViewModel(first, second);
+        var raised = new List<string>();
+        viewModel.RemoveActionCommand.CanExecuteChanged += (_, _) => raised.Add("Remove");
+        viewModel.MoveUpCommand.CanExecuteChanged += (_, _) => raised.Add("MoveUp");
+        viewModel.MoveDownCommand.CanExecuteChanged += (_, _) => raised.Add("MoveDown");
+
+        viewModel.SelectAction(second);
+
+        Assert.Contains("Remove", raised);
+        Assert.Contains("MoveUp", raised);
+        Assert.Contains("MoveDown", raised);
+    }
+
+    [Fact]
+    public void ListCommands_RaiseCanExecuteChangedWhenListChangesOutsideCommands()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var viewModel = CreateViewModel(first, second);
+        viewModel.SelectAction(second);
+        Assert.False(viewModel.MoveDownCommand.CanExecute(null));
+        var raised = 0;
+        viewModel.MoveDownCommand.CanExecuteChanged += (_, _) => raised++;
+
+        // The pie's drag reorder moves items without going through the commands.
+        viewModel.Actions.Move(1, 0);
+
+        Assert.True(raised > 0);
+        Assert.True(viewModel.MoveDownCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void MoveUp_FirstAction_DoesNothing()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var viewModel = CreateViewModel(first, second);
+
+        viewModel.MoveUpCommand.Execute(null);
+
+        Assert.Equal([first, second], viewModel.Actions);
+        Assert.Same(first, viewModel.SelectedAction);
+    }
+
+    [Fact]
+    public void MoveDown_LastAction_DoesNothing()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var viewModel = CreateViewModel(first, second);
+        viewModel.SelectAction(second);
+
+        viewModel.MoveDownCommand.Execute(null);
+
+        Assert.Equal([first, second], viewModel.Actions);
+        Assert.Same(second, viewModel.SelectedAction);
     }
 
     [Fact]
@@ -172,6 +313,43 @@ public sealed class ActionsSettingsViewModelTests
         Assert.Same(third, viewModel.SelectedAction);
         Assert.Equal(1, viewModel.SelectedActionIndex);
         Assert.Same(third, viewModel.Editor.SelectedAction);
+    }
+
+    [Fact]
+    public void RemoveAction_LastAction_SelectsPreviousAction()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var third = PieAction.CreateKeyAction("VolumeDown");
+        var viewModel = CreateViewModel(first, second, third);
+        viewModel.SelectAction(third);
+
+        viewModel.RemoveActionCommand.Execute(null);
+
+        Assert.Equal([first, second], viewModel.Actions);
+        Assert.Same(second, viewModel.SelectedAction);
+        Assert.Equal(1, viewModel.SelectedActionIndex);
+        Assert.Same(second, viewModel.Editor.SelectedAction);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void RemoveAction_RemoveStaysExecutableWhileSelectionMoves(int removedIndex)
+    {
+        // A focused Remove button that disabled itself mid-command would hand keyboard focus to the bare list.
+        var viewModel = CreateViewModel(PieAction.CreateKeyAction("Mute"), PieAction.CreateKeyAction("VolumeUp"), PieAction.CreateKeyAction("VolumeDown"));
+        viewModel.SelectAction(viewModel.Actions[removedIndex]);
+        var canExecuteOnEachChange = new List<bool>();
+        viewModel.RemoveActionCommand.CanExecuteChanged += (_, _) => canExecuteOnEachChange.Add(viewModel.RemoveActionCommand.CanExecute(null));
+
+        viewModel.RemoveActionCommand.Execute(null);
+
+        Assert.NotEmpty(canExecuteOnEachChange);
+        Assert.DoesNotContain(false, canExecuteOnEachChange);
+        Assert.Equal(2, viewModel.Actions.Count);
+        Assert.Same(viewModel.Actions[viewModel.SelectedActionIndex], viewModel.SelectedAction);
     }
 
     [Fact]

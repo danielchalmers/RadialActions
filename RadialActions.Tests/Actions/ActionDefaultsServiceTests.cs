@@ -1,4 +1,4 @@
-namespace RadialActions.Tests;
+﻿namespace RadialActions.Tests;
 
 public sealed class ActionDefaultsServiceTests : IDisposable
 {
@@ -65,6 +65,93 @@ public sealed class ActionDefaultsServiceTests : IDisposable
         service.ApplyOpenDefaults(action, action.Parameter);
 
         Assert.Equal(OpenActionDefaults.FileIcon, action.Icon);
+    }
+
+    [Theory]
+    [InlineData(PieAction.DefaultName)]
+    [InlineData(ActionDefaultsService.LegacyDefaultName)]
+    [InlineData(ActionDefaultsService.LegacyBlankActionName)]
+    [InlineData("")]
+    public void ApplyKeyDefaults_UntouchedDefaultName_TakesKeyName(string name)
+    {
+        var service = new ActionDefaultsService();
+        var action = new PieAction(name) { Type = ActionType.Key, Parameter = "Mute" };
+
+        service.ApplyKeyDefaults(action, FindKeyAction("Mute"));
+
+        Assert.Equal("Mute", action.Name);
+    }
+
+    [Fact]
+    public void ApplyKeyDefaults_FollowsPreviousAutoNameButKeepsCustomName()
+    {
+        var service = new ActionDefaultsService();
+        var action = new PieAction { Type = ActionType.Key, Parameter = "Mute" };
+
+        service.ApplyKeyDefaults(action, FindKeyAction("Mute"));
+        service.ApplyKeyDefaults(action, FindKeyAction("VolumeUp"));
+        Assert.Equal("Volume Up", action.Name);
+
+        action.Name = "Louder";
+        service.ApplyKeyDefaults(action, FindKeyAction("VolumeDown"));
+        Assert.Equal("Louder", action.Name);
+    }
+
+    [Theory]
+    [InlineData(PieAction.DefaultName)]
+    [InlineData(ActionDefaultsService.LegacyDefaultName)]
+    [InlineData(ActionDefaultsService.LegacyBlankActionName)]
+    public void ApplyOpenDefaults_UntouchedDefaultName_TakesTargetName(string name)
+    {
+        var service = new ActionDefaultsService();
+        var action = PieAction.CreateOpenAction(name, "https://example.com", PieAction.DefaultIcon);
+
+        service.ApplyOpenDefaults(action, action.Parameter);
+
+        Assert.Equal("example.com", action.Name);
+        Assert.Equal(OpenActionDefaults.WebIcon, action.Icon);
+    }
+
+    [Fact]
+    public void ApplyOpenDefaults_AfterKeyAutoValues_ReplacesThem()
+    {
+        var service = new ActionDefaultsService();
+        var action = new PieAction { Type = ActionType.Key, Parameter = "Mute" };
+        service.ApplyKeyDefaults(action, FindKeyAction("Mute"));
+
+        action.Type = ActionType.Open;
+        action.Parameter = "https://example.com";
+        service.ApplyOpenDefaults(action, action.Parameter);
+
+        Assert.Equal("example.com", action.Name);
+        Assert.Equal(OpenActionDefaults.WebIcon, action.Icon);
+    }
+
+    [Fact]
+    public void ApplyKeyDefaults_AfterOpenAutoValues_ReplacesThem()
+    {
+        var service = new ActionDefaultsService();
+        var action = PieAction.CreateOpenAction(PieAction.DefaultName, "https://example.com", PieAction.DefaultIcon);
+        service.ApplyOpenDefaults(action, action.Parameter);
+
+        action.Type = ActionType.Key;
+        action.Parameter = "Mute";
+        service.ApplyKeyDefaults(action, FindKeyAction("Mute"));
+
+        Assert.Equal("Mute", action.Name);
+        Assert.Equal(FindKeyAction("Mute").Icon, action.Icon);
+    }
+
+    [Fact]
+    public void TrackExistingDefaults_KeyActionWithCustomName_KeepsNameWhenKeyChanges()
+    {
+        var service = new ActionDefaultsService();
+        var action = new PieAction("Silence") { Type = ActionType.Key, Parameter = "Mute" };
+        service.TrackExistingDefaults([action]);
+
+        service.ApplyKeyDefaults(action, FindKeyAction("VolumeDown"));
+
+        Assert.Equal("Silence", action.Name);
     }
 
     public void Dispose()

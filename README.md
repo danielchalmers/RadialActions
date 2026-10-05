@@ -13,6 +13,7 @@ Radial Actions is a free, open source pie menu launcher for Windows. Press a glo
 - Appears at the mouse pointer, or at the center of the screen if you turn on "Open at screen center".
 - Hold the hotkey, move onto a slice, and release to run it, or press the hotkey and click a slice. "Release hotkey to trigger" can be turned off in Settings.
 - Works from the keyboard too. The arrow keys select a slice, `Enter` runs it, and the number keys `1` to `9` run slices clockwise from the top.
+- Works with screen readers and high contrast themes. The menu and Settings can be used with the keyboard alone, slices and settings have names a screen reader announces, and animations turn off when "Animation effects" is off in Windows.
 - An Open action launches an app, file, folder, or URL, with optional arguments and a working directory.
 - A Key action sends a media key (play/pause, previous, next, stop), a volume key (mute, down, up), Print Screen, or a shortcut you record, such as `Ctrl+Shift+M`.
 - A Script action runs PowerShell stored in the action itself, with no separate file. It can run hidden with no console window, and can use `pwsh.exe` for PowerShell 7.

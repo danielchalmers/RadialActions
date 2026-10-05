@@ -59,6 +59,60 @@ public class SettingsSerializationTests
         Assert.Empty(settings.Actions);
     }
 
+    [Theory]
+    [InlineData("Tab")]
+    [InlineData("Space")]
+    [InlineData("Shift+A")]
+    [InlineData("Alt+F4")]
+    [InlineData("F12")]
+    public void DeserializeFromJson_TypingKeyOrReservedChordHotkey_FallsBackToDefault(string savedHotkey)
+    {
+        var settings = Settings.DeserializeFromJson($$"""{ "ActivationHotkey": "{{savedHotkey}}" }""");
+
+        Assert.Equal(Settings.DefaultActivationHotkey, settings.ActivationHotkey);
+    }
+
+    [Theory]
+    [InlineData("Insert")]
+    [InlineData("F13")]
+    [InlineData("Pause")]
+    [InlineData("NumPad5")]
+    [InlineData("Ctrl+Alt+Space")]
+    [InlineData("Ctrl+Shift+K")]
+    [InlineData("Ctrl+Alt+F12")]
+    public void DeserializeFromJson_OtherSavedHotkeys_AreKept(string savedHotkey)
+    {
+        var settings = Settings.DeserializeFromJson($$"""{ "ActivationHotkey": "{{savedHotkey}}" }""");
+
+        Assert.Equal(savedHotkey, settings.ActivationHotkey);
+    }
+
+    [Theory]
+    [InlineData(50, Settings.MinSize)]
+    [InlineData(Settings.MinSize, Settings.MinSize)]
+    [InlineData(640, 640)]
+    [InlineData(Settings.MaxSize, Settings.MaxSize)]
+    [InlineData(5000, Settings.MaxSize)]
+    [InlineData(-10, Settings.DefaultSize)]
+    public void DeserializeFromJson_ClampsSizeToSupportedRange(int savedSize, int expectedSize)
+    {
+        var settings = Settings.DeserializeFromJson($$"""{ "Size": {{savedSize}} }""");
+
+        Assert.Equal(expectedSize, settings.Size);
+    }
+
+    [Fact]
+    public void HasShownWelcomeNotification_DefaultsToFalseAndRoundTrips()
+    {
+        var settings = Settings.DeserializeFromJson("{}");
+        Assert.False(settings.HasShownWelcomeNotification);
+
+        settings.HasShownWelcomeNotification = true;
+        var loaded = Settings.DeserializeFromJson(settings.SerializeToJson());
+
+        Assert.True(loaded.HasShownWelcomeNotification);
+    }
+
     [Fact]
     public void SerializeToJson_RoundTripsCoreValues()
     {

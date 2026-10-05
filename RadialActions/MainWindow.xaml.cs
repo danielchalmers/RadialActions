@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.Input;
 using RadialActions.Properties;
@@ -17,9 +18,13 @@ namespace RadialActions;
 public partial class MainWindow : Window
 {
     private const string FeedbackUrl = "https://github.com/danielchalmers/RadialActions/issues";
+    private const string OpenMenuItemTag = "OpenMenu";
+    private const int GeneralTabIndex = 0;
+    private const int ActionsTabIndex = 1;
     private readonly TrayService _trayService;
     private readonly HotkeyService _hotkeyService = new();
     private readonly MenuService _menuService;
+    private bool _isActivationHotkeySuspended;
 
     public MainWindow()
     {
@@ -27,12 +32,13 @@ public partial class MainWindow : Window
         DataContext = this;
 
         Settings.Default.PropertyChanged += OnSettingsPropertyChanged;
-        _trayService = new TrayService(Resources, this, Settings.Default.ActivationHotkey);
+        _trayService = new TrayService(Resources, this);
         _menuService = new MenuService(
             this,
             PieMenu,
-            (System.Windows.Media.Animation.Storyboard)Resources["FadeInStoryboard"],
-            (System.Windows.Media.Animation.Storyboard)Resources["FadeOutStoryboard"]);
+            (Storyboard)Resources["FadeInStoryboard"],
+            (Storyboard)Resources["FadeOutStoryboard"],
+            (double)FindResource("MotionMenuEnterScale"));
     }
 
     /// <summary>
@@ -61,9 +67,30 @@ public partial class MainWindow : Window
                 App.SetRunOnStartup(Settings.Default.RunOnStartup);
                 break;
             case nameof(Settings.ActivationHotkey):
-                _hotkeyService.ApplyHotkey(Settings.Default.ActivationHotkey);
+                if (_isActivationHotkeySuspended)
+                {
+                    // The recorder still has focus, and registering now would let its next keystroke open the menu. ResumeActivationHotkey registers the new value and reports its status.
+                    App.CurrentApp.ActivationHotkeyError = null;
+                    break;
+                }
+
+                ApplyActivationHotkey();
                 break;
         }
+    }
+
+    /// <summary>
+    /// Registers the saved activation hotkey and publishes whether it works.
+    /// </summary>
+    private HotkeyRegistrationResult ApplyActivationHotkey()
+    {
+        var hotkey = Settings.Default.ActivationHotkey;
+        var result = _hotkeyService.ApplyHotkey(hotkey);
+
+        App.CurrentApp.ActivationHotkeyError = ActivationHotkeyStatus.GetError(result, hotkey);
+        _trayService.UpdateToolTip(result == HotkeyRegistrationResult.Registered ? hotkey : null);
+
+        return result;
     }
 
     /// <summary>
@@ -94,20 +121,55 @@ public partial class MainWindow : Window
         Application.Current.Shutdown();
     }
 
-    public void ShowMenu(bool atCursor)
+    /// <summary>
+    /// Unregisters the activation hotkey so the Settings recorder can capture the current combination instead of opening the menu.
+    /// </summary>
+    public void SuspendActivationHotkey()
     {
+        Log.Debug("Suspending the activation hotkey while it is being recorded");
+        _isActivationHotkeySuspended = true;
+        _hotkeyService.ClearHotkeys();
+    }
+
+    /// <summary>
+    /// Re-registers the saved activation hotkey after <see cref="SuspendActivationHotkey"/>.
+    /// </summary>
+    public void ResumeActivationHotkey()
+    {
+        Log.Debug("Resuming the activation hotkey");
+        _isActivationHotkeySuspended = false;
+        ApplyActivationHotkey();
+    }
+
+    /// <summary>
+    /// Opens the menu, or Settings on the Actions tab when no action would appear in it.
+    /// </summary>
+    /// <returns>True if the menu opened.</returns>
+    public bool ShowMenu(bool atCursor)
+    {
+        if (!MenuService.HasEnabledActions(Settings.Default.Actions))
+        {
+            // An empty menu would be an invisible window that takes keyboard focus.
+            Log.Information("No enabled actions to show; opening the Actions tab instead of the menu");
+            OpenSettingsWindow(ActionsTabIndex);
+            return false;
+        }
+
         _menuService.ShowMenu(atCursor);
+        return true;
     }
 
     public void HideMenu(bool animate = true)
     {
-        PieMenu.IsReleaseTriggerArmed = false;
         _menuService.HideMenu(animate);
+
+        // Disarmed after the dismiss has frozen the pie's visuals, so a slice fired by releasing the hotkey keeps its release hint through the exit.
+        PieMenu.IsReleaseTriggerArmed = false;
     }
 
-    private void ShowMenuUsingConfiguredPosition()
+    private bool ShowMenuUsingConfiguredPosition()
     {
-        _menuService.ShowMenu(!Settings.Default.OpenMenuInScreenCenter);
+        return ShowMenu(!Settings.Default.OpenMenuInScreenCenter);
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -116,13 +178,41 @@ public partial class MainWindow : Window
 
         var handle = new WindowInteropHelper(this).Handle;
         _hotkeyService.Initialize(handle, OnHotkeyPressed);
-        _hotkeyService.ApplyHotkey(Settings.Default.ActivationHotkey);
+        ShowStartupNotification(ApplyActivationHotkey());
 
 #if DEBUG
         _menuService.ShowMenu(false);
 #endif
 
         await CheckForUpdatesAsync();
+    }
+
+    private void ShowStartupNotification(HotkeyRegistrationResult registration)
+    {
+        var notification = TrayNotificationText.ForStartup(
+            registration,
+            Settings.Default.ActivationHotkey,
+            Settings.Default.HasShownWelcomeNotification,
+            out var isWelcome);
+
+        if (notification == null)
+        {
+            return;
+        }
+
+        Log.Information("Showing the startup notification <{Title}>", notification.Title);
+
+        // A welcome the shell rejected must not count as shown, or it would never appear.
+        if (!_trayService.ShowStartupNotification(notification, isWelcome) || !isWelcome)
+        {
+            return;
+        }
+
+        Settings.Default.HasShownWelcomeNotification = true;
+        if (Settings.CanBeSaved)
+        {
+            Settings.Default.Save();
+        }
     }
 
     private void Window_Unloaded(object sender, RoutedEventArgs e)
@@ -136,17 +226,20 @@ public partial class MainWindow : Window
     {
         Log.Debug("Hotkey pressed");
 
-        if (IsActive)
+        // During the exit animation the window can still be active, so a press there reopens the menu instead of being dropped.
+        if (IsActive && _menuService.IsOpen)
         {
             HideMenu();
+            return;
         }
-        else
-        {
-            ShowMenuUsingConfiguredPosition();
 
-            // Arms the flick gesture: the keys are still held, so releasing them over a slice triggers it.
-            PieMenu.IsReleaseTriggerArmed = Settings.Default.TriggerSliceOnHotkeyRelease;
+        if (!ShowMenuUsingConfiguredPosition())
+        {
+            return;
         }
+
+        // Arms the flick gesture: the keys are still held, so releasing them over a slice triggers it.
+        PieMenu.IsReleaseTriggerArmed = Settings.Default.TriggerSliceOnHotkeyRelease;
     }
 
     private void OnTrayLeftMouseDown(object sender, RoutedEventArgs e)
@@ -155,16 +248,45 @@ public partial class MainWindow : Window
         ShowMenuUsingConfiguredPosition();
     }
 
+    private void OnTrayKeyboardKeySelect(object sender, RoutedEventArgs e)
+    {
+        // Enter or Space on the focused tray icon. The pointer has nothing to do with a keyboard invocation, so open in the middle of the screen.
+        Log.Debug("Tray icon selected from the keyboard");
+        ShowMenu(atCursor: false);
+    }
+
     private void OnTrayLeftMouseDoubleClick(object sender, RoutedEventArgs e)
     {
         Log.Debug("Tray icon left double clicked");
-        OpenSettingsWindow(1);
+        OpenSettingsWindow(ActionsTabIndex);
     }
 
     private void OnTrayBalloonTipClicked(object sender, RoutedEventArgs e)
     {
         Log.Debug("Tray balloon clicked");
-        OpenSettingsWindow(0);
+
+        if (_trayService.NotificationAction is { } failedAction)
+        {
+            OpenActionInSettings(failedAction);
+            return;
+        }
+
+        // The welcome, hotkey and update notifications all lead to the General tab, where the hotkey and the update banner are.
+        OpenSettingsWindow(GeneralTabIndex);
+    }
+
+    private void OnOpenMenuItemClick(object sender, RoutedEventArgs e)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.InvokeAsync(() => OnOpenMenuItemClick(sender, e), DispatcherPriority.Normal);
+            return;
+        }
+
+        // Click is raised after the popup closes, but the keyboard is still the most recent device when Enter or the access key chose the item. Like a keyboard tray invocation, that opens in the middle of the screen because the pointer can be anywhere.
+        var fromKeyboard = InputManager.Current.MostRecentInputDevice is KeyboardDevice;
+        Log.Debug("Open menu item selected <FromKeyboard={FromKeyboard}>", fromKeyboard);
+        ShowMenu(atCursor: !fromKeyboard && !Settings.Default.OpenMenuInScreenCenter);
     }
 
     private void OnTraySettingsMenuItemClick(object sender, RoutedEventArgs e)
@@ -217,12 +339,14 @@ public partial class MainWindow : Window
         var slice = e.Slice;
         Log.Debug($"Slice clicked: {slice.Name}");
 
-        // A slice has fired; releasing the still-held hotkey must not fire another one when the menu stays open.
-        PieMenu.IsReleaseTriggerArmed = false;
-
-        // Dismiss before running the action so the fade-out starts on the same frame as the click.
-        if (!Settings.Default.KeepMenuOpenAfterSliceClick)
+        if (Settings.Default.KeepMenuOpenAfterSliceClick)
         {
+            // A slice has fired; releasing the still-held hotkey must not fire another one while the menu stays open.
+            PieMenu.IsReleaseTriggerArmed = false;
+        }
+        else
+        {
+            // Dismiss before running the action so the fade-out starts on the same frame as the click. HideMenu also disarms the release trigger.
             HideMenu();
         }
 
@@ -234,8 +358,15 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
+            var notification = ActionFailureMessage.Create(slice, ex);
+            if (notification == null)
+            {
+                Log.Information(ex, $"Action was cancelled by the user: {slice.Name}");
+                return;
+            }
+
             Log.Error(ex, $"Failed to execute action: {slice.Name}");
-            _trayService.ShowActionFailedNotification(slice, ex);
+            _trayService.ShowActionFailedNotification(slice, notification);
         }
     }
 
@@ -257,25 +388,38 @@ public partial class MainWindow : Window
     private void OnCenterContextMenuRequested(object sender, EventArgs e)
     {
         Log.Debug("Center close target right clicked");
-        OpenMainContextMenu();
+        OpenMainContextMenu(fromKeyboard: false);
     }
 
-    private void OpenMainContextMenu()
+    private void OpenMainContextMenu(bool fromKeyboard)
     {
         var contextMenu = (ContextMenu)Resources["MainContextMenu"];
         contextMenu.DataContext = this;
+
+        // The menu is already open, so "Open menu" would do nothing here.
+        foreach (var item in contextMenu.Items.OfType<MenuItem>().Where(item => Equals(item.Tag, OpenMenuItemTag)))
+        {
+            item.Visibility = Visibility.Collapsed;
+        }
+
+        // From the keyboard the pointer can be anywhere, even on another monitor, so the menu opens over the pie instead.
         contextMenu.PlacementTarget = PieMenu;
-        contextMenu.Placement = PlacementMode.MousePoint;
+        contextMenu.Placement = fromKeyboard ? PlacementMode.Center : PlacementMode.MousePoint;
         contextMenu.IsOpen = true;
     }
 
     private void OnSliceEditRequested(object sender, SliceClickEventArgs e)
     {
         Log.Debug($"Slice edit requested: {e.Slice.Name}");
-        OpenSettingsWindow(1);
-        var settingsWindow = Application.Current.Windows.OfType<SettingsWindow>().FirstOrDefault();
-        settingsWindow?.SelectAction(e.Slice);
+        OpenActionInSettings(e.Slice);
         HideMenu();
+    }
+
+    private void OpenActionInSettings(PieAction action)
+    {
+        OpenSettingsWindow(ActionsTabIndex);
+        var settingsWindow = Application.Current.Windows.OfType<SettingsWindow>().FirstOrDefault();
+        settingsWindow?.SelectAction(action);
     }
 
     private void Window_Deactivated(object sender, EventArgs e)
@@ -304,7 +448,7 @@ public partial class MainWindow : Window
         if ((key == Key.F10 && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) || key == Key.Apps)
         {
             Log.Debug("Context menu key pressed with no selected slice; opening main context menu");
-            OpenMainContextMenu();
+            OpenMainContextMenu(fromKeyboard: true);
             e.Handled = true;
         }
     }
@@ -323,8 +467,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        PieMenu.IsReleaseTriggerArmed = false;
-
+        // OnSliceClicked disarms the trigger once the dismiss has started, so the fired slice keeps its release hint through the exit.
         if (PieMenu.TriggerActiveSlice())
         {
             Log.Debug("Activation hotkey released over a slice; triggered it");
@@ -332,13 +475,19 @@ public partial class MainWindow : Window
         }
         else
         {
+            PieMenu.IsReleaseTriggerArmed = false;
             Log.Debug("Activation hotkey released with no slice hovered; menu stays open");
         }
     }
 
+    private void FadeInStoryboard_Completed(object sender, EventArgs e)
+    {
+        _menuService.OnEnterCompleted();
+    }
+
     private void FadeOutStoryboard_Completed(object sender, EventArgs e)
     {
-        _menuService.OnFadeOutCompleted();
+        _menuService.OnExitCompleted();
     }
 
     private async Task CheckForUpdatesAsync()
