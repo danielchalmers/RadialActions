@@ -11,259 +11,290 @@
     <ScrollViewer Margin="0,0,-16,0"
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto">
-        <Grid Margin="0,0,16,16">
-            <Grid.ColumnDefinitions>
-                <!--  A capped star column keeps the content left-aligned; MaxWidth on a stretched element would center it  -->
-                <ColumnDefinition Width="*"
-                                  MaxWidth="{StaticResource PageMaxContentWidth}" />
-            </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,16,16">
+            <TextBlock Text="Menu"
+                       Style="{StaticResource FirstSectionHeaderTextStyle}" />
 
-            <StackPanel>
-                <TextBlock Text="Menu"
-                           Style="{StaticResource FirstSectionHeaderTextStyle}" />
-
-                <Border Style="{StaticResource SettingsRowStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ContentControl Grid.Column="0"
-                                        Content="&#xE765;"
-                                        Style="{StaticResource SettingsRowIconStyle}" />
-                        <StackPanel Grid.Column="1"
-                                    VerticalAlignment="Center">
-                            <TextBlock x:Name="ActivationHotkeyTitle"
-                                       Text="Activation hotkey"
-                                       Style="{StaticResource SettingsRowTitleTextStyle}" />
-                            <TextBlock x:Name="ActivationHotkeyDescription"
-                                       Text="Select the box and press a key combination such as Ctrl+Alt+Space. Press Tab to move on or Backspace to clear."
-                                       Style="{StaticResource SettingsRowDescriptionTextStyle}" />
-                            <TextBlock Text="{Binding ActivationHotkeyError, Source={x:Static local:App.CurrentApp}, Mode=OneWay, NotifyOnTargetUpdated=True}"
-                                       Binding.TargetUpdated="StatusText_TargetUpdated"
-                                       Style="{StaticResource CriticalStatusTextStyle}"
-                                       Visibility="{Binding HasActivationHotkeyError, Source={x:Static local:App.CurrentApp}, Mode=OneWay, Converter={local:BooleanToVisibilityConverter}}" />
-                            <TextBlock Text="{Binding ActivationHotkeyHint, Mode=OneWay, NotifyOnTargetUpdated=True}"
-                                       Binding.TargetUpdated="StatusText_TargetUpdated"
-                                       Style="{StaticResource CriticalStatusTextStyle}"
-                                       Visibility="{Binding HasActivationHotkeyHint, Mode=OneWay, Converter={local:BooleanToVisibilityConverter}}" />
-                        </StackPanel>
-                        <!--  Only the recorder writes the hotkey (one-way binding, no IME, drop, paste menu or typed text), so nothing unvalidated can be registered system-wide  -->
-                        <TextBox Grid.Column="2"
-                                 Text="{Binding Settings.ActivationHotkey, Mode=OneWay}"
-                                 Width="180"
-                                 Margin="{StaticResource SettingsRowControlMargin}"
-                                 VerticalAlignment="Center"
-                                 AllowDrop="False"
-                                 AutomationProperties.LabeledBy="{Binding ElementName=ActivationHotkeyTitle}"
-                                 ContextMenu="{x:Null}"
-                                 GotKeyboardFocus="ActivationHotkeyBox_GotKeyboardFocus"
-                                 InputMethod.IsInputMethodEnabled="False"
-                                 LostKeyboardFocus="ActivationHotkeyBox_LostKeyboardFocus"
-                                 PreviewTextInput="ActivationHotkeyBox_PreviewTextInput"
-                                 Tag="ActivationHotkeyInput">
-                            <!--  The error leads the help text so screen reader users hear it whenever they reach the box, not only when it first appears  -->
-                            <AutomationProperties.HelpText>
-                                <MultiBinding Converter="{local:TextJoinConverter}"
-                                              Mode="OneWay">
-                                    <Binding Path="ActivationHotkeyError"
-                                             Source="{x:Static local:App.CurrentApp}" />
-                                    <Binding ElementName="ActivationHotkeyDescription" Path="Text" />
-                                </MultiBinding>
-                            </AutomationProperties.HelpText>
-                        </TextBox>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource SettingsRowStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ContentControl Grid.Column="0"
-                                        Content="&#xE7C9;"
-                                        Style="{StaticResource SettingsRowIconStyle}" />
-                        <StackPanel Grid.Column="1"
-                                    VerticalAlignment="Center">
-                            <TextBlock x:Name="ReleaseToTriggerTitle"
-                                       Text="Release hotkey to trigger"
-                                       Style="{StaticResource SettingsRowTitleTextStyle}" />
-                            <TextBlock x:Name="ReleaseToTriggerDescription"
-                                       Text="Hold the hotkey, point at a slice, and release to run it in one motion."
-                                       Style="{StaticResource SettingsRowDescriptionTextStyle}" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="2"
-                                  Margin="{StaticResource SettingsRowControlMargin}"
-                                  AutomationProperties.HelpText="{Binding Text, ElementName=ReleaseToTriggerDescription}"
-                                  AutomationProperties.LabeledBy="{Binding ElementName=ReleaseToTriggerTitle}"
-                                  IsChecked="{Binding Settings.TriggerSliceOnHotkeyRelease, Mode=TwoWay}"
-                                  Style="{StaticResource ToggleSwitchStyle}" />
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource SettingsRowStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ContentControl Grid.Column="0"
-                                        Content="&#xE740;"
-                                        Style="{StaticResource SettingsRowIconStyle}" />
-                        <StackPanel Grid.Column="1"
-                                    VerticalAlignment="Center">
-                            <TextBlock x:Name="MenuSizeTitle"
-                                       Text="Menu size"
-                                       Style="{StaticResource SettingsRowTitleTextStyle}" />
-                            <TextBlock x:Name="MenuSizeDescription"
-                                       Text="300 to 500 pixels works well on most screens."
-                                       Style="{StaticResource SettingsRowDescriptionTextStyle}" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="2"
-                                    Margin="{StaticResource SettingsRowControlMargin}"
-                                    VerticalAlignment="Center"
-                                    Orientation="Horizontal">
-                            <TextBlock Text="{Binding Settings.Size, Mode=OneWay, StringFormat={}{0} px}"
-                                       MinWidth="56"
-                                       Margin="0,0,12,0"
+            <Border Style="{StaticResource SettingsRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0"
+                                    Content="&#xE765;"
+                                    Style="{StaticResource SettingsRowIconStyle}" />
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="ActivationHotkeyTitle"
+                                   Text="Activation hotkey"
+                                   Style="{StaticResource SettingsRowTitleTextStyle}" />
+                        <TextBlock x:Name="ActivationHotkeyDescription"
+                                   Text="{Binding ActivationHotkeyDescription, Mode=OneWay, NotifyOnTargetUpdated=True}"
+                                   AutomationProperties.LiveSetting="Polite"
+                                   Binding.TargetUpdated="StatusText_TargetUpdated"
+                                   Style="{StaticResource SettingsRowDescriptionTextStyle}" />
+                        <TextBlock Text="{Binding ActivationHotkeyError, Source={x:Static local:App.CurrentApp}, Mode=OneWay, NotifyOnTargetUpdated=True}"
+                                   Binding.TargetUpdated="StatusText_TargetUpdated"
+                                   Style="{StaticResource CriticalStatusTextStyle}"
+                                   Visibility="{Binding HasActivationHotkeyError, Source={x:Static local:App.CurrentApp}, Mode=OneWay, Converter={local:BooleanToVisibilityConverter}}" />
+                        <TextBlock Text="{Binding ActivationHotkeyHint, Mode=OneWay, NotifyOnTargetUpdated=True}"
+                                   Binding.TargetUpdated="StatusText_TargetUpdated"
+                                   Style="{StaticResource CriticalStatusTextStyle}"
+                                   Visibility="{Binding HasActivationHotkeyHint, Mode=OneWay, Converter={local:BooleanToVisibilityConverter}}" />
+                    </StackPanel>
+                    <!--  Recording starts only when the button is selected (WPF moves focus here whenever the tab is chosen), and the hotkey is written only through the validating view model  -->
+                    <Button Grid.Column="2"
+                            MinWidth="180"
+                            Margin="{StaticResource SettingsRowControlMargin}"
+                            VerticalAlignment="Center"
+                            AutomationProperties.Name="{Binding ActivationHotkeyAccessibleName, Mode=OneWay}"
+                            Click="ActivationHotkeyButton_Click"
+                            LostKeyboardFocus="ActivationHotkeyButton_LostKeyboardFocus"
+                            PreviewKeyDown="ActivationHotkeyButton_PreviewKeyDown"
+                            ToolTip="Change the activation hotkey">
+                        <!--  The error leads the help text so screen reader users hear it whenever they reach the button, not only when it first appears  -->
+                        <AutomationProperties.HelpText>
+                            <MultiBinding Converter="{local:TextJoinConverter}"
+                                          Mode="OneWay">
+                                <Binding Path="ActivationHotkeyError"
+                                         Source="{x:Static local:App.CurrentApp}" />
+                                <Binding ElementName="ActivationHotkeyDescription" Path="Text" />
+                            </MultiBinding>
+                        </AutomationProperties.HelpText>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal"
+                                        Visibility="{Binding IsRecordingActivationHotkey, Mode=OneWay, Converter={local:BooleanToVisibilityConverter IsInverted=True}}">
+                                <ItemsControl Focusable="False"
+                                              IsTabStop="False"
+                                              ItemsSource="{Binding ActivationHotkeyKeys, Mode=OneWay}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="0,0,4,0"
+                                                    Style="{StaticResource KeycapBorderStyle}">
+                                                <TextBlock Text="{Binding}"
+                                                           FontSize="{StaticResource CaptionTextBlockFontSize}"
+                                                           Style="{StaticResource KeycapTextStyle}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="Not set"
+                                           Margin="0,0,4,0"
+                                           VerticalAlignment="Center"
+                                           Style="{StaticResource SecondaryBodyTextStyle}"
+                                           TextWrapping="NoWrap"
+                                           Visibility="{Binding HasActivationHotkey, Mode=OneWay, Converter={local:BooleanToVisibilityConverter IsInverted=True}}" />
+                                <ContentControl Content="&#xE70F;"
+                                                Margin="8,0,0,0"
+                                                FontSize="14"
+                                                Style="{StaticResource FontIconStyle}" />
+                            </StackPanel>
+                            <!--  Accent text marks the recording state; the Fluent hover trigger replaces the border brush, so a border cue would vanish under the pointer that just clicked  -->
+                            <TextBlock Text="Press a key combination"
                                        VerticalAlignment="Center"
+                                       Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
                                        Style="{StaticResource BodyTextStyle}"
-                                       TextAlignment="Right"
-                                       TextWrapping="NoWrap" />
-                            <Slider Width="200"
-                                    VerticalAlignment="Center"
-                                    AutomationProperties.HelpText="{Binding Text, ElementName=MenuSizeDescription}"
-                                    AutomationProperties.LabeledBy="{Binding ElementName=MenuSizeTitle}"
-                                    IsSnapToTickEnabled="True"
-                                    LargeChange="50"
-                                    Maximum="{Binding Source={x:Static properties:Settings.MaxSize}, Mode=OneTime}"
-                                    Minimum="{Binding Source={x:Static properties:Settings.MinSize}, Mode=OneTime}"
-                                    SmallChange="10"
-                                    TickFrequency="10"
-                                    Value="{Binding Settings.Size, Mode=TwoWay}" />
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                                       TextWrapping="NoWrap"
+                                       Visibility="{Binding IsRecordingActivationHotkey, Mode=OneWay, Converter={local:BooleanToVisibilityConverter}}" />
+                        </Grid>
+                    </Button>
+                </Grid>
+            </Border>
 
-                <Border Style="{StaticResource SettingsRowStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ContentControl Grid.Column="0"
-                                        Content="&#xE7F4;"
-                                        Style="{StaticResource SettingsRowIconStyle}" />
-                        <StackPanel Grid.Column="1"
-                                    VerticalAlignment="Center">
-                            <TextBlock x:Name="ScreenCenterTitle"
-                                       Text="Open at screen center"
-                                       Style="{StaticResource SettingsRowTitleTextStyle}" />
-                            <TextBlock x:Name="ScreenCenterDescription"
-                                       Text="Open the menu in the middle of the screen instead of at the pointer."
-                                       Style="{StaticResource SettingsRowDescriptionTextStyle}" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="2"
-                                  Margin="{StaticResource SettingsRowControlMargin}"
-                                  AutomationProperties.HelpText="{Binding Text, ElementName=ScreenCenterDescription}"
-                                  AutomationProperties.LabeledBy="{Binding ElementName=ScreenCenterTitle}"
-                                  IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}"
-                                  Style="{StaticResource ToggleSwitchStyle}" />
-                    </Grid>
-                </Border>
+            <Border Style="{StaticResource SettingsRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0"
+                                    Content="&#xE7C9;"
+                                    Style="{StaticResource SettingsRowIconStyle}" />
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="ReleaseToTriggerTitle"
+                                   Text="Release hotkey to trigger"
+                                   Style="{StaticResource SettingsRowTitleTextStyle}" />
+                        <TextBlock x:Name="ReleaseToTriggerDescription"
+                                   Text="Hold the hotkey, point at a slice, and release to run it in one motion."
+                                   Style="{StaticResource SettingsRowDescriptionTextStyle}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="2"
+                              Margin="{StaticResource SettingsRowControlMargin}"
+                              AutomationProperties.HelpText="{Binding Text, ElementName=ReleaseToTriggerDescription}"
+                              AutomationProperties.LabeledBy="{Binding ElementName=ReleaseToTriggerTitle}"
+                              IsChecked="{Binding Settings.TriggerSliceOnHotkeyRelease, Mode=TwoWay}"
+                              Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
 
-                <Border Style="{StaticResource SettingsRowStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ContentControl Grid.Column="0"
-                                        Content="&#xE718;"
-                                        Style="{StaticResource SettingsRowIconStyle}" />
-                        <StackPanel Grid.Column="1"
-                                    VerticalAlignment="Center">
-                            <TextBlock x:Name="KeepOpenTitle"
-                                       Text="Keep menu open after running an action"
-                                       Style="{StaticResource SettingsRowTitleTextStyle}" />
-                            <TextBlock x:Name="KeepOpenDescription"
-                                       Text="The menu stays open until you press Esc or select outside it."
-                                       Style="{StaticResource SettingsRowDescriptionTextStyle}" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="2"
-                                  Margin="{StaticResource SettingsRowControlMargin}"
-                                  AutomationProperties.HelpText="{Binding Text, ElementName=KeepOpenDescription}"
-                                  AutomationProperties.LabeledBy="{Binding ElementName=KeepOpenTitle}"
-                                  IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}"
-                                  Style="{StaticResource ToggleSwitchStyle}" />
-                    </Grid>
-                </Border>
+            <Border Style="{StaticResource SettingsRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0"
+                                    Content="&#xE740;"
+                                    Style="{StaticResource SettingsRowIconStyle}" />
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="MenuSizeTitle"
+                                   Text="Menu size"
+                                   Style="{StaticResource SettingsRowTitleTextStyle}" />
+                        <TextBlock x:Name="MenuSizeDescription"
+                                   Text="300 to 500 pixels works well on most screens."
+                                   Style="{StaticResource SettingsRowDescriptionTextStyle}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2"
+                                Margin="{StaticResource SettingsRowControlMargin}"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal">
+                        <TextBlock Text="{Binding Settings.Size, Mode=OneWay, StringFormat={}{0} px}"
+                                   MinWidth="56"
+                                   Margin="0,0,12,0"
+                                   VerticalAlignment="Center"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   TextAlignment="Right"
+                                   TextWrapping="NoWrap" />
+                        <Slider Width="200"
+                                VerticalAlignment="Center"
+                                AutomationProperties.HelpText="{Binding Text, ElementName=MenuSizeDescription}"
+                                AutomationProperties.LabeledBy="{Binding ElementName=MenuSizeTitle}"
+                                IsSnapToTickEnabled="True"
+                                LargeChange="50"
+                                Maximum="{Binding Source={x:Static properties:Settings.MaxSize}, Mode=OneTime}"
+                                Minimum="{Binding Source={x:Static properties:Settings.MinSize}, Mode=OneTime}"
+                                SmallChange="10"
+                                TickFrequency="10"
+                                Value="{Binding Settings.Size, Mode=TwoWay}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
 
-                <TextBlock Text="System"
-                           Style="{StaticResource SectionHeaderTextStyle}" />
+            <Border Style="{StaticResource SettingsRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0"
+                                    Content="&#xE7F4;"
+                                    Style="{StaticResource SettingsRowIconStyle}" />
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="ScreenCenterTitle"
+                                   Text="Open at screen center"
+                                   Style="{StaticResource SettingsRowTitleTextStyle}" />
+                        <TextBlock x:Name="ScreenCenterDescription"
+                                   Text="Open the menu in the middle of the screen instead of at the pointer."
+                                   Style="{StaticResource SettingsRowDescriptionTextStyle}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="2"
+                              Margin="{StaticResource SettingsRowControlMargin}"
+                              AutomationProperties.HelpText="{Binding Text, ElementName=ScreenCenterDescription}"
+                              AutomationProperties.LabeledBy="{Binding ElementName=ScreenCenterTitle}"
+                              IsChecked="{Binding Settings.OpenMenuInScreenCenter, Mode=TwoWay}"
+                              Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
 
-                <Border Style="{StaticResource SettingsRowStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ContentControl Grid.Column="0"
-                                        Content="&#xE7E8;"
-                                        Style="{StaticResource SettingsRowIconStyle}" />
-                        <StackPanel Grid.Column="1"
-                                    VerticalAlignment="Center">
-                            <TextBlock x:Name="RunOnStartupTitle"
-                                       Text="Run at Windows startup"
-                                       Style="{StaticResource SettingsRowTitleTextStyle}" />
-                            <TextBlock x:Name="RunOnStartupDescription"
-                                       Text="Start in the background when you sign in."
-                                       Style="{StaticResource SettingsRowDescriptionTextStyle}" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="2"
-                                  Margin="{StaticResource SettingsRowControlMargin}"
-                                  AutomationProperties.HelpText="{Binding Text, ElementName=RunOnStartupDescription}"
-                                  AutomationProperties.LabeledBy="{Binding ElementName=RunOnStartupTitle}"
-                                  IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}"
-                                  Style="{StaticResource ToggleSwitchStyle}" />
-                    </Grid>
-                </Border>
+            <Border Style="{StaticResource SettingsRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0"
+                                    Content="&#xE718;"
+                                    Style="{StaticResource SettingsRowIconStyle}" />
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="KeepOpenTitle"
+                                   Text="Keep menu open after running an action"
+                                   Style="{StaticResource SettingsRowTitleTextStyle}" />
+                        <TextBlock x:Name="KeepOpenDescription"
+                                   Text="The menu stays open until you press Esc or select outside it."
+                                   Style="{StaticResource SettingsRowDescriptionTextStyle}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="2"
+                              Margin="{StaticResource SettingsRowControlMargin}"
+                              AutomationProperties.HelpText="{Binding Text, ElementName=KeepOpenDescription}"
+                              AutomationProperties.LabeledBy="{Binding ElementName=KeepOpenTitle}"
+                              IsChecked="{Binding Settings.KeepMenuOpenAfterSliceClick, Mode=TwoWay}"
+                              Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
 
-                <Border Style="{StaticResource SettingsRowStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ContentControl Grid.Column="0"
-                                        Content="&#xE895;"
-                                        Style="{StaticResource SettingsRowIconStyle}" />
-                        <StackPanel Grid.Column="1"
-                                    VerticalAlignment="Center">
-                            <TextBlock x:Name="CheckForUpdatesTitle"
-                                       Text="Check for updates automatically"
-                                       Style="{StaticResource SettingsRowTitleTextStyle}" />
-                            <TextBlock x:Name="CheckForUpdatesDescription"
-                                       Text="Look for a new version on GitHub when the app starts. Nothing installs automatically."
-                                       Style="{StaticResource SettingsRowDescriptionTextStyle}" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="2"
-                                  Margin="{StaticResource SettingsRowControlMargin}"
-                                  AutomationProperties.HelpText="{Binding Text, ElementName=CheckForUpdatesDescription}"
-                                  AutomationProperties.LabeledBy="{Binding ElementName=CheckForUpdatesTitle}"
-                                  IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}"
-                                  Style="{StaticResource ToggleSwitchStyle}" />
-                    </Grid>
-                </Border>
-            </StackPanel>
-        </Grid>
+            <TextBlock Text="System"
+                       Style="{StaticResource SectionHeaderTextStyle}" />
+
+            <Border Style="{StaticResource SettingsRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0"
+                                    Content="&#xE7E8;"
+                                    Style="{StaticResource SettingsRowIconStyle}" />
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="RunOnStartupTitle"
+                                   Text="Run at Windows startup"
+                                   Style="{StaticResource SettingsRowTitleTextStyle}" />
+                        <TextBlock x:Name="RunOnStartupDescription"
+                                   Text="Start in the background when you sign in."
+                                   Style="{StaticResource SettingsRowDescriptionTextStyle}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="2"
+                              Margin="{StaticResource SettingsRowControlMargin}"
+                              AutomationProperties.HelpText="{Binding Text, ElementName=RunOnStartupDescription}"
+                              AutomationProperties.LabeledBy="{Binding ElementName=RunOnStartupTitle}"
+                              IsChecked="{Binding Settings.RunOnStartup, Mode=TwoWay}"
+                              Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource SettingsRowStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0"
+                                    Content="&#xE895;"
+                                    Style="{StaticResource SettingsRowIconStyle}" />
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="CheckForUpdatesTitle"
+                                   Text="Check for updates automatically"
+                                   Style="{StaticResource SettingsRowTitleTextStyle}" />
+                        <TextBlock x:Name="CheckForUpdatesDescription"
+                                   Text="Look for a new version on GitHub when the app starts. Nothing installs automatically."
+                                   Style="{StaticResource SettingsRowDescriptionTextStyle}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="2"
+                              Margin="{StaticResource SettingsRowControlMargin}"
+                              AutomationProperties.HelpText="{Binding Text, ElementName=CheckForUpdatesDescription}"
+                              AutomationProperties.LabeledBy="{Binding ElementName=CheckForUpdatesTitle}"
+                              IsChecked="{Binding Settings.CheckForUpdatesOnStartup, Mode=TwoWay}"
+                              Style="{StaticResource ToggleSwitchStyle}" />
+                </Grid>
+            </Border>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

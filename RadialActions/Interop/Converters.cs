@@ -26,20 +26,22 @@ public sealed class MatchToVisibilityConverter : MarkupExtension, IValueConverte
 }
 
 /// <summary>
-/// Converts a boolean value into a Visibility value.
+/// Converts a boolean value into a Visibility value; with <see cref="IsInverted"/>, false is visible instead.
 /// </summary>
 public sealed class BooleanToVisibilityConverter : MarkupExtension, IValueConverter
 {
+    public bool IsInverted { get; set; }
+
     public override object ProvideValue(IServiceProvider serviceProvider)
         => this;
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        return value is true ? Visibility.Visible : Visibility.Collapsed;
+        return (value is true) != IsInverted ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        return value is Visibility.Visible;
+        return (value is Visibility.Visible) != IsInverted;
     }
 }

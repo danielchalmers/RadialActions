@@ -148,15 +148,110 @@ public sealed class GeneralSettingsViewModelTests
     }
 
     [Fact]
-    public void ClearActivationHotkeyHint_KeepsTheHotkey()
+    public void ActivationHotkey_IsNotRecordingUntilStarted()
     {
         var viewModel = CreateViewModel("Ctrl+Alt+Space");
+
+        Assert.False(viewModel.IsRecordingActivationHotkey);
+        Assert.Equal(GeneralSettingsViewModel.ActivationHotkeyIdleDescription, viewModel.ActivationHotkeyDescription);
+        Assert.Equal("Activation hotkey, Ctrl+Alt+Space", viewModel.ActivationHotkeyAccessibleName);
+    }
+
+    [Fact]
+    public void StartRecordingActivationHotkey_SwitchesTheDescriptionAndName()
+    {
+        var viewModel = CreateViewModel("Ctrl+Alt+Space");
+        var changed = new List<string>();
+        viewModel.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        viewModel.StartRecordingActivationHotkey();
+
+        Assert.True(viewModel.IsRecordingActivationHotkey);
+        Assert.Equal(GeneralSettingsViewModel.ActivationHotkeyRecordingDescription, viewModel.ActivationHotkeyDescription);
+        Assert.Equal("Activation hotkey, press a key combination", viewModel.ActivationHotkeyAccessibleName);
+        Assert.Contains(nameof(GeneralSettingsViewModel.ActivationHotkeyDescription), changed);
+        Assert.Contains(nameof(GeneralSettingsViewModel.ActivationHotkeyAccessibleName), changed);
+    }
+
+    [Fact]
+    public void RecordActivationHotkey_AcceptedCombination_EndsRecording()
+    {
+        var viewModel = CreateViewModel("Ctrl+Alt+Space");
+        viewModel.StartRecordingActivationHotkey();
+
+        viewModel.RecordActivationHotkey(ModifierKeys.Control | ModifierKeys.Alt, Key.K);
+
+        Assert.False(viewModel.IsRecordingActivationHotkey);
+        Assert.Equal("Ctrl+Alt+K", viewModel.Settings.ActivationHotkey);
+    }
+
+    [Fact]
+    public void RecordActivationHotkey_RejectedCombination_KeepsRecording()
+    {
+        var viewModel = CreateViewModel("Ctrl+Alt+Space");
+        viewModel.StartRecordingActivationHotkey();
+
         viewModel.RecordActivationHotkey(ModifierKeys.None, Key.A);
 
-        viewModel.ClearActivationHotkeyHint();
-
+        Assert.True(viewModel.IsRecordingActivationHotkey);
+        Assert.True(viewModel.HasActivationHotkeyHint);
         Assert.Equal("Ctrl+Alt+Space", viewModel.Settings.ActivationHotkey);
+    }
+
+    [Fact]
+    public void CancelRecordingActivationHotkey_KeepsTheHotkeyAndClearsTheHint()
+    {
+        var viewModel = CreateViewModel("Ctrl+Alt+Space");
+        viewModel.StartRecordingActivationHotkey();
+        viewModel.RecordActivationHotkey(ModifierKeys.None, Key.A);
+
+        viewModel.CancelRecordingActivationHotkey();
+
+        Assert.False(viewModel.IsRecordingActivationHotkey);
         Assert.False(viewModel.HasActivationHotkeyHint);
+        Assert.Equal("Ctrl+Alt+Space", viewModel.Settings.ActivationHotkey);
+    }
+
+    [Fact]
+    public void ClearActivationHotkey_EndsRecording()
+    {
+        var viewModel = CreateViewModel("Ctrl+Alt+Space");
+        viewModel.StartRecordingActivationHotkey();
+
+        viewModel.ClearActivationHotkey();
+
+        Assert.False(viewModel.IsRecordingActivationHotkey);
+        Assert.False(viewModel.HasActivationHotkey);
+        Assert.Equal("Activation hotkey, not set", viewModel.ActivationHotkeyAccessibleName);
+    }
+
+    [Theory]
+    [InlineData("Ctrl+Alt+Space", new[] { "Ctrl", "Alt", "Space" })]
+    [InlineData(" Ctrl + K ", new[] { "Ctrl", "K" })]
+    [InlineData("F9", new[] { "F9" })]
+    [InlineData("", new string[0])]
+    [InlineData(null, new string[0])]
+    public void ActivationHotkeyKeys_SplitsTheHotkeyIntoKeycaps(string hotkey, string[] expected)
+    {
+        var viewModel = CreateViewModel(hotkey);
+
+        Assert.Equal(expected, viewModel.ActivationHotkeyKeys);
+        Assert.Equal(expected.Length > 0, viewModel.HasActivationHotkey);
+    }
+
+    [Fact]
+    public void ChangingTheHotkeySetting_RefreshesTheKeycapsAndName()
+    {
+        var viewModel = CreateViewModel("Ctrl+Alt+Space");
+        var changed = new List<string>();
+        viewModel.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        viewModel.Settings.ActivationHotkey = "Win+Shift+Q";
+
+        Assert.Contains(nameof(GeneralSettingsViewModel.ActivationHotkeyKeys), changed);
+        Assert.Contains(nameof(GeneralSettingsViewModel.HasActivationHotkey), changed);
+        Assert.Contains(nameof(GeneralSettingsViewModel.ActivationHotkeyAccessibleName), changed);
+        Assert.Equal(["Win", "Shift", "Q"], viewModel.ActivationHotkeyKeys);
     }
 
     [Fact]

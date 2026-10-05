@@ -31,7 +31,6 @@
                            Y1="0" Y2="0" />
 
     <!--  Spacing and sizing  -->
-    <sys:Double x:Key="PageMaxContentWidth">1000</sys:Double>
     <Thickness x:Key="CardPadding">16</Thickness>
     <Thickness x:Key="SettingsRowPadding">16,12</Thickness>
     <sys:Double x:Key="SettingsRowMinHeight">68</sys:Double>

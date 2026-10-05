@@ -100,391 +100,383 @@
     <!--  The negative right margin pulls the ScrollViewer into the window gutter so its overlay scrollbar never draws over the cards  -->
     <ScrollViewer Margin="0,0,-16,0"
                   HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="0,0,16,16">
-            <Grid.ColumnDefinitions>
-                <!--  A capped star column keeps the content left-aligned; MaxWidth on a stretched element would center it  -->
-                <ColumnDefinition Width="*"
-                                  MaxWidth="{StaticResource PageMaxContentWidth}" />
-            </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,16,16">
+            <Border Style="{StaticResource CardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-            <StackPanel>
-                <Border Style="{StaticResource CardStyle}">
+                    <Image Grid.Column="0"
+                           Width="64" Height="64"
+                           Margin="0,0,16,0" VerticalAlignment="Center"
+                           AutomationProperties.Name="Radial Actions logo"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           Source="/RadialActions;component/RadialActions.ico" />
+
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Radial Actions"
+                                   AutomationProperties.HeadingLevel="Level1"
+                                   Style="{StaticResource TitleTextStyle}" />
+                        <TextBlock Text="Build your own shortcut wheel for the apps and actions you use most."
+                                   Style="{StaticResource SecondaryBodyTextStyle}" />
+                        <WrapPanel Margin="0,4,0,0">
+                            <Border Margin="0,8,8,0"
+                                    Style="{StaticResource ChipBorderStyle}">
+                                <TextBlock Text="{Binding AppVersion, StringFormat='Version {0}'}"
+                                           Style="{StaticResource ChipTextStyle}" />
+                            </Border>
+                            <Border Margin="0,8,8,0"
+                                    Style="{StaticResource ChipBorderStyle}">
+                                <TextBlock Text="{Binding Architecture}"
+                                           Style="{StaticResource ChipTextStyle}" />
+                            </Border>
+                            <Border Margin="0,8,8,0"
+                                    Style="{StaticResource ChipBorderStyle}">
+                                <TextBlock Text="{Binding RuntimeDescription}"
+                                           Style="{StaticResource ChipTextStyle}" />
+                            </Border>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2"
+                                Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Style="{StaticResource HeroLinkPanelStyle}">
+                            <ContentControl Content="&#xE71B;"
+                                            Style="{StaticResource HeroLinkIconStyle}" />
+                            <TextBlock Style="{StaticResource BodyTextStyle}"
+                                       TextWrapping="NoWrap">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    View on GitHub
+                                </Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HeroLinkPanelStyle}">
+                            <ContentControl Content="&#xE789;"
+                                            Style="{StaticResource HeroLinkIconStyle}" />
+                            <TextBlock Style="{StaticResource BodyTextStyle}"
+                                       TextWrapping="NoWrap">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    Release notes
+                                </Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HeroLinkPanelStyle}">
+                            <ContentControl Content="&#xEBE8;"
+                                            Style="{StaticResource HeroLinkIconStyle}" />
+                            <TextBlock Style="{StaticResource BodyTextStyle}"
+                                       TextWrapping="NoWrap">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    Report a bug
+                                </Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HeroLinkPanelStyle}">
+                            <ContentControl Content="&#xE8A5;"
+                                            Style="{StaticResource HeroLinkIconStyle}" />
+                            <TextBlock Style="{StaticResource BodyTextStyle}"
+                                       TextWrapping="NoWrap">
+                                <Hyperlink Command="{Binding OpenLicensesCommand}"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    Third-party licenses
+                                </Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TextBlock Text="Getting started"
+                       Style="{StaticResource SectionHeaderTextStyle}" />
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Add apps, files, folders, scripts, and key commands on the Actions tab."
+                               Style="{StaticResource SecondaryBodyTextStyle}" />
+
+                    <Grid Style="{StaticResource StepPanelStyle}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource StepNumberBorderStyle}">
+                            <TextBlock Text="1"
+                                       Style="{StaticResource StepNumberTextStyle}" />
+                        </Border>
+                        <!--  Keycaps live in InlineUIContainers, which screen readers skip, so each step that uses one also carries its full sentence as its name  -->
+                        <TextBlock Grid.Column="1"
+                                   AutomationProperties.Name="{Binding Settings.ActivationHotkey, Mode=OneWay, StringFormat='Press {0} to open the menu.'}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock"
+                                       BasedOn="{StaticResource BodyTextStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Settings.ActivationHotkey}"
+                                                     Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Settings.ActivationHotkey}"
+                                                     Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding HasActivationHotkeyError, Source={x:Static local:App.CurrentApp}}"
+                                                     Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <Run Text="Press" />
+                            <InlineUIContainer BaselineAlignment="Center">
+                                <Border Style="{StaticResource KeycapBorderStyle}">
+                                    <TextBlock Text="{Binding Settings.ActivationHotkey, Mode=OneWay}"
+                                               Style="{StaticResource KeycapTextStyle}" />
+                                </Border>
+                            </InlineUIContainer>
+                            <Run Text="to open the menu." />
+                        </TextBlock>
+                        <!--  Shown instead when the hotkey was cleared or can't open the menu (for example another app registered it first), so the step never advertises keys that don't work  -->
+                        <TextBlock Grid.Column="1"
+                                   Text="Select the Radial Actions tray icon to open the menu.">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock"
+                                       BasedOn="{StaticResource BodyTextStyle}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Settings.ActivationHotkey}"
+                                                     Value="">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Settings.ActivationHotkey}"
+                                                     Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding HasActivationHotkeyError, Source={x:Static local:App.CurrentApp}}"
+                                                     Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
+                    <Grid Style="{StaticResource StepPanelStyle}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource StepNumberBorderStyle}">
+                            <TextBlock Text="2"
+                                       Style="{StaticResource StepNumberTextStyle}" />
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   AutomationProperties.Name="Point at a slice and click it, or use the arrow keys and press Enter. Number keys 1 to 9 run slices directly."
+                                   Style="{StaticResource BodyTextStyle}">
+                            <Run Text="Point at a slice and click it, or use the arrow keys and press" />
+                            <InlineUIContainer BaselineAlignment="Center">
+                                <Border Style="{StaticResource KeycapBorderStyle}">
+                                    <TextBlock Text="Enter"
+                                               Style="{StaticResource KeycapTextStyle}" />
+                                </Border>
+                            </InlineUIContainer><Run Text=". Number keys 1 to 9 run slices directly." />
+                        </TextBlock>
+                    </Grid>
+
+                    <Grid Style="{StaticResource StepPanelStyle}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource StepNumberBorderStyle}">
+                            <TextBlock Text="3"
+                                       Style="{StaticResource StepNumberTextStyle}" />
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="Drag a slice around the menu to reorder it."
+                                   Style="{StaticResource BodyTextStyle}" />
+                    </Grid>
+
+                    <Grid Style="{StaticResource StepPanelStyle}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource StepNumberBorderStyle}">
+                            <TextBlock Text="4"
+                                       Style="{StaticResource StepNumberTextStyle}" />
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   AutomationProperties.Name="Right-click the center, or press Shift+F10, for more options."
+                                   Style="{StaticResource BodyTextStyle}">
+                            <Run Text="Right-click the center, or press" />
+                            <InlineUIContainer BaselineAlignment="Center">
+                                <Border Style="{StaticResource KeycapBorderStyle}">
+                                    <TextBlock Text="Shift+F10"
+                                               Style="{StaticResource KeycapTextStyle}" />
+                                </Border>
+                            </InlineUIContainer><Run Text=", for more options." />
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="System"
+                       Style="{StaticResource SectionHeaderTextStyle}" />
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                        <Image Grid.Column="0"
-                               Width="64" Height="64"
-                               Margin="0,0,16,0" VerticalAlignment="Center"
-                               AutomationProperties.Name="Radial Actions logo"
-                               RenderOptions.BitmapScalingMode="HighQuality"
-                               Source="/RadialActions;component/RadialActions.ico" />
+                        <TextBlock x:Name="OperatingSystemLabel"
+                                   Grid.Row="0" Grid.Column="0"
+                                   Text="Operating system"
+                                   Style="{StaticResource SystemLabelTextStyle}" />
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding OsDescription, Mode=OneWay}"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=OperatingSystemLabel}"
+                                 Style="{StaticResource SelectableValueTextBoxStyle}" />
 
-                        <StackPanel Grid.Column="1"
-                                    VerticalAlignment="Center">
-                            <TextBlock Text="Radial Actions"
-                                       AutomationProperties.HeadingLevel="Level1"
-                                       Style="{StaticResource TitleTextStyle}" />
-                            <TextBlock Text="Build your own shortcut wheel for the apps and actions you use most."
-                                       Style="{StaticResource SecondaryBodyTextStyle}" />
-                            <WrapPanel Margin="0,4,0,0">
-                                <Border Margin="0,8,8,0"
-                                        Style="{StaticResource ChipBorderStyle}">
-                                    <TextBlock Text="{Binding AppVersion, StringFormat='Version {0}'}"
-                                               Style="{StaticResource ChipTextStyle}" />
-                                </Border>
-                                <Border Margin="0,8,8,0"
-                                        Style="{StaticResource ChipBorderStyle}">
-                                    <TextBlock Text="{Binding Architecture}"
-                                               Style="{StaticResource ChipTextStyle}" />
-                                </Border>
-                                <Border Margin="0,8,8,0"
-                                        Style="{StaticResource ChipBorderStyle}">
-                                    <TextBlock Text="{Binding RuntimeDescription}"
-                                               Style="{StaticResource ChipTextStyle}" />
-                                </Border>
-                            </WrapPanel>
-                        </StackPanel>
+                        <TextBlock x:Name="ExecutableLabel"
+                                   Grid.Row="1" Grid.Column="0"
+                                   Text="Executable"
+                                   Style="{StaticResource SystemLabelTextStyle}" />
+                        <TextBox Grid.Row="1" Grid.Column="1"
+                                 Text="{Binding ExecutablePath, Mode=OneWay}"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=ExecutableLabel}"
+                                 Style="{StaticResource SelectableValueTextBoxStyle}" />
 
-                        <StackPanel Grid.Column="2"
-                                    Margin="16,0,0,0" VerticalAlignment="Center">
-                            <StackPanel Style="{StaticResource HeroLinkPanelStyle}">
-                                <ContentControl Content="&#xE71B;"
-                                                Style="{StaticResource HeroLinkIconStyle}" />
-                                <TextBlock Style="{StaticResource BodyTextStyle}"
-                                           TextWrapping="NoWrap">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        View on GitHub
-                                    </Hyperlink>
-                                </TextBlock>
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource HeroLinkPanelStyle}">
-                                <ContentControl Content="&#xE789;"
-                                                Style="{StaticResource HeroLinkIconStyle}" />
-                                <TextBlock Style="{StaticResource BodyTextStyle}"
-                                           TextWrapping="NoWrap">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/releases"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        Release notes
-                                    </Hyperlink>
-                                </TextBlock>
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource HeroLinkPanelStyle}">
-                                <ContentControl Content="&#xEBE8;"
-                                                Style="{StaticResource HeroLinkIconStyle}" />
-                                <TextBlock Style="{StaticResource BodyTextStyle}"
-                                           TextWrapping="NoWrap">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/RadialActions/issues"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        Report a bug
-                                    </Hyperlink>
-                                </TextBlock>
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource HeroLinkPanelStyle}">
-                                <ContentControl Content="&#xE8A5;"
-                                                Style="{StaticResource HeroLinkIconStyle}" />
-                                <TextBlock Style="{StaticResource BodyTextStyle}"
-                                           TextWrapping="NoWrap">
-                                    <Hyperlink Command="{Binding OpenLicensesCommand}"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        Third-party licenses
-                                    </Hyperlink>
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel>
+                        <TextBlock x:Name="SettingsFileLabel"
+                                   Grid.Row="2" Grid.Column="0"
+                                   Text="Settings file"
+                                   Style="{StaticResource SystemLabelTextStyle}" />
+                        <TextBox Grid.Row="2" Grid.Column="1"
+                                 Text="{Binding SettingsFilePath, Mode=OneWay}"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=SettingsFileLabel}"
+                                 Style="{StaticResource SelectableValueTextBoxStyle}" />
                     </Grid>
-                </Border>
 
-                <TextBlock Text="Getting started"
-                           Style="{StaticResource SectionHeaderTextStyle}" />
-                <Border Style="{StaticResource CardStyle}">
-                    <StackPanel>
-                        <TextBlock Text="Add apps, files, folders, scripts, and key commands on the Actions tab."
-                                   Style="{StaticResource SecondaryBodyTextStyle}" />
+                    <WrapPanel Margin="0,4,0,0">
+                        <Button Content="Open app folder"
+                                Command="{Binding OpenExeFolderCommand}"
+                                Margin="0,0,8,8" />
+                        <Button Content="Open settings file"
+                                Command="{Binding OpenSettingsFileCommand}"
+                                Margin="0,0,8,8" />
+                    </WrapPanel>
+                    <TextBlock Text="Edits made while Radial Actions is running are replaced when settings are saved. Exit from the tray icon before editing the file by hand."
+                               Style="{StaticResource CaptionTextStyle}" />
+                </StackPanel>
+            </Border>
 
-                        <Grid Style="{StaticResource StepPanelStyle}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource StepNumberBorderStyle}">
-                                <TextBlock Text="1"
-                                           Style="{StaticResource StepNumberTextStyle}" />
-                            </Border>
-                            <!--  Keycaps live in InlineUIContainers, which screen readers skip, so each step that uses one also carries its full sentence as its name  -->
-                            <TextBlock Grid.Column="1"
-                                       AutomationProperties.Name="{Binding Settings.ActivationHotkey, Mode=OneWay, StringFormat='Press {0} to open the menu.'}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock"
-                                           BasedOn="{StaticResource BodyTextStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Settings.ActivationHotkey}"
-                                                         Value="">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Settings.ActivationHotkey}"
-                                                         Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding HasActivationHotkeyError, Source={x:Static local:App.CurrentApp}}"
-                                                         Value="True">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                                <Run Text="Press" />
-                                <InlineUIContainer BaselineAlignment="Center">
-                                    <Border Style="{StaticResource KeycapBorderStyle}">
-                                        <TextBlock Text="{Binding Settings.ActivationHotkey, Mode=OneWay}"
-                                                   Style="{StaticResource KeycapTextStyle}" />
-                                    </Border>
-                                </InlineUIContainer>
-                                <Run Text="to open the menu." />
+            <TextBlock Text="More from the author"
+                       Style="{StaticResource SectionHeaderTextStyle}" />
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <!--  Fixed-width tiles wrap to fewer columns in a narrow window instead of clipping their titles  -->
+                    <WrapPanel ItemWidth="232">
+                        <StackPanel Style="{StaticResource ProjectTileStyle}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    DesktopClock
+                                </Hyperlink>
                             </TextBlock>
-                            <!--  Shown instead when the hotkey was cleared or can't open the menu (for example another app registered it first), so the step never advertises keys that don't work  -->
-                            <TextBlock Grid.Column="1"
-                                       Text="Select the Radial Actions tray icon to open the menu.">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock"
-                                           BasedOn="{StaticResource BodyTextStyle}">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Settings.ActivationHotkey}"
-                                                         Value="">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Settings.ActivationHotkey}"
-                                                         Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding HasActivationHotkeyError, Source={x:Static local:App.CurrentApp}}"
-                                                         Value="True">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
+                            <TextBlock Text="A digital clock for your desktop."
+                                       Style="{StaticResource ProjectDescriptionTextStyle}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStyle}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SteamAccountSwitcher"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    SteamAccountSwitcher
+                                </Hyperlink>
                             </TextBlock>
-                        </Grid>
-
-                        <Grid Style="{StaticResource StepPanelStyle}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource StepNumberBorderStyle}">
-                                <TextBlock Text="2"
-                                           Style="{StaticResource StepNumberTextStyle}" />
-                            </Border>
-                            <TextBlock Grid.Column="1"
-                                       AutomationProperties.Name="Point at a slice and click it, or use the arrow keys and press Enter. Number keys 1 to 9 run slices directly."
-                                       Style="{StaticResource BodyTextStyle}">
-                                <Run Text="Point at a slice and click it, or use the arrow keys and press" />
-                                <InlineUIContainer BaselineAlignment="Center">
-                                    <Border Style="{StaticResource KeycapBorderStyle}">
-                                        <TextBlock Text="Enter"
-                                                   Style="{StaticResource KeycapTextStyle}" />
-                                    </Border>
-                                </InlineUIContainer><Run Text=". Number keys 1 to 9 run slices directly." />
+                            <TextBlock Text="Swap Steam accounts from the system tray."
+                                       Style="{StaticResource ProjectDescriptionTextStyle}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStyle}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Network-Monitor"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    Network Monitor
+                                </Hyperlink>
                             </TextBlock>
-                        </Grid>
-
-                        <Grid Style="{StaticResource StepPanelStyle}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource StepNumberBorderStyle}">
-                                <TextBlock Text="3"
-                                           Style="{StaticResource StepNumberTextStyle}" />
-                            </Border>
-                            <TextBlock Grid.Column="1"
-                                       Text="Drag a slice around the menu to reorder it."
-                                       Style="{StaticResource BodyTextStyle}" />
-                        </Grid>
-
-                        <Grid Style="{StaticResource StepPanelStyle}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource StepNumberBorderStyle}">
-                                <TextBlock Text="4"
-                                           Style="{StaticResource StepNumberTextStyle}" />
-                            </Border>
-                            <TextBlock Grid.Column="1"
-                                       AutomationProperties.Name="Right-click the center, or press Shift+F10, for more options."
-                                       Style="{StaticResource BodyTextStyle}">
-                                <Run Text="Right-click the center, or press" />
-                                <InlineUIContainer BaselineAlignment="Center">
-                                    <Border Style="{StaticResource KeycapBorderStyle}">
-                                        <TextBlock Text="Shift+F10"
-                                                   Style="{StaticResource KeycapTextStyle}" />
-                                    </Border>
-                                </InlineUIContainer><Run Text=", for more options." />
+                            <TextBlock Text="Live latency and bandwidth in a desktop widget."
+                                       Style="{StaticResource ProjectDescriptionTextStyle}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStyle}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    Good Diary
+                                </Hyperlink>
                             </TextBlock>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <TextBlock Text="System"
-                           Style="{StaticResource SectionHeaderTextStyle}" />
-                <Border Style="{StaticResource CardStyle}">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock x:Name="OperatingSystemLabel"
-                                       Grid.Row="0" Grid.Column="0"
-                                       Text="Operating system"
-                                       Style="{StaticResource SystemLabelTextStyle}" />
-                            <TextBox Grid.Row="0" Grid.Column="1"
-                                     Text="{Binding OsDescription, Mode=OneWay}"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=OperatingSystemLabel}"
-                                     Style="{StaticResource SelectableValueTextBoxStyle}" />
-
-                            <TextBlock x:Name="ExecutableLabel"
-                                       Grid.Row="1" Grid.Column="0"
-                                       Text="Executable"
-                                       Style="{StaticResource SystemLabelTextStyle}" />
-                            <TextBox Grid.Row="1" Grid.Column="1"
-                                     Text="{Binding ExecutablePath, Mode=OneWay}"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=ExecutableLabel}"
-                                     Style="{StaticResource SelectableValueTextBoxStyle}" />
-
-                            <TextBlock x:Name="SettingsFileLabel"
-                                       Grid.Row="2" Grid.Column="0"
-                                       Text="Settings file"
-                                       Style="{StaticResource SystemLabelTextStyle}" />
-                            <TextBox Grid.Row="2" Grid.Column="1"
-                                     Text="{Binding SettingsFilePath, Mode=OneWay}"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=SettingsFileLabel}"
-                                     Style="{StaticResource SelectableValueTextBoxStyle}" />
-                        </Grid>
-
-                        <WrapPanel Margin="0,4,0,0">
-                            <Button Content="Open app folder"
-                                    Command="{Binding OpenExeFolderCommand}"
-                                    Margin="0,0,8,8" />
-                            <Button Content="Open settings file"
-                                    Command="{Binding OpenSettingsFileCommand}"
-                                    Margin="0,0,8,8" />
-                        </WrapPanel>
-                        <TextBlock Text="Edits made while Radial Actions is running are replaced when settings are saved. Exit from the tray icon before editing the file by hand."
-                                   Style="{StaticResource CaptionTextStyle}" />
-                    </StackPanel>
-                </Border>
-
-                <TextBlock Text="More from the author"
-                           Style="{StaticResource SectionHeaderTextStyle}" />
-                <Border Style="{StaticResource CardStyle}">
-                    <StackPanel>
-                        <!--  Fixed-width tiles wrap to fewer columns in a narrow window instead of clipping their titles  -->
-                        <WrapPanel ItemWidth="232">
-                            <StackPanel Style="{StaticResource ProjectTileStyle}">
-                                <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/DesktopClock"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        DesktopClock
-                                    </Hyperlink>
-                                </TextBlock>
-                                <TextBlock Text="A digital clock for your desktop."
-                                           Style="{StaticResource ProjectDescriptionTextStyle}" />
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource ProjectTileStyle}">
-                                <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/SteamAccountSwitcher"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        SteamAccountSwitcher
-                                    </Hyperlink>
-                                </TextBlock>
-                                <TextBlock Text="Swap Steam accounts from the system tray."
-                                           Style="{StaticResource ProjectDescriptionTextStyle}" />
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource ProjectTileStyle}">
-                                <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/Network-Monitor"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        Network Monitor
-                                    </Hyperlink>
-                                </TextBlock>
-                                <TextBlock Text="Live latency and bandwidth in a desktop widget."
-                                           Style="{StaticResource ProjectDescriptionTextStyle}" />
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource ProjectTileStyle}">
-                                <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        Good Diary
-                                    </Hyperlink>
-                                </TextBlock>
-                                <TextBlock Text="Track your daily activities and moods on Android."
-                                           Style="{StaticResource ProjectDescriptionTextStyle}" />
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource ProjectTileStyle}">
-                                <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        Sentry Replay
-                                    </Hyperlink>
-                                </TextBlock>
-                                <TextBlock Text="Review Tesla dashcam clips on Windows."
-                                           Style="{StaticResource ProjectDescriptionTextStyle}" />
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource ProjectTileStyle}">
-                                <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/Teichos"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        Teichos
-                                    </Hyperlink>
-                                </TextBlock>
-                                <TextBlock Text="Stay focused with URL blocking and schedules."
-                                           Style="{StaticResource ProjectDescriptionTextStyle}" />
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource ProjectTileStyle}">
-                                <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/Dayboard"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        Dayboard
-                                    </Hyperlink>
-                                </TextBlock>
-                                <TextBlock Text="Put widgets on your browser's new tab page."
-                                           Style="{StaticResource ProjectDescriptionTextStyle}" />
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource ProjectTileStyle}">
-                                <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
-                                    <Hyperlink NavigateUri="https://github.com/danielchalmers/NullTab"
-                                               Style="{StaticResource StandaloneHyperlinkStyle}">
-                                        NullTab
-                                    </Hyperlink>
-                                </TextBlock>
-                                <TextBlock Text="Replace your new tab page with a blank one."
-                                           Style="{StaticResource ProjectDescriptionTextStyle}" />
-                            </StackPanel>
-                        </WrapPanel>
-                        <TextBlock Margin="0,4,0,0"
-                                   Style="{StaticResource BodyTextStyle}">
-                            <Hyperlink NavigateUri="https://github.com/danielchalmers"
-                                       Style="{StaticResource StandaloneHyperlinkStyle}">
-                                View all projects on GitHub
-                            </Hyperlink>
-                        </TextBlock>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </Grid>
+                            <TextBlock Text="Track your daily activities and moods on Android."
+                                       Style="{StaticResource ProjectDescriptionTextStyle}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStyle}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    Sentry Replay
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock Text="Review Tesla dashcam clips on Windows."
+                                       Style="{StaticResource ProjectDescriptionTextStyle}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStyle}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Teichos"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    Teichos
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock Text="Stay focused with URL blocking and schedules."
+                                       Style="{StaticResource ProjectDescriptionTextStyle}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStyle}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/Dayboard"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    Dayboard
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock Text="Put widgets on your browser's new tab page."
+                                       Style="{StaticResource ProjectDescriptionTextStyle}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource ProjectTileStyle}">
+                            <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/NullTab"
+                                           Style="{StaticResource StandaloneHyperlinkStyle}">
+                                    NullTab
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock Text="Replace your new tab page with a blank one."
+                                       Style="{StaticResource ProjectDescriptionTextStyle}" />
+                        </StackPanel>
+                    </WrapPanel>
+                    <TextBlock Margin="0,4,0,0"
+                               Style="{StaticResource BodyTextStyle}">
+                        <Hyperlink NavigateUri="https://github.com/danielchalmers"
+                                   Style="{StaticResource StandaloneHyperlinkStyle}">
+                            View all projects on GitHub
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:RadialActions"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        Title="Radial Actions settings"
+        Title="Radial Actions Settings"
         Width="1040" Height="760"
         MinWidth="720" MinHeight="500"
         d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
@@ -16,13 +16,9 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!--  The banner shares the pages' capped content column so its right edge lines up with the cards; its vertical margin stays on the banner so the row takes no space while it's collapsed  -->
+        <!--  The vertical margin stays on the banner so the row takes no space while it's collapsed  -->
         <Grid Grid.Row="0"
               Margin="16,0,16,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"
-                                  MaxWidth="{StaticResource PageMaxContentWidth}" />
-            </Grid.ColumnDefinitions>
             <Border x:Name="UpdateBanner"
                     Margin="0,8,0,4"
                     Binding.TargetUpdated="UpdateBanner_TargetUpdated"
