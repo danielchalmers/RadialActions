@@ -13,14 +13,21 @@ internal static class TrayNotificationText
     private const string AppName = "Radial Actions";
 
     /// <summary>
-    /// First-run notification that says how to open the menu.
+    /// First-run notification that says how to open the menu and, while the app doesn't start at sign-in, how to make it.
     /// </summary>
     /// <param name="hotkey">The registered activation hotkey, or null or empty when there isn't one.</param>
-    public static TrayNotification Welcome(string hotkey) => new(
-        $"{AppName} is running",
-        string.IsNullOrWhiteSpace(hotkey)
+    /// <param name="runsAtStartup">Whether Run at Windows startup is on; without it the hotkey stops working after a restart.</param>
+    public static TrayNotification Welcome(string hotkey, bool runsAtStartup)
+    {
+        var howToOpen = string.IsNullOrWhiteSpace(hotkey)
             ? $"Select the {AppName} tray icon to open the menu."
-            : $"Press {hotkey.Trim()} to open the menu.");
+            : $"Press {hotkey.Trim()} to open the menu.";
+
+        // Selecting the welcome opens the General tab, where the setting is.
+        return new(
+            $"{AppName} is running",
+            runsAtStartup ? howToOpen : $"{howToOpen} To start {AppName} when you sign in, select this and turn on Run at Windows startup.");
+    }
 
     /// <summary>
     /// Shown at startup while the activation hotkey can't be registered; selecting it opens Settings on the hotkey.
@@ -35,9 +42,10 @@ internal static class TrayNotificationText
     /// </summary>
     /// <param name="hotkey">The saved activation hotkey.</param>
     /// <param name="hasShownWelcome">Whether the welcome appeared on an earlier launch.</param>
+    /// <param name="runsAtStartup">Whether Run at Windows startup is on, which the welcome mentions while it's off.</param>
     /// <param name="isWelcome">True when the result is the welcome, which the caller records as shown so it doesn't appear again.</param>
     /// <returns>The notification, or null when there's nothing to say.</returns>
-    public static TrayNotification ForStartup(HotkeyRegistrationResult result, string hotkey, bool hasShownWelcome, out bool isWelcome)
+    public static TrayNotification ForStartup(HotkeyRegistrationResult result, string hotkey, bool hasShownWelcome, bool runsAtStartup, out bool isWelcome)
     {
         isWelcome = false;
 
@@ -53,7 +61,7 @@ internal static class TrayNotificationText
         }
 
         isWelcome = true;
-        return Welcome(result == HotkeyRegistrationResult.Registered ? hotkey : null);
+        return Welcome(result == HotkeyRegistrationResult.Registered ? hotkey : null, runsAtStartup);
     }
 
     public static TrayNotification UpdateAvailable(Version latestVersion) => new(

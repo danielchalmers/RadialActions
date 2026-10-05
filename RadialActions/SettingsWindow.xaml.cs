@@ -14,7 +14,6 @@ namespace RadialActions;
 /// </summary>
 public partial class SettingsWindow : Window
 {
-    private const string LatestReleaseUrl = "https://github.com/danielchalmers/RadialActions/releases/latest";
     private const string ShortcutInputTag = "HotkeyInput";
 
     private readonly SettingsWindowViewModel _viewModel;
@@ -61,7 +60,7 @@ public partial class SettingsWindow : Window
 
     private void DownloadUpdateButton_Click(object sender, RoutedEventArgs e)
     {
-        OpenUrl(LatestReleaseUrl);
+        OpenUrl(UpdateService.LatestReleasePageUrl);
     }
 
     private static void OpenUrl(string url)

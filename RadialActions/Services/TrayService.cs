@@ -25,6 +25,11 @@ internal sealed class TrayService : IDisposable
     /// </summary>
     public PieAction NotificationAction { get; private set; }
 
+    /// <summary>
+    /// The page the most recent notification is about, so selecting the notification can open it; null when the latest one is about something else.
+    /// </summary>
+    public string NotificationLink { get; private set; }
+
     public void UpdateToolTip(string registeredHotkey)
     {
         try
@@ -48,7 +53,11 @@ internal sealed class TrayService : IDisposable
 
     public void ShowUpdateAvailableNotification(Version latestVersion)
     {
-        Show(TrayNotificationText.UpdateAvailable(latestVersion), NotificationIcon.Info);
+        // Silent like the startup notifications, since it comes back on every launch until the update is installed.
+        if (Show(TrayNotificationText.UpdateAvailable(latestVersion), NotificationIcon.Info, sound: false))
+        {
+            NotificationLink = UpdateService.LatestReleasePageUrl;
+        }
     }
 
     /// <param name="notification">The text from <see cref="ActionFailureMessage.Create"/>.</param>
@@ -84,6 +93,7 @@ internal sealed class TrayService : IDisposable
         }
 
         NotificationAction = null;
+        NotificationLink = null;
         return true;
     }
 
