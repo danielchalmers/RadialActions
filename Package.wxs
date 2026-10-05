@@ -7,10 +7,9 @@
     <Property Id="ARPNOMODIFY" Value="1" />
     <!--  Skip the System Restore point, which can hold the installer at "Please wait" for most of a minute and protects nothing in a per-user app folder  -->
     <Property Id="MSIFASTINSTALL" Value="1" />
-    <!--  Removing the old version inside the install transaction lets a failed or cancelled update roll back to it instead of leaving nothing installed  -->
+    <!--  Keep the default schedule: in a per-user install without elevation, rolling back an in-transaction removal (afterInstallInitialize) restores the old files but not the old product's registration, leaving a copy no update or uninstall can find  -->
     <MajorUpgrade AllowSameVersionUpgrades="yes"
-                  DowngradeErrorMessage="A newer version of Radial Actions is already installed."
-                  Schedule="afterInstallInitialize" />
+                  DowngradeErrorMessage="A newer version of Radial Actions is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
     <!--  Started through Explorer so the app gets the user's environment, including their PATH, instead of the Windows Installer service's  -->

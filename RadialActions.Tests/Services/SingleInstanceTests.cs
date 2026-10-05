@@ -1,4 +1,7 @@
-﻿namespace RadialActions.Tests;
+﻿using System.Security.AccessControl;
+using System.Security.Principal;
+
+namespace RadialActions.Tests;
 
 public class SingleInstanceTests
 {
@@ -30,6 +33,21 @@ public class SingleInstanceTests
         }
 
         Assert.True(showRequested.Wait(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public void LaterCopyThatCannotOpenTheEvent_IsNotFirst_AndRequestShowAndDisposeAreNoOps()
+    {
+        var name = UniqueName();
+        var security = new EventWaitHandleSecurity();
+        security.AddAccessRule(new EventWaitHandleAccessRule(WindowsIdentity.GetCurrent().User, EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Deny));
+        using var otherAccountCopy = EventWaitHandleAcl.Create(false, EventResetMode.AutoReset, name, out _, security);
+
+        var later = new SingleInstance(name);
+
+        Assert.False(later.IsFirst);
+        later.RequestShow();
+        later.Dispose();
     }
 
     [Fact]

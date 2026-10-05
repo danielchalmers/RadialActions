@@ -22,8 +22,8 @@ internal sealed class SingleInstance : IDisposable
         }
         catch (UnauthorizedAccessException ex)
         {
-            // A copy running as administrator created the event, so this copy can't open it or ask that copy to show itself.
-            Log.Warning(ex, "Radial Actions is already running as administrator");
+            // A copy under another account in this session created the event, so this copy can't open it or ask that copy to show itself.
+            Log.Warning(ex, "Radial Actions is already running under another account");
         }
     }
 
