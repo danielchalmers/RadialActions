@@ -5,13 +5,18 @@
            UpgradeCode="EB19552B-9520-4638-9459-D2D257B52D05"
            Scope="perUser">
     <Property Id="ARPNOMODIFY" Value="1" />
+    <!--  Skip the System Restore point, which can hold the installer at "Please wait" for most of a minute and protects nothing in a per-user app folder  -->
+    <Property Id="MSIFASTINSTALL" Value="1" />
+    <!--  Removing the old version inside the install transaction lets a failed or cancelled update roll back to it instead of leaving nothing installed  -->
     <MajorUpgrade AllowSameVersionUpgrades="yes"
-                  DowngradeErrorMessage="A newer version of Radial Actions is already installed." />
+                  DowngradeErrorMessage="A newer version of Radial Actions is already installed."
+                  Schedule="afterInstallInitialize" />
     <MediaTemplate EmbedCab="yes" />
 
+    <!--  Started through Explorer so the app gets the user's environment, including their PATH, instead of the Windows Installer service's  -->
     <CustomAction Id="LaunchApp"
                   Directory="INSTALLFOLDER"
-                  ExeCommand="&quot;[INSTALLFOLDER]RadialActions.exe&quot;"
+                  ExeCommand="&quot;[WindowsFolder]explorer.exe&quot; &quot;[INSTALLFOLDER]RadialActions.exe&quot;"
                   Execute="immediate"
                   Impersonate="yes"
                   Return="asyncNoWait" />
