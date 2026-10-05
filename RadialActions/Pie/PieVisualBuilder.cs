@@ -8,11 +8,18 @@ namespace RadialActions;
 
 public static class PieVisualBuilder
 {
+    private const string CloseGlyph = "\uE8BB";
+    private const string ReleaseHintGlyph = "\uE945";
+
     public readonly record struct CenterElements(
         Grid Target,
         SolidColorBrush FillBrush,
-        SolidColorBrush StrokeBrush,
-        TextBlock Icon);
+        SolidColorBrush GlyphBrush);
+
+    public readonly record struct SliceContent(
+        StackPanel Panel,
+        TextBlock Icon,
+        TextBlock Label);
 
     public static void AddSurfaceRing(
         Canvas canvas,
@@ -76,14 +83,16 @@ public static class PieVisualBuilder
         double innerRadius,
         double hubStrokeThickness,
         Color hubColor,
-        Color hubBorderColor,
-        Color iconTextColor,
+        Color strokeColor,
+        Color glyphColor,
+        FontFamily symbolFontFamily,
         Style hubEllipseStyle,
         Style hubContainerStyle,
-        Style iconTextStyle)
+        Style glyphTextStyle,
+        double contentScale)
     {
         var centerFillBrush = new SolidColorBrush(hubColor);
-        var centerStrokeBrush = new SolidColorBrush(hubBorderColor);
+        var centerGlyphBrush = new SolidColorBrush(glyphColor);
 
         var centerHole = new Ellipse
         {
@@ -91,24 +100,22 @@ public static class PieVisualBuilder
             Width = innerRadius * 2,
             Height = innerRadius * 2,
             Fill = centerFillBrush,
-            Stroke = centerStrokeBrush,
+            Stroke = new SolidColorBrush(strokeColor),
             StrokeThickness = hubStrokeThickness,
             Cursor = System.Windows.Input.Cursors.Hand,
             SnapsToDevicePixels = true,
         };
 
-        var centerCloseIcon = new TextBlock
+        // Always shown so the center reads as a close button, not a blank decoration.
+        var centerCloseGlyph = new TextBlock
         {
-            Style = iconTextStyle,
-            Text = "\uE8BB",
-            FontFamily = new FontFamily("Segoe MDL2 Assets"),
-            Foreground = new SolidColorBrush(iconTextColor),
-            FontSize = Math.Max(innerRadius * 0.40, 11),
-            Margin = new Thickness(0, -1, 0, 0),
-            Opacity = 0,
-            Visibility = Visibility.Collapsed,
+            Style = glyphTextStyle,
+            Text = CloseGlyph,
+            FontFamily = symbolFontFamily,
+            Foreground = centerGlyphBrush,
             IsHitTestVisible = false,
         };
+        ScaleFontSize(centerCloseGlyph, contentScale);
 
         var centerCloseTarget = new Grid
         {
@@ -119,60 +126,86 @@ public static class PieVisualBuilder
         };
 
         centerCloseTarget.Children.Add(centerHole);
-        centerCloseTarget.Children.Add(centerCloseIcon);
+        centerCloseTarget.Children.Add(centerCloseGlyph);
 
-        return new CenterElements(centerCloseTarget, centerFillBrush, centerStrokeBrush, centerCloseIcon);
+        return new CenterElements(centerCloseTarget, centerFillBrush, centerGlyphBrush);
     }
 
     public static TextBlock CreateSliceDigitHint(
         int digit,
-        Style labelTextStyle,
-        Color labelTextColor,
-        bool isHighContrast)
+        Style hintTextStyle,
+        Brush foreground,
+        double contentScale)
     {
-        return new TextBlock
+        var hint = new TextBlock
         {
-            Style = labelTextStyle,
+            Style = hintTextStyle,
             Text = digit.ToString(),
-            Foreground = new SolidColorBrush(labelTextColor),
-            FontSize = 9,
-            FontWeight = FontWeights.Normal,
-            Opacity = isHighContrast ? 1 : 0.3,
+            Foreground = foreground,
             IsHitTestVisible = false,
-            SnapsToDevicePixels = true,
         };
+        ScaleFontSize(hint, contentScale);
+        return hint;
     }
 
-    public static TextBlock CreateSliceReleaseHint(Style iconTextStyle, Color iconTextColor)
+    public static TextBlock CreateSliceReleaseHint(
+        Style glyphTextStyle,
+        FontFamily symbolFontFamily,
+        Brush foreground,
+        double contentScale)
     {
-        return new TextBlock
+        var hint = new TextBlock
         {
-            Style = iconTextStyle,
-            Text = "\uE945",
-            FontFamily = new FontFamily("Segoe MDL2 Assets"),
-            Foreground = new SolidColorBrush(iconTextColor),
-            FontSize = 14,
+            Style = glyphTextStyle,
+            Text = ReleaseHintGlyph,
+            FontFamily = symbolFontFamily,
+            Foreground = foreground,
             Opacity = 0,
             IsHitTestVisible = false,
-            SnapsToDevicePixels = true,
+        };
+        ScaleFontSize(hint, contentScale);
+        return hint;
+    }
+
+    public static Path CreateSelectionArc(
+        Geometry arcGeometry,
+        double thickness,
+        Brush stroke,
+        Style selectionArcStyle,
+        Transform sliceTransform)
+    {
+        return new Path
+        {
+            Style = selectionArcStyle,
+            Data = arcGeometry,
+            Stroke = stroke,
+            StrokeThickness = thickness,
+            IsHitTestVisible = false,
+            Opacity = 0,
+
+            // Shares the slice's press scale and reorder rotation so the arc moves with its slice.
+            RenderTransform = sliceTransform,
         };
     }
 
-    public static StackPanel CreateSliceContentPanel(
+    /// <summary>
+    /// Builds the icon stacked over the label, or returns an empty <see cref="SliceContent"/> when the action has neither.
+    /// </summary>
+    public static SliceContent CreateSliceContent(
         PieAction sliceAction,
         Style iconTextStyle,
         Style labelTextStyle,
-        Color iconTextColor,
-        Color labelTextColor,
+        Brush iconForeground,
+        Brush labelForeground,
         double iconToLabelSpacing,
-        double outerRadius,
-        double contentMaxWidthRatio,
-        Thickness contentPadding)
+        Thickness contentPadding,
+        double contentScale)
     {
         var showIcon = !string.IsNullOrEmpty(sliceAction.Icon);
-        if (!showIcon && string.IsNullOrWhiteSpace(sliceAction.Name))
+        var showLabel = !string.IsNullOrWhiteSpace(sliceAction.Name);
+        if (!showIcon && !showLabel)
         {
-            return null;
+            return default;
         }
 
         var contentPanel = new StackPanel
@@ -185,34 +218,56 @@ public static class PieVisualBuilder
             SnapsToDevicePixels = true,
         };
 
+        TextBlock icon = null;
         if (showIcon)
         {
-            contentPanel.Children.Add(new TextBlock
+            icon = new TextBlock
             {
                 Style = iconTextStyle,
                 Text = sliceAction.Icon,
-                Foreground = new SolidColorBrush(iconTextColor),
-                FontSize = 20,
-                Margin = new Thickness(0, 0, 0, iconToLabelSpacing),
-            });
+                Foreground = iconForeground,
+                Margin = new Thickness(0, 0, 0, showLabel ? iconToLabelSpacing : 0),
+            };
+            ScaleFontSize(icon, contentScale);
+            contentPanel.Children.Add(icon);
         }
 
-        if (!string.IsNullOrWhiteSpace(sliceAction.Name))
+        TextBlock label = null;
+        if (showLabel)
         {
-            contentPanel.Children.Add(new TextBlock
+            label = new TextBlock
             {
                 Style = labelTextStyle,
                 Text = sliceAction.Name,
-                Foreground = new SolidColorBrush(labelTextColor),
-                FontSize = 11,
-                FontWeight = FontWeights.SemiBold,
-                TextAlignment = TextAlignment.Center,
-                TextWrapping = TextWrapping.NoWrap,
-                TextTrimming = TextTrimming.CharacterEllipsis,
-                MaxWidth = Math.Max(56, outerRadius * contentMaxWidthRatio),
-            });
+                Foreground = labelForeground,
+            };
+            ScaleFontSize(label, contentScale);
+            contentPanel.Children.Add(label);
         }
 
-        return contentPanel;
+        return new SliceContent(contentPanel, icon, label);
+    }
+
+    /// <summary>
+    /// Removes the label so the slice shows its icon alone, for slices too narrow for even a trimmed name.
+    /// </summary>
+    public static void DropLabel(SliceContent content)
+    {
+        if (content.Label == null || content.Icon == null)
+        {
+            return;
+        }
+
+        content.Panel.Children.Remove(content.Label);
+        content.Icon.Margin = new Thickness(0);
+    }
+
+    private static void ScaleFontSize(TextBlock textBlock, double contentScale)
+    {
+        // The style carries the base size for a default menu; larger menus scale it here rather than overriding it with a literal.
+        if (contentScale != 1)
+        {
+            textBlock.FontSize *= contentScale;
+        }
     }
 }

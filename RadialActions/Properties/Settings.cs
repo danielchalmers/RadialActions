@@ -8,6 +8,8 @@ public sealed partial class Settings
 {
     public const string DefaultActivationHotkey = "Ctrl+Alt+Space";
     public const int DefaultSize = 400;
+    public const int MinSize = 200;
+    public const int MaxSize = 1000;
 
     /// <summary>
     /// The index of the selected tab in the settings window.
@@ -23,7 +25,7 @@ public sealed partial class Settings
     private string _activationHotkey = DefaultActivationHotkey;
 
     /// <summary>
-    /// The width and height of the radial menu in pixels.
+    /// The width and height of the radial menu in pixels, between <see cref="MinSize"/> and <see cref="MaxSize"/>.
     /// </summary>
     [ObservableProperty]
     private int _size = DefaultSize;
@@ -59,6 +61,12 @@ public sealed partial class Settings
     private bool _checkForUpdatesOnStartup = true;
 
     /// <summary>
+    /// Set once the first-run notification that explains the hotkey has been shown, so later launches start quietly.
+    /// </summary>
+    [ObservableProperty]
+    private bool _hasShownWelcomeNotification;
+
+    /// <summary>
     /// The collection of actions displayed in the pie menu.
     /// </summary>
     [ObservableProperty]
@@ -82,9 +90,21 @@ public sealed partial class Settings
     internal void NormalizeAfterLoad()
     {
         ActivationHotkey ??= DefaultActivationHotkey;
+
+        // Older recorders could save a bare key such as Tab, which would then be taken from every app at startup.
+        if (HotkeyUtil.ShouldReplaceSavedActivationHotkey(ActivationHotkey))
+        {
+            Log.Information("Replacing the saved activation hotkey {Hotkey}, which can't be used globally, with {DefaultHotkey}", ActivationHotkey, DefaultActivationHotkey);
+            ActivationHotkey = DefaultActivationHotkey;
+        }
+
         if (Size <= 0)
         {
             Size = DefaultSize;
+        }
+        else
+        {
+            Size = Math.Clamp(Size, MinSize, MaxSize);
         }
 
         if (Actions == null)

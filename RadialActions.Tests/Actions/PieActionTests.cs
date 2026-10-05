@@ -73,6 +73,22 @@ public class PieActionTests
     }
 
     [Fact]
+    public void DefaultName_UsesSentenceCase()
+    {
+        Assert.Equal("New action", PieAction.DefaultName);
+        Assert.Equal(PieAction.DefaultName, new PieAction().Name);
+    }
+
+    [Fact]
+    public void KeyActionDefinition_ToString_ReturnsName()
+    {
+        foreach (var definition in PieAction.KeyActions)
+        {
+            Assert.Equal(definition.Name, definition.ToString());
+        }
+    }
+
+    [Fact]
     public void KeyActions_AllHaveCategoryAndVirtualKey()
     {
         foreach (var definition in PieAction.KeyActions)
@@ -89,7 +105,7 @@ public class PieActionTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
-        Assert.Equal("No action configured", ex.Message);
+        Assert.Equal("This action doesn't have a type yet. Choose one in Settings.", ex.Message);
     }
 
     [Fact]
@@ -99,7 +115,7 @@ public class PieActionTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
-        Assert.Equal("Launch target not configured", ex.Message);
+        Assert.Equal("No target is set.", ex.Message);
     }
 
     [Fact]
@@ -109,7 +125,7 @@ public class PieActionTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
-        Assert.Equal("Script is empty", ex.Message);
+        Assert.Equal("The script is empty.", ex.Message);
     }
 
     [Fact]
@@ -119,7 +135,7 @@ public class PieActionTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
-        Assert.Equal("Script is too long to run", ex.Message);
+        Assert.Equal("The script is too long to run.", ex.Message);
     }
 
     [Fact]
@@ -133,6 +149,6 @@ public class PieActionTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => action.Execute());
 
-        Assert.Equal("Shortcut is invalid", ex.Message);
+        Assert.Equal("The shortcut isn't valid.", ex.Message);
     }
 }

@@ -5,6 +5,32 @@ using System.Windows.Interop;
 namespace RadialActions;
 
 /// <summary>
+/// The outcome of registering a global hotkey.
+/// </summary>
+public enum HotkeyRegistrationResult
+{
+    /// <summary>
+    /// The hotkey is registered.
+    /// </summary>
+    Registered,
+
+    /// <summary>
+    /// No hotkey is set, so nothing was registered.
+    /// </summary>
+    Empty,
+
+    /// <summary>
+    /// The text isn't a key combination that can be registered.
+    /// </summary>
+    Unrecognized,
+
+    /// <summary>
+    /// Windows refused the registration, usually because another app already uses the combination.
+    /// </summary>
+    Failed,
+}
+
+/// <summary>
 /// Manages global hotkey registration for the application.
 /// </summary>
 public class HotkeyManager : IDisposable
@@ -25,7 +51,7 @@ public class HotkeyManager : IDisposable
     private readonly Dictionary<string, int> _hotkeys = new(StringComparer.OrdinalIgnoreCase);
     private bool _disposed;
 
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", SetLastError = true)]
     private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
 
     [DllImport("user32.dll")]
@@ -47,13 +73,13 @@ public class HotkeyManager : IDisposable
     /// Registers a hotkey string (e.g., "Ctrl+Alt+Space").
     /// </summary>
     /// <param name="hotkey">The hotkey string to register.</param>
-    /// <returns>True if registration succeeded.</returns>
-    public bool RegisterHotkey(string hotkey)
+    /// <returns>Whether the hotkey registered, and why not when it didn't.</returns>
+    public HotkeyRegistrationResult RegisterHotkey(string hotkey)
     {
         if (string.IsNullOrWhiteSpace(hotkey))
         {
             Log.Warning("Cannot register empty hotkey");
-            return false;
+            return HotkeyRegistrationResult.Empty;
         }
 
         // Unregister existing hotkey with same string if any
@@ -67,14 +93,14 @@ public class HotkeyManager : IDisposable
         if (!HotkeyUtil.TryParse(hotkey, out var modifiers, out var key))
         {
             Log.Warning($"Could not parse hotkey: {hotkey}");
-            return false;
+            return HotkeyRegistrationResult.Unrecognized;
         }
 
         var keyCode = (uint)KeyInterop.VirtualKeyFromKey(key);
         if (keyCode == 0)
         {
             Log.Warning($"Could not resolve key code for hotkey: {hotkey}");
-            return false;
+            return HotkeyRegistrationResult.Unrecognized;
         }
 
         var id = ++_currentId;
@@ -83,12 +109,12 @@ public class HotkeyManager : IDisposable
         {
             _hotkeys[hotkey] = id;
             Log.Information($"Registered hotkey: {hotkey} (ID: {id})");
-            return true;
+            return HotkeyRegistrationResult.Registered;
         }
         else
         {
-            Log.Error($"Failed to register hotkey: {hotkey}. It may be in use by another application.");
-            return false;
+            Log.Error($"Failed to register hotkey: {hotkey} (error {Marshal.GetLastWin32Error()}). It may be in use by another application.");
+            return HotkeyRegistrationResult.Failed;
         }
     }
 

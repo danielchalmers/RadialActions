@@ -5,7 +5,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DesignHeight="300"
              d:DesignWidth="300"
+             AutomationProperties.HelpText="Use the arrow keys to choose a slice, then press Enter to run it. Number keys 1 to 9 run slices directly. Shift+F10 opens more options, and Esc closes the menu."
+             AutomationProperties.Name="Radial Actions menu"
              ClipToBounds="False"
+             Focusable="True"
+             FocusVisualStyle="{x:Null}"
              SnapsToDevicePixels="True"
              UseLayoutRounding="True"
              mc:Ignorable="d">

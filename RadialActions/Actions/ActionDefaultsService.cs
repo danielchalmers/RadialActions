@@ -1,8 +1,10 @@
-namespace RadialActions;
+﻿namespace RadialActions;
 
 public sealed class ActionDefaultsService
 {
     public const string LegacyDefaultIcon = "\u2B50";
+    public const string LegacyDefaultName = "New Action";
+    public const string LegacyBlankActionName = "Blank action";
 
     private readonly Dictionary<PieAction, KeyActionDefinition> _autoKeyDefaults = [];
     private readonly Dictionary<PieAction, OpenActionDefaults> _autoOpenDefaults = [];
@@ -58,10 +60,12 @@ public sealed class ActionDefaultsService
 
     public void ApplyKeyDefaults(PieAction action, KeyActionDefinition definition)
     {
-        _autoKeyDefaults.TryGetValue(action, out var previous);
+        if (IsUntouchedName(action))
+        {
+            action.Name = definition.Name;
+        }
 
-        if (ShouldApplyDefault(action.Icon, PieAction.DefaultIcon, previous?.Icon ?? string.Empty) ||
-            action.Icon == LegacyDefaultIcon)
+        if (IsUntouchedIcon(action))
         {
             action.Icon = definition.Icon;
         }
@@ -78,21 +82,20 @@ public sealed class ActionDefaultsService
         if (!defaults.HasValue)
             return;
 
-        _autoOpenDefaults.TryGetValue(action, out var previous);
         var next = defaults.Value;
 
-        if (ShouldApplyDefault(action.Name, PieAction.DefaultName, previous.Name ?? string.Empty))
+        if (IsUntouchedName(action))
         {
             action.Name = next.Name;
         }
 
-        if (ShouldApplyDefault(action.Icon, PieAction.DefaultIcon, previous.Icon ?? string.Empty) ||
-            action.Icon == LegacyDefaultIcon)
+        if (IsUntouchedIcon(action))
         {
             action.Icon = next.Icon;
         }
 
-        if (ShouldApplyDefault(action.WorkingDirectory, string.Empty, previous.WorkingDirectory ?? string.Empty) &&
+        var previousWorkingDirectory = GetPreviousOpen(action)?.WorkingDirectory;
+        if ((string.IsNullOrWhiteSpace(action.WorkingDirectory) || action.WorkingDirectory == previousWorkingDirectory) &&
             !string.IsNullOrWhiteSpace(next.WorkingDirectory))
         {
             action.WorkingDirectory = next.WorkingDirectory;
@@ -101,17 +104,28 @@ public sealed class ActionDefaultsService
         _autoOpenDefaults[action] = next;
     }
 
-    private static bool ShouldApplyDefault(string currentValue, string defaultValue, string previousValue)
+    // A name the user never edited: blank, the default (including names older versions used), or the last value filled in from a key or target.
+    private bool IsUntouchedName(PieAction action)
     {
-        if (string.IsNullOrWhiteSpace(currentValue))
-            return true;
-
-        if (!string.IsNullOrWhiteSpace(defaultValue) && currentValue == defaultValue)
-            return true;
-
-        if (!string.IsNullOrWhiteSpace(previousValue) && currentValue == previousValue)
-            return true;
-
-        return false;
+        var name = action.Name;
+        return string.IsNullOrWhiteSpace(name) ||
+            name is PieAction.DefaultName or LegacyDefaultName or LegacyBlankActionName ||
+            name == GetPreviousKey(action)?.Name ||
+            name == GetPreviousOpen(action)?.Name;
     }
+
+    private bool IsUntouchedIcon(PieAction action)
+    {
+        var icon = action.Icon;
+        return string.IsNullOrWhiteSpace(icon) ||
+            icon is PieAction.DefaultIcon or LegacyDefaultIcon ||
+            icon == GetPreviousKey(action)?.Icon ||
+            icon == GetPreviousOpen(action)?.Icon;
+    }
+
+    private KeyActionDefinition GetPreviousKey(PieAction action)
+        => _autoKeyDefaults.TryGetValue(action, out var previous) ? previous : null;
+
+    private OpenActionDefaults? GetPreviousOpen(PieAction action)
+        => _autoOpenDefaults.TryGetValue(action, out var previous) ? previous : null;
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.IO;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,16 +10,19 @@ namespace RadialActions;
 public partial class ActionEditorViewModel : ObservableObject
 {
     public const string CustomKeyActionId = "__custom__";
+    public const string PowerShell7Interpreter = "pwsh.exe";
 
     private static readonly KeyActionDefinition CustomKeyActionOption =
-        new(CustomKeyActionId, "Custom Shortcut...", "⌨️", "Custom", 0);
+        new(CustomKeyActionId, "Custom shortcut", "⌨️", "Custom", 0);
 
     private readonly ActionDefaultsService _actionDefaultsService;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedAction))]
     [NotifyPropertyChangedFor(nameof(SelectedActionType))]
+    [NotifyPropertyChangedFor(nameof(SelectedActionTypeDescription))]
     [NotifyPropertyChangedFor(nameof(SelectedKeyActionId))]
+    [NotifyPropertyChangedFor(nameof(ScriptInterpreter))]
     private PieAction _selectedAction;
 
     public ActionEditorViewModel(ActionDefaultsService actionDefaultsService, IEnumerable<PieAction> actions)
@@ -33,9 +37,9 @@ public partial class ActionEditorViewModel : ObservableObject
 
     public IReadOnlyList<ActionTypeOption> ActionTypes { get; } =
     [
-        new(ActionType.Key, "Key", "⌨️"),
-        new(ActionType.Open, "Open", "🚀"),
-        new(ActionType.Script, "Script", "📜"),
+        new(ActionType.Key, "\uE765"),
+        new(ActionType.Open, "\uE8A7"),
+        new(ActionType.Script, "\uE756"),
     ];
 
     public IReadOnlyList<KeyActionDefinition> KeyActionOptions { get; } =
@@ -46,7 +50,32 @@ public partial class ActionEditorViewModel : ObservableObject
     /// </summary>
     public ICollectionView KeyActionOptionsView { get; }
 
+    /// <summary>
+    /// Suggestions for the script interpreter; the box also accepts any other executable or full path.
+    /// </summary>
+    public IReadOnlyList<string> ScriptInterpreterOptions { get; } = [PieAction.DefaultScriptInterpreter, PowerShell7Interpreter];
+
     public bool HasSelectedAction => SelectedAction != null;
+
+    /// <summary>
+    /// Help text for the Type field, describing only the selected type (or asking for one when none is chosen).
+    /// </summary>
+    public string SelectedActionTypeDescription => ActionDisplayText.GetTypeDescription(SelectedActionType);
+
+    /// <summary>
+    /// The interpreter of a Script action. Other types store unrelated values in <see cref="PieAction.Parameter"/>, so this reads empty and ignores writes for them.
+    /// </summary>
+    public string ScriptInterpreter
+    {
+        get => SelectedActionType == ActionType.Script ? SelectedAction.Parameter : string.Empty;
+        set
+        {
+            if (SelectedActionType != ActionType.Script || SelectedAction.Parameter == value)
+                return;
+
+            SelectedAction.Parameter = value ?? string.Empty;
+        }
+    }
 
     public ActionType SelectedActionType
     {
@@ -139,12 +168,20 @@ public partial class ActionEditorViewModel : ObservableObject
         if (SelectedAction == null)
             return;
 
+        // Keep a picked shortcut as the .lnk itself so it runs with its own arguments and start folder, the same as dropping it on the list.
         var dialog = new OpenFileDialog
         {
-            Title = "Select app, file, or shortcut",
+            Title = "Choose an app, file, or shortcut",
             Filter = "All files (*.*)|*.*",
-            CheckFileExists = true
+            CheckFileExists = true,
+            DereferenceLinks = false
         };
+
+        var currentFolder = GetExistingParentFolder(SelectedAction.Parameter);
+        if (currentFolder != null)
+        {
+            dialog.InitialDirectory = currentFolder;
+        }
 
         if (dialog.ShowDialog() != true)
             return;
@@ -160,7 +197,7 @@ public partial class ActionEditorViewModel : ObservableObject
 
         var dialog = new OpenFolderDialog
         {
-            Title = "Select a working directory"
+            Title = "Choose a working directory"
         };
 
         var suggested = _actionDefaultsService.GetOpenDefaults(SelectedAction.Parameter)?.WorkingDirectory;
@@ -179,6 +216,16 @@ public partial class ActionEditorViewModel : ObservableObject
         SelectedAction.WorkingDirectory = dialog.FolderName;
     }
 
+    // The folder that contains a file path, when that folder exists; null for URLs, commands and blank values.
+    internal static string GetExistingParentFolder(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        var folder = Path.GetDirectoryName(path);
+        return !string.IsNullOrEmpty(folder) && Directory.Exists(folder) ? folder : null;
+    }
+
     partial void OnSelectedActionChanged(PieAction oldValue, PieAction newValue)
     {
         if (oldValue != null)
@@ -193,7 +240,9 @@ public partial class ActionEditorViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(SelectedActionType));
+        OnPropertyChanged(nameof(SelectedActionTypeDescription));
         OnPropertyChanged(nameof(SelectedKeyActionId));
+        OnPropertyChanged(nameof(ScriptInterpreter));
     }
 
     private void SelectedActionPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -201,13 +250,16 @@ public partial class ActionEditorViewModel : ObservableObject
         if (e.PropertyName == nameof(PieAction.Type))
         {
             OnPropertyChanged(nameof(SelectedActionType));
+            OnPropertyChanged(nameof(SelectedActionTypeDescription));
             OnPropertyChanged(nameof(SelectedKeyActionId));
+            OnPropertyChanged(nameof(ScriptInterpreter));
         }
 
         if (e.PropertyName != nameof(PieAction.Parameter))
             return;
 
         OnPropertyChanged(nameof(SelectedKeyActionId));
+        OnPropertyChanged(nameof(ScriptInterpreter));
 
         if (SelectedAction == null)
             return;
@@ -226,14 +278,21 @@ public partial class ActionEditorViewModel : ObservableObject
 
 public sealed class ActionTypeOption
 {
-    public ActionTypeOption(ActionType type, string name, string icon)
+    public ActionTypeOption(ActionType type, string glyph)
     {
         Type = type;
-        Name = name;
-        Icon = icon;
+        Name = ActionDisplayText.GetTypeName(type);
+        Glyph = glyph;
     }
 
     public ActionType Type { get; }
     public string Name { get; }
-    public string Icon { get; }
+
+    /// <summary>
+    /// A Segoe Fluent Icons character shown next to the name.
+    /// </summary>
+    public string Glyph { get; }
+
+    // Combo box items are named from ToString, so screen readers and type-ahead see the display name.
+    public override string ToString() => Name;
 }

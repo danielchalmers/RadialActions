@@ -19,23 +19,35 @@ internal sealed class HotkeyService : IDisposable
         _hotkeys.HotkeyPressed += _hotkeyHandler;
     }
 
-    public void ApplyHotkey(string hotkey)
+    /// <summary>
+    /// Replaces the registered hotkey with <paramref name="hotkey"/>.
+    /// </summary>
+    /// <returns>Whether it registered; an empty hotkey reports <see cref="HotkeyRegistrationResult.Empty"/> because nothing can open the menu from the keyboard.</returns>
+    public HotkeyRegistrationResult ApplyHotkey(string hotkey)
     {
         if (_hotkeys is null)
         {
             Log.Debug("Skipping hotkey apply because service is not initialized");
-            return;
+            return HotkeyRegistrationResult.Failed;
         }
 
         _hotkeys.UnregisterAll();
         if (!string.IsNullOrWhiteSpace(hotkey))
         {
             Log.Debug("Applying configured hotkey: {Hotkey}", hotkey);
-            _hotkeys.RegisterHotkey(hotkey);
-            return;
+            return _hotkeys.RegisterHotkey(hotkey);
         }
 
         Log.Information("No activation hotkey configured; hotkeys are cleared");
+        return HotkeyRegistrationResult.Empty;
+    }
+
+    /// <summary>
+    /// Unregisters every hotkey without touching the setting, for example while the Settings recorder captures a new combination.
+    /// </summary>
+    public void ClearHotkeys()
+    {
+        _hotkeys?.UnregisterAll();
     }
 
     public void Dispose()

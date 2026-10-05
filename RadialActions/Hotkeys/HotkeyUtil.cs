@@ -108,6 +108,88 @@ public static class HotkeyUtil
         };
     }
 
+    public static bool IsModifierKey(Key key)
+    {
+        return key is Key.LeftCtrl or Key.RightCtrl or Key.LeftShift or Key.RightShift or Key.LeftAlt or Key.RightAlt
+            or Key.LWin or Key.RWin;
+    }
+
+    /// <summary>
+    /// Returns whether a recorder box should let a key press keep its usual meaning: Tab and Shift+Tab always move focus, and the activation hotkey box also lets a bare Escape and Alt+F4 through.
+    /// </summary>
+    public static bool IsRecorderPassThroughKey(Key key, ModifierKeys modifiers, bool isActivationHotkey)
+    {
+        if (key == Key.Tab && (modifiers & (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Windows)) == 0)
+            return true;
+
+        if (!isActivationHotkey)
+            return false;
+
+        return (key == Key.Escape && modifiers == ModifierKeys.None) || (key == Key.F4 && modifiers == ModifierKeys.Alt);
+    }
+
+    /// <summary>
+    /// Returns whether a key combination is one Windows keeps for itself, so registering it as a global hotkey can never work.
+    /// </summary>
+    public static bool IsReservedSystemHotkey(ModifierKeys modifiers, Key key)
+    {
+        // Windows keeps F12 and Shift+F12 for debuggers, so RegisterHotKey always refuses them; F12 with Ctrl, Alt or Win registers normally.
+        if (key == Key.F12 && modifiers is ModifierKeys.None or ModifierKeys.Shift)
+            return true;
+
+        return (modifiers, key) switch
+        {
+            (ModifierKeys.Alt, Key.F4) => true,
+            (ModifierKeys.Alt, Key.Tab) => true,
+            (ModifierKeys.Alt | ModifierKeys.Shift, Key.Tab) => true,
+            (ModifierKeys.Alt, Key.Escape) => true,
+            (ModifierKeys.Control, Key.Escape) => true,
+            (ModifierKeys.Control | ModifierKeys.Shift, Key.Escape) => true,
+            (ModifierKeys.Windows, Key.L) => true,
+            (ModifierKeys.Control | ModifierKeys.Alt, Key.Delete) => true,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// Returns whether a recorded combination is safe as the global activation hotkey: any key with Ctrl, Alt or Win except chords Windows reserves, otherwise only F1-F24, Pause and Scroll Lock so a stray letter, Space or Tab can't take over the keyboard system-wide.
+    /// </summary>
+    public static bool IsValidActivationHotkey(ModifierKeys modifiers, Key key)
+    {
+        if (key == Key.None || IsModifierKey(key) || IsReservedSystemHotkey(modifiers, key))
+            return false;
+
+        if ((modifiers & (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Windows)) != 0)
+            return true;
+
+        return key is >= Key.F1 and <= Key.F24 or Key.Pause or Key.Scroll;
+    }
+
+    /// <summary>
+    /// Returns whether a combination is a key people type or move around with (letters, digits, Space, Enter, Tab, Escape, Backspace, arrows, Home, End, Page Up, Page Down or punctuation) with no Ctrl, Alt or Win, so registering it globally would take that key away from every app.
+    /// </summary>
+    public static bool IsTypingOrNavigationHotkey(ModifierKeys modifiers, Key key)
+    {
+        if ((modifiers & (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Windows)) != 0)
+            return false;
+
+        return key is >= Key.A and <= Key.Z
+            or >= Key.D0 and <= Key.D9
+            or Key.Space or Key.Enter or Key.Tab or Key.Escape or Key.Back
+            or Key.Left or Key.Up or Key.Right or Key.Down
+            or Key.Home or Key.End or Key.PageUp or Key.PageDown
+            or >= Key.OemSemicolon and <= Key.OemBackslash;
+    }
+
+    /// <summary>
+    /// Returns whether a saved activation hotkey must be replaced on load: a typing or navigation key without Ctrl, Alt or Win (older versions could record one) or a chord Windows reserves. Other saved keys the recorder no longer accepts on their own, such as Insert or NumPad keys, keep working.
+    /// </summary>
+    public static bool ShouldReplaceSavedActivationHotkey(string hotkey)
+    {
+        return TryParse(hotkey, out var modifiers, out var key)
+            && (IsTypingOrNavigationHotkey(modifiers, key) || IsReservedSystemHotkey(modifiers, key));
+    }
+
     public static string BuildHotkeyString(Key key, ModifierKeys modifiers)
     {
         if (key == Key.None)

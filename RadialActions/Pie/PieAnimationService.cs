@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -23,7 +23,7 @@ internal sealed class PieAnimationService
         brush.Color = color;
     }
 
-    public void AnimateBrushColor(
+    private static void AnimateBrushColor(
         SolidColorBrush brush,
         Color toColor,
         Duration duration,
@@ -63,18 +63,16 @@ internal sealed class PieAnimationService
         element.Opacity = opacity;
     }
 
-    public void AnimateOpacity(
+    private static void AnimateOpacity(
         UIElement element,
         double toOpacity,
         Duration duration,
-        IEasingFunction easingFunction,
-        Action onCompleted = null)
+        IEasingFunction easingFunction)
     {
         if (IsReducedMotionEnabled())
         {
             element.BeginAnimation(UIElement.OpacityProperty, null);
             element.Opacity = toOpacity;
-            onCompleted?.Invoke();
             return;
         }
 
@@ -84,11 +82,6 @@ internal sealed class PieAnimationService
             Duration = duration,
             EasingFunction = easingFunction,
         };
-
-        if (onCompleted != null)
-        {
-            opacityAnimation.Completed += (_, _) => onCompleted();
-        }
 
         element.BeginAnimation(UIElement.OpacityProperty, opacityAnimation, HandoffBehavior.SnapshotAndReplace);
     }
@@ -123,7 +116,7 @@ internal sealed class PieAnimationService
         transform.BeginAnimation(RotateTransform.AngleProperty, rotationAnimation, HandoffBehavior.SnapshotAndReplace);
     }
 
-    public void AnimateClickDown(UIElement target, Duration duration, IEasingFunction easingFunction)
+    public void AnimateClickDown(UIElement target, double pressedScale, Duration duration, IEasingFunction easingFunction)
     {
         var scaleTransform = FindScaleTransform(target);
         if (scaleTransform == null)
@@ -135,16 +128,13 @@ internal sealed class PieAnimationService
 
         if (IsReducedMotionEnabled())
         {
-            scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-            scaleTransform.ScaleX = 0.95;
-            scaleTransform.ScaleY = 0.95;
+            SetScale(scaleTransform, pressedScale);
             return;
         }
 
         var scaleAnimation = new DoubleAnimation
         {
-            To = 0.95,
+            To = pressedScale,
             Duration = duration,
             EasingFunction = easingFunction,
             FillBehavior = FillBehavior.HoldEnd,
@@ -164,10 +154,7 @@ internal sealed class PieAnimationService
 
         if (IsReducedMotionEnabled())
         {
-            scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-            scaleTransform.ScaleX = 1;
-            scaleTransform.ScaleY = 1;
+            SetScale(scaleTransform, 1);
             return;
         }
 
@@ -182,9 +169,29 @@ internal sealed class PieAnimationService
         scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation, HandoffBehavior.SnapshotAndReplace);
     }
 
+    /// <summary>
+    /// Snaps a press scale back to 1 without animating, so a press interrupted by a dismiss never carries into the next open.
+    /// </summary>
+    public void ResetClickScale(UIElement target)
+    {
+        var scaleTransform = FindScaleTransform(target);
+        if (scaleTransform != null)
+        {
+            SetScale(scaleTransform, 1);
+        }
+    }
+
     public static bool IsReducedMotionEnabled()
     {
         return !SystemParameters.ClientAreaAnimation;
+    }
+
+    private static void SetScale(ScaleTransform scaleTransform, double scale)
+    {
+        scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+        scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+        scaleTransform.ScaleX = scale;
+        scaleTransform.ScaleY = scale;
     }
 
     private static ScaleTransform FindScaleTransform(UIElement target)

@@ -25,6 +25,15 @@ public partial class App : Application
     [ObservableProperty]
     private bool _isUpdateAvailable;
 
+    /// <summary>
+    /// Why the activation hotkey isn't working (empty, unrecognized, or taken by another app), or null when it registered.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActivationHotkeyError))]
+    private string _activationHotkeyError;
+
+    public bool HasActivationHotkeyError => !string.IsNullOrEmpty(ActivationHotkeyError);
+
     public Version CurrentVersion { get; } =
         Version.TryParse(FileVersionInfo.GetVersionInfo(MainFileInfo.FullName)?.FileVersion, out var parsedVersion)
             ? parsedVersion

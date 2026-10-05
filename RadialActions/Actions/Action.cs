@@ -50,6 +50,9 @@ public sealed class KeyActionDefinition
     public string Icon { get; }
     public string Category { get; }
     public byte VirtualKey { get; }
+
+    // Lists and combo boxes name their items from ToString, so screen readers and type-ahead see the display name.
+    public override string ToString() => Name;
 }
 
 /// <summary>
@@ -57,7 +60,7 @@ public sealed class KeyActionDefinition
 /// </summary>
 public partial class PieAction : ObservableObject
 {
-    public const string DefaultName = "New Action";
+    public const string DefaultName = "New action";
     public const string DefaultIcon = "⚡";
     public const string DefaultScriptInterpreter = "powershell.exe";
 
@@ -210,7 +213,7 @@ public partial class PieAction : ObservableObject
         switch (Type)
         {
             case ActionType.None:
-                throw new InvalidOperationException("No action configured");
+                throw new InvalidOperationException("This action doesn't have a type yet. Choose one in Settings.");
             case ActionType.Key:
                 ExecuteKey();
                 return;
@@ -228,7 +231,7 @@ public partial class PieAction : ObservableObject
     private void ExecuteKey()
     {
         if (string.IsNullOrWhiteSpace(Parameter))
-            throw new InvalidOperationException("Shortcut not configured");
+            throw new InvalidOperationException("No shortcut is set.");
 
         if (TryGetKeyAction(Parameter, out var definition))
         {
@@ -237,7 +240,7 @@ public partial class PieAction : ObservableObject
         }
 
         if (!HotkeyUtil.TryParse(Parameter, out _, out _))
-            throw new InvalidOperationException("Shortcut is invalid");
+            throw new InvalidOperationException("The shortcut isn't valid.");
 
         ActionUtil.SimulateKeyboardShortcut(Parameter);
     }
@@ -245,7 +248,7 @@ public partial class PieAction : ObservableObject
     private void ExecuteOpen()
     {
         if (string.IsNullOrWhiteSpace(Parameter))
-            throw new InvalidOperationException("Launch target not configured");
+            throw new InvalidOperationException("No target is set.");
 
         var psi = new ProcessStartInfo(Parameter)
         {
@@ -264,14 +267,14 @@ public partial class PieAction : ObservableObject
     private void ExecuteScript()
     {
         if (string.IsNullOrWhiteSpace(Script))
-            throw new InvalidOperationException("Script is empty");
+            throw new InvalidOperationException("The script is empty.");
 
         var interpreter = string.IsNullOrWhiteSpace(Parameter) ? DefaultScriptInterpreter : Parameter;
         var arguments = $"-NoProfile -ExecutionPolicy Bypass -EncodedCommand {EncodePowerShellCommand(Script)}";
 
         // The whole command line must fit CreateProcess's 32,767 character limit; fail with a clear message instead of an opaque OS error.
         if (interpreter.Length + 1 + arguments.Length >= 32000)
-            throw new InvalidOperationException("Script is too long to run");
+            throw new InvalidOperationException("The script is too long to run.");
 
         // UseShellExecute must be false so CreateNoWindow can suppress the console window for hidden scripts.
         // The body is passed as a Base64-encoded command so multiline scripts, quotes, and newlines need no escaping and no temp file.

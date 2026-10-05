@@ -1,3 +1,4 @@
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -11,8 +12,24 @@ internal sealed class PieSliceVisual
     public required PieAction Action { get; init; }
     public required Path Path { get; init; }
     public required SolidColorBrush FillBrush { get; init; }
-    public required SolidColorBrush StrokeBrush { get; init; }
     public required ContextMenu ContextMenu { get; init; }
+
+    /// <summary>
+    /// Where the slice's icon and label are centered, in canvas coordinates; also the point assistive technology clicks.
+    /// </summary>
+    public required Point ContentCenter { get; init; }
+
+    /// <summary>
+    /// Accent arc just inside the rim that marks the hovered, keyboard-selected or release-targeted slice; null when the slice is too narrow for one.
+    /// </summary>
+    public Path SelectionArc { get; set; }
+
+    /// <summary>
+    /// High contrast only: one brush shared by every foreground on the slice, so selection can switch them all from WindowText to HighlightText.
+    /// </summary>
+    public SolidColorBrush ForegroundBrush { get; set; }
+
+    public bool IsPressed { get; set; }
 
     /// <summary>
     /// Rotates the slice path around the pie center during drag reordering.
