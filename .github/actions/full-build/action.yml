@@ -43,9 +43,9 @@ runs:
     - name: Create MSI Installers
       shell: bash
       run: |
-        dotnet tool install --global wix --version 6.0.*
+        dotnet tool install --global wix --version 7.0.*
         for arch in ${{ inputs.archs }}; do
-          wix build Package.wxs -arch $arch -d Version=${{ inputs.version }} -d Arch=$arch -o "publish/RadialActions-${{ inputs.version }}-$arch.msi"
+          wix build Package.wxs -arch $arch -acceptEula wix7 -o "publish/RadialActions-${{ inputs.version }}-$arch.msi"
         done
 
     - uses: actions/upload-artifact@v7
