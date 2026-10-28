@@ -2,6 +2,8 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
 
@@ -68,6 +70,13 @@ public partial class App : Application
             _singleInstance.RequestShow();
             Shutdown();
             return;
+        }
+
+        // WPF's hardware rendering has open Arm64 bugs that reach the menu's transparent window: red and blue trade places (dotnet/wpf#11847), and the app crashes when the GPU is suspended mid-frame (dotnet/wpf#11471).
+        // The menu is small and only animates briefly, so drawing it in software there costs nothing noticeable.
+        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+        {
+            RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
         }
 
         var mainWindow = new MainWindow();
