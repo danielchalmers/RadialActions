@@ -40,8 +40,6 @@ runs:
           Compress-Archive -Path "publish/$arch/*" -DestinationPath "publish/RadialActions-${{ inputs.version }}-$arch.zip"
         }
 
-    # The installer takes its version from the exe and its files from publish/<arch>, so it only needs the architecture.
-    # WiX v7 won't build until its OSMF EULA is accepted, and -acceptEula accepts it for this run only.
     - name: Create MSI Installers
       shell: bash
       run: |

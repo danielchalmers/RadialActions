@@ -32,11 +32,9 @@
 
     <StandardDirectory Id="ProgramMenuFolder">
       <Component>
-        <!--  Targets the folder path rather than [#RadialActions.exe], which ICE69 flags because the exe is in another component  -->
         <Shortcut Name="Radial Actions"
                   Target="[INSTALLFOLDER]RadialActions.exe"
                   WorkingDirectory="INSTALLFOLDER" />
-        <!--  A per-user shortcut needs a registry key path  -->
         <RegistryValue Root="HKCU"
                        Key="Software\Daniel Chalmers\RadialActions"
                        Name="StartMenuShortcut"
