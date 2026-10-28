@@ -73,7 +73,7 @@ public partial class App : Application
         }
 
         // WPF's hardware rendering has open Arm64 bugs that reach the menu's transparent window: red and blue trade places (dotnet/wpf#11847), and the app crashes when the GPU is suspended mid-frame (dotnet/wpf#11471).
-        // The menu is small and only animates briefly, so it gives up little by drawing in software there.
+        // Other architectures don't have them, so only Arm64 draws in software, until they're fixed.
         if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
         {
             RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
