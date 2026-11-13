@@ -1035,7 +1035,7 @@ public partial class PieControl : UserControl
     }
 
     /// <summary>
-    /// Limits the label to the room its slice actually has, or drops it for an icon-only slice when even a short trimmed name won't fit.
+    /// Limits the label to the room its slice actually has: a name too wide for one line wraps onto a second when there is room, and the label is dropped for an icon-only slice when even a short trimmed name won't fit.
     /// </summary>
     /// <returns>True when the label was trimmed or dropped, so the full name needs another way to be seen.</returns>
     private bool FitSliceLabel(
@@ -1056,17 +1056,21 @@ public partial class PieControl : UserControl
         var labelSize = label.DesiredSize;
 
         // The content stack is centered on the text position, and the label is its bottom row.
-        var rowCenter = textOffset + new Vector(0, (content.Panel.DesiredSize.Height / 2) - content.Panel.Margin.Bottom - (labelSize.Height / 2));
-        var fittedWidth = PieLayoutCalculator.GetLabelMaxWidth(
-            rowCenter,
-            labelSize.Height,
+        var panelHeight = content.Panel.DesiredSize.Height;
+        var rowCenter = textOffset + new Vector(0, (panelHeight / 2) - content.Panel.Margin.Bottom - (labelSize.Height / 2));
+
+        double GetRowMaxWidth(Vector center, double height) => PieLayoutCalculator.GetLabelMaxWidth(
+            center,
+            height,
             _layoutInnerRadius,
             _layoutOuterRadius - theme.SliceStrokeThickness - theme.SelectionArcThickness,
             startAngle,
             endAngle,
             theme.SliceStrokeThickness + LabelEdgePadding,
             hintKeepOut);
-        var maxWidth = Math.Min(fittedWidth, _layoutOuterRadius * LabelMaxWidthRatio);
+
+        var widthLimit = _layoutOuterRadius * LabelMaxWidthRatio;
+        var maxWidth = Math.Min(GetRowMaxWidth(rowCenter, labelSize.Height), widthLimit);
 
         // Changing a child only dirties the child, so the panel would otherwise report its cached unconstrained size and be positioned off-center.
         content.Panel.InvalidateMeasure();
@@ -1078,7 +1082,39 @@ public partial class PieControl : UserControl
         }
 
         label.MaxWidth = maxWidth;
-        return labelSize.Width > maxWidth;
+        if (labelSize.Width <= maxWidth)
+        {
+            return false;
+        }
+
+        var words = label.Text.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length < 2)
+        {
+            return true;
+        }
+
+        // A second line grows the centered stack by one line, half above and half below, so the two-line block keeps the single row's center and the icon moves up by half a line.
+        var lineHeight = labelSize.Height;
+        var twoLineWidth = Math.Min(GetRowMaxWidth(rowCenter, 2 * lineHeight), widthLimit);
+        if (content.Icon is { } icon)
+        {
+            // The icon also has to fit where the taller stack moves it, clear of the rim hints.
+            var iconHeight = icon.DesiredSize.Height - icon.Margin.Bottom;
+            var iconCenter = textOffset + new Vector(0, content.Panel.Margin.Top + (iconHeight / 2) - ((panelHeight + lineHeight) / 2));
+            if (GetRowMaxWidth(iconCenter, iconHeight) < icon.DesiredSize.Width)
+            {
+                twoLineWidth = 0;
+            }
+        }
+
+        var firstLineWords = PieLayoutCalculator.GetLabelFirstLineWordCount(PieVisualBuilder.MeasureWordEnds(label, words), maxWidth, twoLineWidth, MinLabelWidth);
+        if (firstLineWords == 0)
+        {
+            return true;
+        }
+
+        label.MaxWidth = twoLineWidth;
+        return PieVisualBuilder.WrapLabel(label, words, firstLineWords) > twoLineWidth;
     }
 
     private Rect AddRimHint(TextBlock hint, Point position)

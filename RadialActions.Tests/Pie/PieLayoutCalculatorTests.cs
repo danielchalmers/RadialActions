@@ -198,6 +198,71 @@ public class PieLayoutCalculatorTests
     }
 
     [Theory]
+    [InlineData(400, 8, 0)]
+    [InlineData(400, 8, 2)]
+    [InlineData(400, 12, 5)]
+    [InlineData(260, 5, 1)]
+    [InlineData(400, 2, 0)]
+    public void GetLabelMaxWidth_TwoLineBlock_IsNeverWiderThanOneRow(double size, int sliceCount, int sliceIndex)
+    {
+        var oneRow = GetSimulatedLabelWidth(size, sliceCount, sliceIndex, Rect.Empty);
+        var twoRows = GetSimulatedLabelWidth(size, sliceCount, sliceIndex, Rect.Empty, rowHeight: 30);
+
+        Assert.True(twoRows <= oneRow + 1e-6);
+    }
+
+    [Fact]
+    public void GetLabelFirstLineWordCount_NameThatFitsOneLine_StaysOnOneLine()
+    {
+        Assert.Equal(0, PieLayoutCalculator.GetLabelFirstLineWordCount([30, 70], oneLineMaxWidth: 80, twoLineMaxWidth: 60, minimumWidth: 32));
+    }
+
+    [Fact]
+    public void GetLabelFirstLineWordCount_SingleWord_StaysOnOneLine()
+    {
+        Assert.Equal(0, PieLayoutCalculator.GetLabelFirstLineWordCount([120], oneLineMaxWidth: 80, twoLineMaxWidth: 60, minimumWidth: 32));
+    }
+
+    // "Screenshot region" and "Windows Terminal settings and profiles" in an eight-slice menu at the default size.
+    [Theory]
+    [InlineData(new double[] { 60, 98 }, 80, 64, 1)]
+    [InlineData(new double[] { 50, 104, 152, 176, 214 }, 137, 123, 2)]
+    public void GetLabelFirstLineWordCount_TakesTheWholeWordsThatFitTheFirstLine(double[] wordEndWidths, double oneLineMaxWidth, double twoLineMaxWidth, int expectedWords)
+    {
+        Assert.Equal(expectedWords, PieLayoutCalculator.GetLabelFirstLineWordCount(wordEndWidths, oneLineMaxWidth, twoLineMaxWidth, minimumWidth: 32));
+    }
+
+    [Fact]
+    public void GetLabelFirstLineWordCount_LeavesAWordForTheSecondLine()
+    {
+        // Every word would fit the first line, which only happens when the two-line width is not the narrower one.
+        Assert.Equal(1, PieLayoutCalculator.GetLabelFirstLineWordCount([30, 70], oneLineMaxWidth: 60, twoLineMaxWidth: 90, minimumWidth: 32));
+    }
+
+    [Fact]
+    public void GetLabelFirstLineWordCount_FirstWordTooWide_StaysOnOneLine()
+    {
+        // "Internationalization notes": splitting the first word across lines would read worse than trimming it.
+        Assert.Equal(0, PieLayoutCalculator.GetLabelFirstLineWordCount([107, 140], oneLineMaxWidth: 80, twoLineMaxWidth: 64, minimumWidth: 32));
+    }
+
+    [Fact]
+    public void GetLabelFirstLineWordCount_TwoLineBlockTooNarrow_StaysOnOneLine()
+    {
+        Assert.Equal(0, PieLayoutCalculator.GetLabelFirstLineWordCount([19, 67], oneLineMaxWidth: 41, twoLineMaxWidth: 31, minimumWidth: 32));
+    }
+
+    [Fact]
+    public void GetLabelFirstLineWordCount_TwoLinesThatShowNoMore_StaysOnOneLine()
+    {
+        // One trimmed line shows 140px of the name; a 30px first word plus a 100px second line shows less.
+        Assert.Equal(0, PieLayoutCalculator.GetLabelFirstLineWordCount([30, 150, 200], oneLineMaxWidth: 140, twoLineMaxWidth: 100, minimumWidth: 32));
+
+        // With a wider two-line block the same name shows more on two lines.
+        Assert.Equal(1, PieLayoutCalculator.GetLabelFirstLineWordCount([30, 150, 200], oneLineMaxWidth: 140, twoLineMaxWidth: 120, minimumWidth: 32));
+    }
+
+    [Theory]
     [InlineData(300, 100, 0)]
     [InlineData(300, 300, 1)]
     [InlineData(100, 300, 2)]
@@ -235,7 +300,7 @@ public class PieLayoutCalculatorTests
         return ((canvasRadius - 0.5) + (canvasRadius * 0.25)) / 2;
     }
 
-    private static double GetSimulatedLabelWidth(double size, int sliceCount, int sliceIndex, Rect keepOut)
+    private static double GetSimulatedLabelWidth(double size, int sliceCount, int sliceIndex, Rect keepOut, double rowHeight = 15)
     {
         var canvasRadius = size / 2;
         var outerRadius = canvasRadius - 0.5;
@@ -247,6 +312,6 @@ public class PieLayoutCalculatorTests
         var midAngle = ((startAngle + endAngle) / 2) * Math.PI / 180;
         var rowCenter = new Vector(textRadius * Math.Cos(midAngle), (textRadius * Math.Sin(midAngle)) + 12.5);
 
-        return PieLayoutCalculator.GetLabelMaxWidth(rowCenter, 15, innerRadius, outerRadius, startAngle, endAngle, 3, keepOut);
+        return PieLayoutCalculator.GetLabelMaxWidth(rowCenter, rowHeight, innerRadius, outerRadius, startAngle, endAngle, 3, keepOut);
     }
 }

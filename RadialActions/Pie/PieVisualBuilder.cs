@@ -262,6 +262,34 @@ public static class PieVisualBuilder
         content.Icon.Margin = new Thickness(0);
     }
 
+    /// <summary>
+    /// Measures how wide the label's name is up to the end of each word, in the label's own font.
+    /// </summary>
+    public static double[] MeasureWordEnds(TextBlock label, string[] words)
+    {
+        var probe = new TextBlock { Style = label.Style, FontSize = label.FontSize };
+        var wordEnds = new double[words.Length];
+        for (var i = 0; i < words.Length; i++)
+        {
+            probe.Text = string.Join(' ', words, 0, i + 1);
+            probe.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            wordEnds[i] = probe.DesiredSize.Width;
+        }
+
+        return wordEnds;
+    }
+
+    /// <summary>
+    /// Breaks the label after its first <paramref name="firstLineWordCount"/> words. The style doesn't wrap, so each line trims on its own and a long second line keeps as much of the name as fits.
+    /// </summary>
+    /// <returns>The width of the widest line before any trimming.</returns>
+    public static double WrapLabel(TextBlock label, string[] words, int firstLineWordCount)
+    {
+        label.Text = string.Join(' ', words, 0, firstLineWordCount) + "\n" + string.Join(' ', words, firstLineWordCount, words.Length - firstLineWordCount);
+        label.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        return label.DesiredSize.Width;
+    }
+
     private static void ScaleFontSize(TextBlock textBlock, double contentScale)
     {
         // The style carries the base size for a default menu; larger menus scale it here rather than overriding it with a literal.

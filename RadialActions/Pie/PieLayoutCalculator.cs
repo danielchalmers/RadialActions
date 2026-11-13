@@ -249,6 +249,44 @@ public static class PieLayoutCalculator
     }
 
     /// <summary>
+    /// Decides where a label that is too wide for one line breaks onto a second. The first line takes as many whole words as fit, and the label only wraps when the two lines together show more of the name than a single trimmed line would.
+    /// </summary>
+    /// <param name="wordEndWidths">Width of the name up to the end of each word; the last entry is the whole name.</param>
+    /// <param name="oneLineMaxWidth">Room for a single row.</param>
+    /// <param name="twoLineMaxWidth">Room for a block two rows tall, which is never wider than the single row.</param>
+    /// <param name="minimumWidth">The narrowest label worth showing.</param>
+    /// <returns>How many words go on the first line, or 0 to keep the label on one line.</returns>
+    public static int GetLabelFirstLineWordCount(IReadOnlyList<double> wordEndWidths, double oneLineMaxWidth, double twoLineMaxWidth, double minimumWidth)
+    {
+        if (wordEndWidths.Count < 2)
+        {
+            return 0;
+        }
+
+        var textWidth = wordEndWidths[^1];
+        if (textWidth <= oneLineMaxWidth || twoLineMaxWidth < minimumWidth)
+        {
+            return 0;
+        }
+
+        var firstLineWords = 0;
+        while (firstLineWords < wordEndWidths.Count - 1 && wordEndWidths[firstLineWords] <= twoLineMaxWidth)
+        {
+            firstLineWords++;
+        }
+
+        if (firstLineWords == 0)
+        {
+            return 0;
+        }
+
+        // A trimmed single line shows about its full width of the name, so two narrower lines have to beat that to be worth the taller stack.
+        var firstLineWidth = wordEndWidths[firstLineWords - 1];
+        var shownWidth = firstLineWidth + Math.Min(textWidth - firstLineWidth, twoLineMaxWidth);
+        return shownWidth > oneLineMaxWidth ? firstLineWords : 0;
+    }
+
+    /// <summary>
     /// Finds the slice under <paramref name="point"/> from geometry alone (slices are laid out clockwise from 12 o'clock).
     /// </summary>
     /// <returns>The slice index, or -1 over the hub or outside the ring.</returns>
