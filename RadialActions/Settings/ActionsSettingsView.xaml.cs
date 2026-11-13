@@ -115,6 +115,22 @@ public partial class ActionsSettingsView
         }, DispatcherPriority.Input);
     }
 
+    private void UndoRemoveButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel is not { RemovedAction: { } action } viewModel)
+            return;
+
+        // Click is raised before the button runs its command. The undo bar collapses once the action is back, which would drop keyboard focus to the window, so move it to the restored action.
+        Dispatcher.InvokeAsync(() =>
+        {
+            if (viewModel.Actions.Contains(action))
+            {
+                FocusSelectedAction();
+                AnnounceListChange(ActionDisplayText.GetRestoredAnnouncement(action));
+            }
+        }, DispatcherPriority.Input);
+    }
+
     private void AnnounceListChange(string text)
     {
         // Focus stays on the button, so without this a screen reader says nothing about the result.
@@ -130,7 +146,22 @@ public partial class ActionsSettingsView
 
     private void ActionsList_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (Keyboard.Modifiers != ModifierKeys.Alt || ViewModel is not { } viewModel)
+        if (ViewModel is not { } viewModel)
+            return;
+
+        if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
+        {
+            e.Handled = true;
+            if (viewModel.SelectedAction is not { } action || !viewModel.RemoveActionCommand.CanExecute(null))
+                return;
+
+            viewModel.RemoveActionCommand.Execute(null);
+            FocusSelectedAction();
+            AnnounceListChange(ActionDisplayText.GetRemovedAnnouncement(action));
+            return;
+        }
+
+        if (Keyboard.Modifiers != ModifierKeys.Alt)
             return;
 
         ICommand command = (e.Key == Key.System ? e.SystemKey : e.Key) switch

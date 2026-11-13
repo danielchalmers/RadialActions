@@ -367,6 +367,136 @@ public sealed class ActionsSettingsViewModelTests
     }
 
     [Fact]
+    public void RemoveAction_OffersUndo()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var viewModel = CreateViewModel(first, second);
+        Assert.False(viewModel.HasRemovedAction);
+        Assert.Null(viewModel.RemovedActionMessage);
+        Assert.False(viewModel.UndoRemoveCommand.CanExecute(null));
+        var changed = new List<string>();
+        viewModel.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        viewModel.RemoveActionCommand.Execute(null);
+
+        Assert.Same(first, viewModel.RemovedAction);
+        Assert.True(viewModel.HasRemovedAction);
+        Assert.Equal("Mute removed.", viewModel.RemovedActionMessage);
+        Assert.True(viewModel.UndoRemoveCommand.CanExecute(null));
+        Assert.Contains(nameof(ActionsSettingsViewModel.HasRemovedAction), changed);
+        Assert.Contains(nameof(ActionsSettingsViewModel.RemovedActionMessage), changed);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void UndoRemove_RestoresTheActionAtItsOldPositionAndSelectsIt(int removedIndex)
+    {
+        var actions = new[] { PieAction.CreateKeyAction("Mute"), PieAction.CreateKeyAction("VolumeUp"), PieAction.CreateKeyAction("VolumeDown") };
+        var viewModel = CreateViewModel(actions);
+        var removed = actions[removedIndex];
+        viewModel.SelectAction(removed);
+        viewModel.RemoveActionCommand.Execute(null);
+
+        viewModel.UndoRemoveCommand.Execute(null);
+
+        Assert.Equal(actions, viewModel.Actions);
+        Assert.Same(removed, viewModel.SelectedAction);
+        Assert.Equal(removedIndex, viewModel.SelectedActionIndex);
+        Assert.Same(removed, viewModel.Editor.SelectedAction);
+        Assert.False(viewModel.HasRemovedAction);
+        Assert.False(viewModel.UndoRemoveCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void UndoRemove_RestoresTheOnlyAction()
+    {
+        var only = PieAction.CreateKeyAction("Mute");
+        var viewModel = CreateViewModel(only);
+        viewModel.RemoveActionCommand.Execute(null);
+
+        viewModel.UndoRemoveCommand.Execute(null);
+
+        Assert.Equal([only], viewModel.Actions);
+        Assert.Same(only, viewModel.SelectedAction);
+        Assert.Equal(0, viewModel.SelectedActionIndex);
+    }
+
+    [Fact]
+    public void UndoRemove_WithNothingRemoved_DoesNothing()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var viewModel = CreateViewModel(first);
+
+        viewModel.UndoRemoveCommand.Execute(null);
+
+        Assert.Equal([first], viewModel.Actions);
+    }
+
+    [Fact]
+    public void RemoveAction_Twice_UndoRestoresOnlyTheLatest()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var third = PieAction.CreateKeyAction("VolumeDown");
+        var viewModel = CreateViewModel(first, second, third);
+
+        viewModel.RemoveActionCommand.Execute(null);
+        viewModel.RemoveActionCommand.Execute(null);
+        Assert.Same(second, viewModel.RemovedAction);
+
+        viewModel.UndoRemoveCommand.Execute(null);
+
+        Assert.Equal([second, third], viewModel.Actions);
+        Assert.False(viewModel.HasRemovedAction);
+    }
+
+    [Fact]
+    public void UndoRemove_EndsWhenTheListChangesAgain()
+    {
+        var first = PieAction.CreateKeyAction("Mute");
+        var second = PieAction.CreateKeyAction("VolumeUp");
+        var third = PieAction.CreateKeyAction("VolumeDown");
+
+        var afterAdd = CreateViewModel(first, second, third);
+        afterAdd.RemoveActionCommand.Execute(null);
+        afterAdd.AddActionCommand.Execute(null);
+        Assert.False(afterAdd.HasRemovedAction);
+
+        var afterMove = CreateViewModel(first, second, third);
+        afterMove.RemoveActionCommand.Execute(null);
+        afterMove.MoveDownCommand.Execute(null);
+        Assert.False(afterMove.HasRemovedAction);
+
+        var afterDrop = CreateViewModel(first, second, third);
+        afterDrop.RemoveActionCommand.Execute(null);
+        afterDrop.AddDroppedTargets(["https://a.com"]);
+        Assert.False(afterDrop.HasRemovedAction);
+
+        // Dragging a slice in the menu reorders the same collection without going through the view model.
+        var afterOutsideChange = CreateViewModel(first, second, third);
+        afterOutsideChange.RemoveActionCommand.Execute(null);
+        afterOutsideChange.Actions.Move(0, 1);
+        Assert.False(afterOutsideChange.HasRemovedAction);
+        Assert.False(afterOutsideChange.UndoRemoveCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void UndoRemove_RestoredKeyActionStillFollowsKeyChanges()
+    {
+        var mute = PieAction.CreateKeyAction("Mute");
+        var viewModel = CreateViewModel(mute, PieAction.CreateKeyAction("VolumeDown"));
+        viewModel.RemoveActionCommand.Execute(null);
+
+        viewModel.UndoRemoveCommand.Execute(null);
+        viewModel.Editor.SelectedKeyActionId = "VolumeUp";
+
+        Assert.Equal("Volume Up", mute.Name);
+    }
+
+    [Fact]
     public void MoveUp_MovesSelectedActionAndKeepsSelection()
     {
         var first = PieAction.CreateKeyAction("Mute");

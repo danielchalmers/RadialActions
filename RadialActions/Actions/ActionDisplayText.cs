@@ -51,10 +51,18 @@ public static class ActionDisplayText
     }
 
     /// <summary>
-    /// Announced after Remove, such as "Mute removed."
+    /// Announced after Remove and shown next to Undo, such as "Mute removed."
     /// </summary>
     public static string GetRemovedAnnouncement(PieAction action)
     {
         return $"{GetActionName(action?.Name, action?.Type ?? ActionType.None)} removed.";
+    }
+
+    /// <summary>
+    /// Announced after Undo puts a removed action back, such as "Mute restored."
+    /// </summary>
+    public static string GetRestoredAnnouncement(PieAction action)
+    {
+        return $"{GetActionName(action?.Name, action?.Type ?? ActionType.None)} restored.";
     }
 }
