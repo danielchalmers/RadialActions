@@ -35,7 +35,8 @@
     <Thickness x:Key="SettingsRowPadding">16,12</Thickness>
     <sys:Double x:Key="SettingsRowMinHeight">68</sys:Double>
     <Thickness x:Key="SettingsRowControlMargin">16,0,0,0</Thickness>
-    <FontFamily x:Key="MonospaceFontFamily">Cascadia Mono, Consolas, Courier New</FontFamily>
+    <!--  Consolas leads because WPF draws Cascadia Mono's regular weight much heavier than Segoe UI, so it reads as bold next to the rest of the form  -->
+    <FontFamily x:Key="MonospaceFontFamily">Consolas, Cascadia Mono, Courier New</FontFamily>
 
     <!--  Typography  -->
     <Style x:Key="TitleTextStyle"

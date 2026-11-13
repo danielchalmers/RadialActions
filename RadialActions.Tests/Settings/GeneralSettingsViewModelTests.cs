@@ -158,6 +158,15 @@ public sealed class GeneralSettingsViewModelTests
     }
 
     [Fact]
+    public void ActivationHotkeyDescriptions_CallItAHotkey()
+    {
+        // "Shortcut" names the keys a Key action sends, so the activation hotkey's own copy must not borrow the word.
+        Assert.Contains("hotkey", GeneralSettingsViewModel.ActivationHotkeyIdleDescription);
+        Assert.DoesNotContain("shortcut", GeneralSettingsViewModel.ActivationHotkeyIdleDescription, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("shortcut", GeneralSettingsViewModel.ActivationHotkeyRecordingDescription, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void StartRecordingActivationHotkey_SwitchesTheDescriptionAndName()
     {
         var viewModel = CreateViewModel("Ctrl+Alt+Space");

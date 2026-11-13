@@ -9,7 +9,7 @@ public sealed partial class GeneralSettingsViewModel : ObservableObject
 {
     public const string MissingModifierHint = "Include Ctrl, Alt, or Win, such as Ctrl+Alt+Space.";
     public const string UnsupportedKeyHint = "Radial Actions can't use that key. Try a combination, such as Ctrl+Alt+Space.";
-    public const string ActivationHotkeyIdleDescription = "Opens the menu from anywhere. Select the shortcut to change it.";
+    public const string ActivationHotkeyIdleDescription = "Opens the menu from anywhere. Select the hotkey to change it.";
     public const string ActivationHotkeyRecordingDescription = "Press the new key combination, such as Ctrl+Alt+Space. Press Esc to cancel or Backspace to clear.";
 
     public GeneralSettingsViewModel(Settings settings)
