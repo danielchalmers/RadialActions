@@ -69,14 +69,14 @@
                             AutomationProperties.Name="Move up" Click="MoveButton_Click"
                             IsEnabledChanged="ListCommandButton_IsEnabledChanged"
                             Style="{StaticResource IconButtonStyle}"
-                            ToolTip="Move up" />
+                            ToolTip="Move up (Alt+Up)" />
                     <Button Grid.Column="3"
                             Content="&#xE70D;"
                             Command="{Binding MoveDownCommand}"
                             AutomationProperties.Name="Move down" Click="MoveButton_Click"
                             IsEnabledChanged="ListCommandButton_IsEnabledChanged"
                             Style="{StaticResource IconButtonStyle}"
-                            ToolTip="Move down" />
+                            ToolTip="Move down (Alt+Down)" />
                     <Button Grid.Column="5"
                             Content="&#xE74D;"
                             Command="{Binding RemoveActionCommand}"
@@ -191,8 +191,20 @@
                 <TextBlock x:Name="DropHintText"
                            Grid.Row="2"
                            Text="Drag apps, files, folders, or links here to add them."
-                           Margin="0,12,16,0"
-                           Style="{StaticResource CaptionTextStyle}" />
+                           Margin="0,12,16,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock"
+                               BasedOn="{StaticResource CaptionTextStyle}">
+                            <Style.Triggers>
+                                <!--  The empty state already invites drops, so the caption would say it twice  -->
+                                <DataTrigger Binding="{Binding Actions.Count}"
+                                             Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Grid>
         </Border>
 

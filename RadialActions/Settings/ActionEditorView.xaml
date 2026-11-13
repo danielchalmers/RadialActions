@@ -120,9 +120,22 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <TextBlock x:Name="KeyHelp"
-                           Text="Choose Custom shortcut to record your own."
-                           Style="{StaticResource FieldHelpTextStyle}" />
+                <TextBlock x:Name="KeyHelp">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock"
+                               BasedOn="{StaticResource FieldHelpTextStyle}">
+                            <Setter Property="Text" Value="Choose Custom shortcut to record your own." />
+                            <Style.Triggers>
+                                <!--  Once Custom shortcut is chosen the tip has nothing left to say, and the Shortcut field below explains recording  -->
+                                <DataTrigger Binding="{Binding SelectedKeyActionId}"
+                                             Value="{x:Static local:ActionEditorViewModel.CustomKeyActionId}">
+                                    <Setter Property="Text" Value="" />
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </StackPanel>
 
             <StackPanel Style="{StaticResource FieldPanelStyle}"

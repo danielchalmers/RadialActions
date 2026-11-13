@@ -8,6 +8,7 @@
         Width="1040" Height="760"
         MinWidth="720" MinHeight="500"
         d:DataContext="{d:DesignInstance Type=local:SettingsWindowViewModel}"
+        FontSize="{StaticResource BodyTextBlockFontSize}"
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
     <Grid>
