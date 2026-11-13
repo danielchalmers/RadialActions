@@ -16,6 +16,14 @@ public partial class ActionsSettingsViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(RemoveActionCommand), nameof(MoveUpCommand), nameof(MoveDownCommand))]
     private int _selectedActionIndex = -1;
 
+    // The action Remove took out last, kept until the list changes again so Undo can put it back.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRemovedAction), nameof(RemovedActionMessage))]
+    [NotifyCanExecuteChangedFor(nameof(UndoRemoveCommand))]
+    private PieAction _removedAction;
+
+    private int _removedActionIndex;
+
     public ActionsSettingsViewModel(Settings settings)
     {
         Settings = settings;
@@ -34,6 +42,13 @@ public partial class ActionsSettingsViewModel : ObservableObject
     public Settings Settings { get; }
     public ObservableCollection<PieAction> Actions => Settings.Actions;
     public ActionEditorViewModel Editor { get; }
+
+    public bool HasRemovedAction => RemovedAction != null;
+
+    /// <summary>
+    /// What the undo bar says about the removed action, such as "Mute removed."; null when there is nothing to undo.
+    /// </summary>
+    public string RemovedActionMessage => RemovedAction == null ? null : ActionDisplayText.GetRemovedAnnouncement(RemovedAction);
 
     private int SelectedPosition => SelectedAction == null ? -1 : Actions.IndexOf(SelectedAction);
 
@@ -97,7 +112,7 @@ public partial class ActionsSettingsViewModel : ObservableObject
         if (index < 0)
             return;
 
-        Editor.Forget(SelectedAction);
+        var removed = SelectedAction;
 
         // Select the neighbor before removing so the list commands never read a selection that has left the list, which would briefly disable a focused Remove button.
         var neighborIndex = index < Actions.Count - 1 ? index + 1 : index - 1;
@@ -116,7 +131,41 @@ public partial class ActionsSettingsViewModel : ObservableObject
             Actions.RemoveAt(index);
         }
 
+        // Set after the removal, which discards whatever an earlier Remove left to undo.
+        _removedActionIndex = index;
+        RemovedAction = removed;
         Log.Debug("Removed action");
+    }
+
+    private bool CanUndoRemove() => RemovedAction != null;
+
+    /// <summary>
+    /// Puts the last removed action back where it was and selects it.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanUndoRemove))]
+    private void UndoRemove()
+    {
+        var action = RemovedAction;
+        if (action == null)
+            return;
+
+        // Cleared first so the insertion doesn't discard the action it is restoring.
+        RemovedAction = null;
+
+        var index = Math.Min(_removedActionIndex, Actions.Count);
+        Actions.Insert(index, action);
+        SelectedActionIndex = index;
+        SelectedAction = action;
+        Log.Debug("Restored removed action");
+    }
+
+    private void DiscardRemovedAction()
+    {
+        if (RemovedAction == null)
+            return;
+
+        Editor.Forget(RemovedAction);
+        RemovedAction = null;
     }
 
     private bool CanMoveUp() => SelectedPosition > 0;
@@ -157,6 +206,9 @@ public partial class ActionsSettingsViewModel : ObservableObject
     // Removing or moving items can change which commands apply without changing the selection, for example when the selected action becomes the last one.
     private void OnActionsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
+        // Undo only covers the most recent change, so adding, removing or reordering (here or by dragging slices in the menu) ends it.
+        DiscardRemovedAction();
+
         RemoveActionCommand.NotifyCanExecuteChanged();
         MoveUpCommand.NotifyCanExecuteChanged();
         MoveDownCommand.NotifyCanExecuteChanged();

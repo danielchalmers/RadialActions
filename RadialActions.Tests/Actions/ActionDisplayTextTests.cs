@@ -78,4 +78,14 @@ public sealed class ActionDisplayTextTests
         Assert.Equal("File Explorer removed.", ActionDisplayText.GetRemovedAnnouncement(named));
         Assert.Equal("Not set up removed.", ActionDisplayText.GetRemovedAnnouncement(unnamed));
     }
+
+    [Fact]
+    public void GetRestoredAnnouncement_NamesTheAction()
+    {
+        var named = PieAction.CreateOpenAction("File Explorer", "explorer.exe");
+        var unnamed = new PieAction { Name = " ", Type = ActionType.Script };
+
+        Assert.Equal("File Explorer restored.", ActionDisplayText.GetRestoredAnnouncement(named));
+        Assert.Equal("Script restored.", ActionDisplayText.GetRestoredAnnouncement(unnamed));
+    }
 }

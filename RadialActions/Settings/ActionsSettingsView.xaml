@@ -83,12 +83,12 @@
                             AutomationProperties.Name="Remove" Click="RemoveButton_Click"
                             IsEnabledChanged="ListCommandButton_IsEnabledChanged"
                             Style="{StaticResource IconButtonStyle}"
-                            ToolTip="Remove" />
+                            ToolTip="Remove (Delete)" />
                 </Grid>
 
                 <ListView x:Name="ActionsList"
                           Grid.Row="1"
-                          AutomationProperties.HelpText="{Binding Text, ElementName=DropHintText, StringFormat='Press Alt+Up or Alt+Down to move the selected action. {0}'}"
+                          AutomationProperties.HelpText="{Binding Text, ElementName=DropHintText, StringFormat='Press Alt+Up or Alt+Down to move the selected action, or Delete to remove it. {0}'}"
                           AutomationProperties.Name="Actions" Background="Transparent"
                           BorderThickness="0"
                           ItemsSource="{Binding Actions}"
@@ -188,23 +188,50 @@
                                Style="{StaticResource EmptyStateTextStyle}" />
                 </StackPanel>
 
-                <TextBlock x:Name="DropHintText"
-                           Grid.Row="2"
-                           Text="Drag apps, files, folders, or links here to add them."
-                           Margin="0,12,16,0">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock"
-                               BasedOn="{StaticResource CaptionTextStyle}">
-                            <Style.Triggers>
-                                <!--  The empty state already invites drops, so the caption would say it twice  -->
-                                <DataTrigger Binding="{Binding Actions.Count}"
-                                             Value="0">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                <StackPanel Grid.Row="2"
+                            Margin="0,4,16,0">
+                    <!--  Offered after Remove until the list changes again  -->
+                    <Border Margin="0,8,0,0" Padding="12,6,6,6"
+                            Style="{StaticResource InfoBarBorderStyle}"
+                            Visibility="{Binding HasRemovedAction, Converter={local:BooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="RemovedActionText"
+                                       Grid.Column="0"
+                                       Text="{Binding RemovedActionMessage}"
+                                       VerticalAlignment="Center"
+                                       Style="{StaticResource BodyTextStyle}"
+                                       TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                            <Button x:Name="UndoRemoveButton"
+                                    Grid.Column="1"
+                                    Content="Undo"
+                                    Command="{Binding UndoRemoveCommand}"
+                                    Margin="8,0,0,0" VerticalAlignment="Center"
+                                    AutomationProperties.HelpText="{Binding Text, ElementName=RemovedActionText}"
+                                    Click="UndoRemoveButton_Click" />
+                        </Grid>
+                    </Border>
+
+                    <TextBlock x:Name="DropHintText"
+                               Text="Drag apps, files, folders, or links here to add them."
+                               Margin="0,8,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock"
+                                   BasedOn="{StaticResource CaptionTextStyle}">
+                                <Style.Triggers>
+                                    <!--  The empty state already invites drops, so the caption would say it twice  -->
+                                    <DataTrigger Binding="{Binding Actions.Count}"
+                                                 Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
             </Grid>
         </Border>
 
