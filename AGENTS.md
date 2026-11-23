@@ -4,8 +4,8 @@ This file is the root harness for coding agents working on Radial Actions. Keep 
 
 ## Project Map
 
-- `RadialActions.sln` is the entry point.
-- `RadialActions/` contains the WPF desktop app targeting `net10.0-windows`.
+- `RadialActions.slnx` is the entry point.
+- `RadialActions/` contains the WPF desktop app targeting `net11.0-windows`.
 - `RadialActions.Tests/` contains xUnit v3 tests for deterministic behavior.
 - Production code is grouped by ownership: `Actions/`, `Hotkeys/`, `Interop/`, `Pie/`, `Services/`, `Settings/`, `Themes/`, and `Properties/`.
 - `RadialActions/Themes/AppTheme.xaml` is the shared design system. `App.xaml` merges it after the Fluent theme, so every window and view can use its keys without merging it again.
@@ -26,12 +26,12 @@ This file is the root harness for coding agents working on Radial Actions. Keep 
 
 Run commands from the repository root unless noted.
 
-- Restore: `dotnet restore RadialActions.sln`
-- Build: `dotnet build RadialActions.sln`
-- Test: `dotnet test RadialActions.sln`
-- Release publish example: `dotnet publish ./RadialActions/RadialActions.csproj -o publish/x64 -c Release -f net10.0-windows --os win --arch x64 --self-contained -p:PublishSingleFile=true -p:DebugType=embedded`
+- Restore: `dotnet restore RadialActions.slnx`
+- Build: `dotnet build RadialActions.slnx`
+- Test: `dotnet test RadialActions.slnx`
+- Release publish example: `dotnet publish ./RadialActions/RadialActions.csproj -o publish/x64 -c Release -f net11.0-windows --os win --arch x64 --self-contained -p:PublishSingleFile=true -p:DebugType=embedded`
 
-For documentation-only changes, explain why build or test commands were skipped. For code, project, packaging, workflow, or XAML changes, run the closest relevant command and then `dotnet test RadialActions.sln` before handing off.
+For documentation-only changes, explain why build or test commands were skipped. For code, project, packaging, workflow, or XAML changes, run the closest relevant command and then `dotnet test RadialActions.slnx` before handing off.
 
 ## Working Loop
 

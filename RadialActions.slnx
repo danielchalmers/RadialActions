@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="RadialActions/RadialActions.csproj" />
+  <Project Path="RadialActions.Tests/RadialActions.Tests.csproj" />
+</Solution>

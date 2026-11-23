@@ -44,4 +44,4 @@ Extract the `.zip` to a folder you can write to and run `RadialActions.exe`. Set
 
 ### Build from source
 
-The app is written in C# with WPF and needs the .NET 10 SDK. Clone the repository, then open `RadialActions.sln` in Visual Studio 2022 or later, or run `dotnet build RadialActions.sln`.
+The app is written in C# with WPF and needs the .NET 11 SDK. Clone the repository, then open `RadialActions.slnx` in Visual Studio 2026 or later, or run `dotnet build RadialActions.slnx`.
