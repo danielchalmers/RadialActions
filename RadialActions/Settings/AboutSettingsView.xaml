@@ -421,7 +421,7 @@
                             <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
                                 <Hyperlink NavigateUri="https://github.com/danielchalmers/JournalApp"
                                            Style="{StaticResource StandaloneHyperlinkStyle}">
-                                    Good Diary
+                                    Journal App
                                 </Hyperlink>
                             </TextBlock>
                             <TextBlock Text="Track your daily activities and moods on Android."
@@ -429,9 +429,9 @@
                         </StackPanel>
                         <StackPanel Style="{StaticResource ProjectTileStyle}">
                             <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
-                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryReplay"
+                                <Hyperlink NavigateUri="https://github.com/danielchalmers/SentryDeck"
                                            Style="{StaticResource StandaloneHyperlinkStyle}">
-                                    Sentry Replay
+                                    Sentry Deck
                                 </Hyperlink>
                             </TextBlock>
                             <TextBlock Text="Review Tesla dashcam clips on Windows."
@@ -461,7 +461,7 @@
                             <TextBlock Style="{StaticResource ProjectTitleTextStyle}">
                                 <Hyperlink NavigateUri="https://github.com/danielchalmers/NullTab"
                                            Style="{StaticResource StandaloneHyperlinkStyle}">
-                                    NullTab
+                                    Null Tab
                                 </Hyperlink>
                             </TextBlock>
                             <TextBlock Text="Replace your new tab page with a blank one."
