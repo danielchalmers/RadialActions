@@ -15,7 +15,7 @@ runs:
   steps:
     - uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 10.0.x
+        dotnet-version: 11.0.x
 
     - name: Build
       shell: bash
@@ -29,7 +29,7 @@ runs:
       shell: bash
       run: |
         for arch in ${{ inputs.archs }}; do
-          dotnet publish ./RadialActions/RadialActions.csproj -o "publish/$arch" -c Release -f net10.0-windows --os win --arch $arch --self-contained -p:PublishSingleFile=true -p:DebugType=embedded -p:Version=${{ inputs.version }}
+          dotnet publish ./RadialActions/RadialActions.csproj -o "publish/$arch" -c Release -f net11.0-windows --os win --arch $arch --self-contained -p:PublishSingleFile=true -p:DebugType=embedded -p:Version=${{ inputs.version }}
         done
 
     - name: Create Portable ZIPs
